@@ -5,13 +5,14 @@ namespace Intel8080
     public partial class CPU
     {
         private State state;
+        private bool diag;
 
         public State State
         {
             get { return state; }
         }
 
-        public CPU()
+        public CPU(ushort pc = 0, bool diag = false)
         {
             state = new State();
             state.A = 0;
@@ -21,14 +22,15 @@ namespace Intel8080
             state.E = 0;
             state.H = 0;
             state.SP = 0xf000;
-            state.PC = 0;
+            state.PC = pc;
             state.EnableInterrupts = false;
-            state.Memory = new byte[0x4000]; // 16KB RAM
+            state.Memory = new byte[0x8000]; // 16KB RAM
             state.Flags = new Flags();
             state.Ports = new Ports();
             state.Cycles = 0;
             state.Halted = false;
             state.Instructions = 0;
+            this.diag = diag;
         }
 
         public ushort GetNextWord()
@@ -72,6 +74,21 @@ namespace Intel8080
             state.Flags.Zero = Util.CheckZero(value);
             state.Flags.Sign = Util.CheckSign(value);
             state.Flags.Parity = Util.CheckParity(value);
+        }
+
+        public void UpdatePorts(int number, byte value)
+        {
+            switch (number)
+            {
+                case 1:
+                    state.Ports.Read1 = value;
+                    break;
+                case 2:
+                    state.Ports.Read2 = value;
+                    break;
+                case 3:
+                    break;
+            }
         }
 
         public ushort PopStack()
@@ -124,6 +141,16 @@ namespace Intel8080
             }
         }
 
+        public void GenerateInterrupt(int interruptNumber)
+        {
+            if (State.EnableInterrupts)
+            {
+                PushStack(State.PC);
+                Di();
+                state.PC = (ushort) (8 * interruptNumber);
+            }
+        }
+
         public byte EmularCiclo()
         {
             byte opcode = GetNextByte();
@@ -145,10 +172,10 @@ namespace Intel8080
                 case 0x13: Inx(Register.DE); break;
                 case 0x23: Inx(Register.HL);break;
                 case 0x33: Inx(Register.SP); break;
-                case 0x04: Inr(Register.BC); break;
-                case 0x14: Inr(Register.DE); break;
-                case 0x24: Inr(Register.HL); break;
-                case 0x34: Inr(Register.SP); break;
+                case 0x04: Inr(Register.B); break;
+                case 0x14: Inr(Register.D); break;
+                case 0x24: Inr(Register.H); break;
+                case 0x34: Inr(Register.HL); break;
                 case 0x05: Dcr(Register.B); break;
                 case 0x15: Dcr(Register.D); break;
                 case 0x25: Dcr(Register.H); break;

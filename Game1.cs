@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
@@ -13,6 +15,8 @@ namespace Intel8080
         Texture2D whiteRect;
         CPU cpu;
         Texture2D blackRect;
+        TimeSpan lastInterruptTime = TimeSpan.Zero;
+        int lastInterrupt = 1;
         const int tamanhoPixel = 2;
 
         public Game1()
@@ -22,6 +26,7 @@ namespace Intel8080
             graphics.PreferredBackBufferHeight = 256 * tamanhoPixel;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 8);
         }
 
         protected override void Initialize()
@@ -52,16 +57,8 @@ namespace Intel8080
             whiteRect.SetData(whiteColor);
             blackRect.SetData(blackColor);
 
-            Task t = new Task (() => 
-            {
-                for (;;) 
-                {
-                    cpu.EmularCiclo();
-                    Thread.Sleep(0);
-                }	
-            });
-
-            t.Start();
+            cpu.UpdatePorts(1, 0x01);
+            cpu.UpdatePorts(2, 0x00);
         }
 
         protected override void Update(GameTime gameTime)
@@ -69,13 +66,52 @@ namespace Intel8080
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            UpdateButtons();
+
+            if ((gameTime.TotalGameTime - lastInterruptTime).TotalMilliseconds >= 8)  //1/60 second has elapsed 
+            {
+                if (cpu.State.EnableInterrupts)
+                {
+                    lastInterruptTime = gameTime.TotalGameTime;
+                    lastInterrupt = lastInterrupt == 1 ? 2 : 1;
+                    GenerateInterrupt(lastInterrupt);
+                }
+            }
+
             base.Update(gameTime);
+
+            int cycle = 1000;
+
+            while (cycle-- >= 0)
+                cpu.EmularCiclo();
+        }
+
+        private void UpdateButtons()
+        {
+            byte read1 = 0;
+            // créditos
+            if (Keyboard.GetState().IsKeyDown(Keys.D5))
+                read1 = (byte) (read1 | (1 << 0));
+            
+            if (Keyboard.GetState().IsKeyDown(Keys.D1))
+                read1 = (byte) (read1 | (1 << 2));
+            
+            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+                read1 = (byte) (read1 | (1 << 4));
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Left))
+                read1 = (byte) (read1 | (1 << 5));
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Right))
+                read1 = (byte) (read1 | (1 << 6));
+
+            cpu.UpdatePorts(1, read1);
         }
 
         protected override void Draw (GameTime gameTime)
 		{
 			GraphicsDevice.Clear (Color.Black);
-			spriteBatch.Begin ();
+            spriteBatch.Begin ();
 			
 			for (int i = 0; i < 224; i++) 
 			{
@@ -98,11 +134,14 @@ namespace Intel8080
 				}
 			}
 
-            //spriteBatch.Draw(whiteRect, new Vector2(100, 100), Color.White);
-
 			spriteBatch.End ();
 
             base.Draw (gameTime);	
 		}
+
+        public void GenerateInterrupt(int interruptNumber)
+        {
+            cpu.GenerateInterrupt(interruptNumber);
+        }
     }
 }

@@ -73,7 +73,7 @@ namespace Intel8080
             get { return (ushort) Util.Get16BitNumber(F, A); }
         }
 
-        public void LoadProgram(string fileName)
+        public void LoadProgram(string fileName, int offset = 0)
         {
             byte[] bytes = File.ReadAllBytes(fileName);
             
@@ -81,7 +81,7 @@ namespace Intel8080
                 throw new Exception("Programa muito grande!");
 
             for (int i = 0; i < bytes.Length; i++)
-                Memory[i] = bytes[i];
+                Memory[i + offset] = bytes[i];
         }
 
         public override string ToString()

@@ -183,7 +183,23 @@ namespace Intel8080
 
         public void Daa()
         {
-            throw new NotImplementedException();
+            bool carry = state.Flags.Carry;
+            byte correction = 0;
+
+            byte lsb = (byte) (state.A & 0x0F);
+            byte msb = (byte) (state.A >> 4);
+
+            if (state.Flags.AuxiliaryCarry || lsb > 9) {
+                correction += 0x06;
+            }
+            if (state.Flags.Carry || msb > 9 || (msb >= 9 && lsb > 9)) {
+                correction += 0x60;
+                carry = true;
+            }
+
+            state.A += correction;
+            UpdateZSP(state.A);
+            state.Flags.Carry = carry;
         }
 
         public void Stc()
@@ -614,6 +630,29 @@ namespace Intel8080
             ConditionalJmp(state.Flags.Sign);
         }
 
+        public void In()
+		{
+            byte port = GetNextByte();
+
+			switch(port)
+			{
+                case 1:
+                    state.A = state.Ports.Read1;
+                    break;
+                case 2:
+                    state.A = state.Ports.Read2;
+                    break;
+                case 3:
+                    ushort value = Util.Get16BitNumber(state.Ports.Shift0, state.Ports.Shift1);
+                    state.A = (byte)((value >> (8 - state.Ports.Write2)) & 0xFF);
+                    break;
+                default:
+                    break;
+			}
+
+            state.Cycles += 10;
+		}
+
         public void Out()
         {
             byte port = GetNextByte();
@@ -632,31 +671,6 @@ namespace Intel8080
 
             state.Cycles += 10;
         }
-
-        public void In()
-		{
-            byte port = GetNextByte();
-
-			switch(port)
-			{
-                case 1:
-                    state.A = state.Ports.Read1;
-                    break;
-                case 2:
-                    state.A = state.Ports.Read2;
-                    break;
-                case 3:
-                    {
-                        ushort value = Util.Get16BitNumber(state.Ports.Shift0, state.Ports.Shift1);
-                        state.A = (byte)((value >> (8 - state.Ports.Write2)) & 0xFF);
-                        break;
-                    }
-                default:
-                    break;
-			}
-
-            state.Cycles += 10;
-		}
 
         public void Xthl()
         {
@@ -682,9 +696,29 @@ namespace Intel8080
         public void Call()
         {
             ushort addr = GetNextWord();
-            PushStack(state.PC);
-            Jmp(addr);
-            state.Cycles += 7;
+
+            // if (addr == 5)
+            // {
+            //     if (state.C == 9)
+            //     {
+            //         ushort offset = (ushort) (((state.D << 8) | (state.E)) + 3);
+            //         char c = Convert.ToChar(state.Memory[offset]);
+
+            //         while (c != '$')
+            //         {
+            //             Console.Write(c);
+            //             c = Convert.ToChar(state.Memory[++offset]);
+            //         }
+
+            //         Hlt();
+            //     }
+            // }
+            // else
+            {
+                PushStack(state.PC);
+                Jmp(addr);
+                state.Cycles += 7;
+            }
         }
 
         private void Call(ushort addr)
@@ -732,7 +766,7 @@ namespace Intel8080
 
         public void Cc()
         {
-            ConditionalCall(!state.Flags.Carry);
+            ConditionalCall(state.Flags.Carry);
         }
 
         public void Cpe()

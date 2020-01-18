@@ -13,6 +13,11 @@ namespace Intel8080
             codeBuffer = File.ReadAllBytes(fileName);
         }
 
+        public Disassembler(byte[] codebuffer)
+        {
+            this.codeBuffer = codebuffer;
+        }
+
         public string GetInstructionsText()
         {
             var sb = new StringBuilder();
@@ -38,7 +43,7 @@ namespace Intel8080
             }
         }
 
-        private Instruction GetInstruction(int pointer)
+        public Instruction GetInstruction(int pointer)
         {
             byte opcode = codeBuffer[pointer];
             byte minInstruction = pointer + 1 < codeBuffer.Length ? codeBuffer[pointer + 1] : (byte) 0;
