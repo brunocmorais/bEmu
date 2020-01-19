@@ -632,43 +632,11 @@ namespace Intel8080
 
         public void In()
 		{
-            byte port = GetNextByte();
-
-			switch(port)
-			{
-                case 1:
-                    state.A = state.Ports.Read1;
-                    break;
-                case 2:
-                    state.A = state.Ports.Read2;
-                    break;
-                case 3:
-                    ushort value = Util.Get16BitNumber(state.Ports.Shift0, state.Ports.Shift1);
-                    state.A = (byte)((value >> (8 - state.Ports.Write2)) & 0xFF);
-                    break;
-                default:
-                    break;
-			}
-
             state.Cycles += 10;
 		}
 
         public void Out()
         {
-            byte port = GetNextByte();
-            switch(port)
-			{
-                case 2:
-                    state.Ports.Write2 = (byte)(state.A & 0x7);
-                    break;
-                case 4:
-                    state.Ports.Shift0 = state.Ports.Shift1;
-                    state.Ports.Shift1 = state.A;
-                    break;
-                default:
-                    break;
-			}
-
             state.Cycles += 10;
         }
 

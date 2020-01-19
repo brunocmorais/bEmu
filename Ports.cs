@@ -7,6 +7,7 @@ namespace Intel8080
         public byte Shift1 { get; set; }
         public byte Shift0 { get; set; }
         public byte Write2 { get; set; }
-        public byte Write4 { get; set; }
+        public byte Write3 { get; set; }
+        public byte Write5 { get; set; }
     }
 }

@@ -3,8 +3,10 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 namespace Intel8080
 {
@@ -13,17 +15,31 @@ namespace Intel8080
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Texture2D whiteRect;
+        Texture2D backdrop;
         CPU cpu;
-        Texture2D blackRect;
         TimeSpan lastInterruptTime = TimeSpan.Zero;
         int lastInterrupt = 1;
         const int tamanhoPixel = 2;
+        SoundEffect shot;
+        SoundEffect invaderDie;
+        SoundEffect explosion;
+        SoundEffect ufoLowPitch;
+        SoundEffectInstance ufoHighPitch;
+        SoundEffect fastInvader1;
+        SoundEffect fastInvader2;
+        SoundEffect fastInvader3;
+        SoundEffect fastInvader4;
+        byte lastWrite3;
+        byte lastWrite5;
+        const int width = 224 * tamanhoPixel;
+        const int height = 256 * tamanhoPixel;
+        Color backdropColor = Color.FromNonPremultiplied(255, 255, 255, 128);
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = 224 * tamanhoPixel;
-            graphics.PreferredBackBufferHeight = 256 * tamanhoPixel;
+            graphics.PreferredBackBufferWidth = width;
+            graphics.PreferredBackBufferHeight = height;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 8);
@@ -31,8 +47,6 @@ namespace Intel8080
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             cpu = new CPU();
             cpu.State.LoadProgram("invaders");
 
@@ -43,19 +57,25 @@ namespace Intel8080
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             whiteRect = new Texture2D(GraphicsDevice, tamanhoPixel, tamanhoPixel);
-            blackRect = new Texture2D(GraphicsDevice, tamanhoPixel, tamanhoPixel);
+            backdrop = Content.Load<Texture2D>("backdrop");
+
+            shot = Content.Load<SoundEffect>("shot");
+            invaderDie = Content.Load<SoundEffect>("invader_die");
+            explosion = Content.Load<SoundEffect>("explosion");
+            ufoLowPitch = Content.Load<SoundEffect>("ufo_lowpitch");
+            fastInvader1 = Content.Load<SoundEffect>("fastinvader1");
+            fastInvader2 = Content.Load<SoundEffect>("fastinvader2");
+            fastInvader3 = Content.Load<SoundEffect>("fastinvader3");
+            fastInvader4 = Content.Load<SoundEffect>("fastinvader4");
+            ufoHighPitch = Content.Load<SoundEffect>("ufo_highpitch").CreateInstance();
+            ufoHighPitch.IsLooped = false;
 
             Color[] whiteColor = new Color[tamanhoPixel * tamanhoPixel];
-            Color[] blackColor = new Color[tamanhoPixel * tamanhoPixel];
             
-            for(int i=0; i < whiteColor.Length; ++i) 
-            {
+            for(int i = 0; i < whiteColor.Length; i++) 
                 whiteColor[i] = Color.White;
-                blackColor[i] = Color.Black;
-            }
             
             whiteRect.SetData(whiteColor);
-            blackRect.SetData(blackColor);
 
             cpu.UpdatePorts(1, 0x01);
             cpu.UpdatePorts(2, 0x00);
@@ -63,12 +83,13 @@ namespace Intel8080
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
             UpdateButtons();
+            UpdateSounds();
 
-            if ((gameTime.TotalGameTime - lastInterruptTime).TotalMilliseconds >= 8)  //1/60 second has elapsed 
+            if ((gameTime.TotalGameTime - lastInterruptTime).TotalMilliseconds >= 8)
             {
                 if (cpu.State.EnableInterrupts)
                 {
@@ -78,12 +99,19 @@ namespace Intel8080
                 }
             }
 
-            base.Update(gameTime);
-
             int cycle = 1000;
 
             while (cycle-- >= 0)
-                cpu.EmularCiclo();
+            {
+                byte opcode = cpu.EmularCiclo();
+
+                if (opcode == 0xDB) //IN
+                    In();
+                else if (opcode == 0xD3) //OUT
+                    Out();
+            }
+
+            base.Update(gameTime);
         }
 
         private void UpdateButtons()
@@ -112,6 +140,8 @@ namespace Intel8080
 		{
 			GraphicsDevice.Clear (Color.Black);
             spriteBatch.Begin ();
+            spriteBatch.Draw(backdrop, new Rectangle(0, 0, width, height), backdropColor);
+            Color color;
 			
 			for (int i = 0; i < 224; i++) 
 			{
@@ -126,10 +156,15 @@ namespace Intel8080
 
                         Vector2 coor = new Vector2(y, (256 * tamanhoPixel) - x);
 
+                        if (coor.Y < (50 * tamanhoPixel))
+                            color = Color.Red;
+                        else if (coor.Y > (180 * tamanhoPixel))
+                            color = Color.Lime;
+                        else
+                            color = Color.White;
+
 						if ((sprite & (1 << pixel)) > 0) 
-                            spriteBatch.Draw (whiteRect, coor, Color.White);
-                        else 
-                            spriteBatch.Draw (blackRect, coor, Color.Black);
+                            spriteBatch.Draw (whiteRect, coor, color);
 					}
 				}
 			}
@@ -142,6 +177,109 @@ namespace Intel8080
         public void GenerateInterrupt(int interruptNumber)
         {
             cpu.GenerateInterrupt(interruptNumber);
+        }
+
+        public void In()
+        {
+            byte port = cpu.GetNextByte();
+            var state = cpu.State;
+
+			switch(port)
+			{
+                case 1:
+                    state.A = cpu.State.Ports.Read1;
+                    break;
+                case 2:
+                    state.A = cpu.State.Ports.Read2;
+                    break;
+                case 3:
+                    ushort value = Util.Get16BitNumber(cpu.State.Ports.Shift0, cpu.State.Ports.Shift1);
+                    state.A = (byte)((value >> (8 - cpu.State.Ports.Write2)) & 0xFF);
+                    break;
+                default:
+                    break;
+			}
+
+            cpu.State = state;
+        }
+
+        public void Out()
+        {
+            byte port = cpu.GetNextByte();
+            var state = cpu.State;
+            
+            switch(port)
+			{
+                case 2:
+                    state.Ports.Write2 = (byte)(state.A & 0x7);
+                    break;
+                case 3:
+                    state.Ports.Write3 = state.A;
+                    break;
+                case 4:
+                    state.Ports.Shift0 = state.Ports.Shift1;
+                    state.Ports.Shift1 = state.A;
+                    break;
+                case 5:
+                    state.Ports.Write5 = state.A;
+                    break;
+                default:
+                    break;
+			}
+
+            cpu.State = state;
+        }
+
+        public void UpdateSounds()
+        {
+            byte write3 = cpu.State.Ports.Write3;
+            byte write5 = cpu.State.Ports.Write5;
+
+            bool playShot = ((write3 & (1 << 1)) >> 1) == 1;
+            bool wasPlayingShot = ((lastWrite3 & (1 << 1)) >> 1) == 1;
+            bool playExplosion = ((write3 & (1 << 2)) >> 2) == 1;
+            bool wasPlayingExplosion = ((lastWrite3 & (1 << 2)) >> 2) == 1;
+            bool playInvaderDie = ((write3 & (1 << 3)) >> 3) == 1;
+            bool wasPlayingInvaderDie = ((lastWrite3 & (1 << 3)) >> 3) == 1;
+
+            if (playShot && !wasPlayingShot)
+                shot.Play();
+            if (playInvaderDie && !wasPlayingInvaderDie)
+                invaderDie.Play();
+            if (playExplosion && !wasPlayingExplosion)
+                explosion.Play();
+
+            bool playFastInvader1 = ((write5 & (1 << 0)) >> 0) == 1;
+            bool wasPlayingFastInvader1 = ((lastWrite5 & (1 << 0)) >> 0) == 1;
+            bool playFastInvader2 = ((write5 & (1 << 1)) >> 1) == 1;
+            bool wasPlayingFastInvader2 = ((lastWrite5 & (1 << 1)) >> 1) == 1;
+            bool playFastInvader3 = ((write5 & (1 << 2)) >> 2) == 1;
+            bool wasPlayingFastInvader3 = ((lastWrite5 & (1 << 2)) >> 2) == 1;
+            bool playFastInvader4 = ((write5 & (1 << 3)) >> 3) == 1;
+            bool wasPlayingFastInvader4 = ((lastWrite5 & (1 << 3)) >> 3) == 1;
+            bool playUfoLowPitch = ((write5 & (1 << 4)) >> 4) == 1;
+            bool wasPlayingUfoLowPitch = ((lastWrite5 & (1 << 4)) >> 4) == 1;
+
+            if (playFastInvader1 && !wasPlayingFastInvader1)
+                fastInvader1.Play();
+            if (playFastInvader2 && !wasPlayingFastInvader2)
+                fastInvader2.Play();
+            if (playFastInvader3 && !wasPlayingFastInvader3)
+                fastInvader3.Play();
+            if (playFastInvader4 && !wasPlayingFastInvader4)
+                fastInvader4.Play();
+            if (playUfoLowPitch && !wasPlayingUfoLowPitch)
+                ufoLowPitch.Play();
+
+            ufoHighPitch.IsLooped = (write3 & 1) == 1;
+
+            if (ufoHighPitch.IsLooped)
+                ufoHighPitch.Play();
+            else
+                ufoHighPitch.Stop();
+
+            lastWrite3 = write3;
+            lastWrite5 = write5;
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Intel8080
         public State State
         {
             get { return state; }
+            set { state = value; }
         }
 
         public CPU(ushort pc = 0, bool diag = false)
