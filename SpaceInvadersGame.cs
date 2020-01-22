@@ -48,7 +48,7 @@ namespace Intel8080
             graphics.PreferredBackBufferHeight = height;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 8);
+            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 5);
         }
 
         protected override void Initialize()
@@ -116,7 +116,7 @@ namespace Intel8080
             UpdateButtons();
             UpdateSounds();
 
-            if ((gameTime.TotalGameTime - lastInterruptTime).TotalMilliseconds >= 8)
+            if ((gameTime.TotalGameTime - lastInterruptTime).TotalMilliseconds >= 5)
             {
                 if (cpu.State.EnableInterrupts)
                 {
