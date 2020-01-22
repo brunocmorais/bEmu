@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace Intel8080
 {
     public static class Util
@@ -51,6 +53,19 @@ namespace Intel8080
                 numberOfOneBits += (ushort)((value >> i) & 1);
 
             return (numberOfOneBits & 1) == 0;
+        }
+
+        public static byte[] CombineArrays(params byte[][] arrays)
+        {
+            byte[] result = new byte[arrays.Sum(a => a.Length)];
+            int offset = 0;
+
+            foreach (byte[] array in arrays)
+            {
+                System.Buffer.BlockCopy(array, 0, result, offset, array.Length);
+                offset += array.Length;
+            }
+            return result;
         }
     }
 }

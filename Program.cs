@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace Intel8080
 {
@@ -9,7 +12,13 @@ namespace Intel8080
         [STAThread]
         static void Main(string[] args)
         {
-            using (var game = new Game1())
+            // using (var game = new SpaceInvadersGame())
+            //     game.Run();
+
+            var gameInfos = JsonConvert.DeserializeObject<IList<GameInfo>>(File.ReadAllText("games.json"));
+            var gameInfo = gameInfos.FirstOrDefault(x => x.zipName == "steelwkr");
+
+            using (var game = new Generic8080Game(gameInfo.zipName, gameInfo.fileNames, gameInfo.memoryPositions))
                 game.Run();
             
             //DebugCpu();

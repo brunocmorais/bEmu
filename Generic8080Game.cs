@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
@@ -10,32 +14,24 @@ using Microsoft.Xna.Framework.Media;
 
 namespace Intel8080
 {
-    public class Game1 : Game
+    public class Generic8080Game : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Texture2D whiteRect;
-        Texture2D backdrop;
         CPU cpu;
         TimeSpan lastInterruptTime = TimeSpan.Zero;
         int lastInterrupt = 1;
         const int tamanhoPixel = 2;
-        SoundEffect shot;
-        SoundEffect invaderDie;
-        SoundEffect explosion;
-        SoundEffect ufoLowPitch;
-        SoundEffectInstance ufoHighPitch;
-        SoundEffect fastInvader1;
-        SoundEffect fastInvader2;
-        SoundEffect fastInvader3;
-        SoundEffect fastInvader4;
         byte lastWrite3;
         byte lastWrite5;
+        string[] fileNames;
+        string[] memoryPositions;
+        string zipName;
         const int width = 224 * tamanhoPixel;
         const int height = 256 * tamanhoPixel;
-        Color backdropColor = Color.FromNonPremultiplied(255, 255, 255, 128);
-
-        public Game1()
+        
+        public Generic8080Game(string zipName, string[] fileNames, string[] memoryPositions)
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = width;
@@ -43,12 +39,33 @@ namespace Intel8080
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 8);
+            this.fileNames = fileNames;
+            this.memoryPositions = memoryPositions; 
+            this.zipName = zipName;
         }
 
         protected override void Initialize()
         {
+            var entries = new Dictionary<string, byte[]>();
+            
+            using (var zipFile = ZipFile.OpenRead($"Content/{zipName}.zip"))
+            {
+                foreach (var fileName in fileNames)
+                {
+                    var stream = zipFile.GetEntry(fileName).Open();
+                    
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        stream.CopyTo(memoryStream);
+                        entries.Add(fileName, memoryStream.ToArray());
+                    }
+                }
+            }
+
             cpu = new CPU();
-            cpu.State.LoadProgram("invaders");
+
+            for (int i = 0; i < fileNames.Length; i++)
+                cpu.State.LoadProgram(entries[fileNames[i]], Convert.ToInt32(memoryPositions[i], 16));
 
             base.Initialize();
         }
@@ -57,18 +74,6 @@ namespace Intel8080
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             whiteRect = new Texture2D(GraphicsDevice, tamanhoPixel, tamanhoPixel);
-            backdrop = Content.Load<Texture2D>("backdrop");
-
-            shot = Content.Load<SoundEffect>("shot");
-            invaderDie = Content.Load<SoundEffect>("invader_die");
-            explosion = Content.Load<SoundEffect>("explosion");
-            ufoLowPitch = Content.Load<SoundEffect>("ufo_lowpitch");
-            fastInvader1 = Content.Load<SoundEffect>("fastinvader1");
-            fastInvader2 = Content.Load<SoundEffect>("fastinvader2");
-            fastInvader3 = Content.Load<SoundEffect>("fastinvader3");
-            fastInvader4 = Content.Load<SoundEffect>("fastinvader4");
-            ufoHighPitch = Content.Load<SoundEffect>("ufo_highpitch").CreateInstance();
-            ufoHighPitch.IsLooped = false;
 
             Color[] whiteColor = new Color[tamanhoPixel * tamanhoPixel];
             
@@ -140,9 +145,7 @@ namespace Intel8080
 		{
 			GraphicsDevice.Clear (Color.Black);
             spriteBatch.Begin ();
-            spriteBatch.Draw(backdrop, new Rectangle(0, 0, width, height), backdropColor);
-            Color color;
-			
+            
 			for (int i = 0; i < 224; i++) 
 			{
 				for (int j = 0; j < 256; j += 8)
@@ -156,15 +159,8 @@ namespace Intel8080
 
                         Vector2 coor = new Vector2(y, (256 * tamanhoPixel) - x);
 
-                        if (coor.Y < (50 * tamanhoPixel))
-                            color = Color.Red;
-                        else if (coor.Y > (180 * tamanhoPixel))
-                            color = Color.Lime;
-                        else
-                            color = Color.White;
-
 						if ((sprite & (1 << pixel)) > 0) 
-                            spriteBatch.Draw (whiteRect, coor, color);
+                            spriteBatch.Draw (whiteRect, coor, Color.White);
 					}
 				}
 			}
@@ -233,51 +229,8 @@ namespace Intel8080
         public void UpdateSounds()
         {
             byte write3 = cpu.State.Ports.Write3;
-            byte write5 = cpu.State.Ports.Write5;
-
-            bool playShot = ((write3 & (1 << 1)) >> 1) == 1;
-            bool wasPlayingShot = ((lastWrite3 & (1 << 1)) >> 1) == 1;
-            bool playExplosion = ((write3 & (1 << 2)) >> 2) == 1;
-            bool wasPlayingExplosion = ((lastWrite3 & (1 << 2)) >> 2) == 1;
-            bool playInvaderDie = ((write3 & (1 << 3)) >> 3) == 1;
-            bool wasPlayingInvaderDie = ((lastWrite3 & (1 << 3)) >> 3) == 1;
-
-            if (playShot && !wasPlayingShot)
-                shot.Play();
-            if (playInvaderDie && !wasPlayingInvaderDie)
-                invaderDie.Play();
-            if (playExplosion && !wasPlayingExplosion)
-                explosion.Play();
-
-            bool playFastInvader1 = ((write5 & (1 << 0)) >> 0) == 1;
-            bool wasPlayingFastInvader1 = ((lastWrite5 & (1 << 0)) >> 0) == 1;
-            bool playFastInvader2 = ((write5 & (1 << 1)) >> 1) == 1;
-            bool wasPlayingFastInvader2 = ((lastWrite5 & (1 << 1)) >> 1) == 1;
-            bool playFastInvader3 = ((write5 & (1 << 2)) >> 2) == 1;
-            bool wasPlayingFastInvader3 = ((lastWrite5 & (1 << 2)) >> 2) == 1;
-            bool playFastInvader4 = ((write5 & (1 << 3)) >> 3) == 1;
-            bool wasPlayingFastInvader4 = ((lastWrite5 & (1 << 3)) >> 3) == 1;
-            bool playUfoLowPitch = ((write5 & (1 << 4)) >> 4) == 1;
-            bool wasPlayingUfoLowPitch = ((lastWrite5 & (1 << 4)) >> 4) == 1;
-
-            if (playFastInvader1 && !wasPlayingFastInvader1)
-                fastInvader1.Play();
-            if (playFastInvader2 && !wasPlayingFastInvader2)
-                fastInvader2.Play();
-            if (playFastInvader3 && !wasPlayingFastInvader3)
-                fastInvader3.Play();
-            if (playFastInvader4 && !wasPlayingFastInvader4)
-                fastInvader4.Play();
-            if (playUfoLowPitch && !wasPlayingUfoLowPitch)
-                ufoLowPitch.Play();
-
-            ufoHighPitch.IsLooped = (write3 & 1) == 1;
-
-            if (ufoHighPitch.IsLooped)
-                ufoHighPitch.Play();
-            else
-                ufoHighPitch.Stop();
-
+            byte write5 = cpu.State.Ports.Write5;            
+            
             lastWrite3 = write3;
             lastWrite5 = write5;
         }

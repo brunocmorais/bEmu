@@ -84,6 +84,15 @@ namespace Intel8080
                 Memory[i + offset] = bytes[i];
         }
 
+        public void LoadProgram(byte[] bytes, int position = 0)
+        {            
+            if (bytes.Length + position > Memory.Length)
+                throw new Exception("Programa não cabe na memória!");
+
+            for (int i = 0; i < bytes.Length; i++)
+                Memory[i + position] = bytes[i];
+        }
+
         public override string ToString()
         {
             return "af = " + AF.ToString("x") + "\n" +
