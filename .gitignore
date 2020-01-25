@@ -1,4 +1,4 @@
-/bin/*
-/obj/*
-Content/bin/*
-Content/obj/*
+*/bin/*
+*/obj/*
+*/Content/bin/*
+*/Content/obj/*

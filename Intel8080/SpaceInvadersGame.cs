@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Newtonsoft.Json;
 
-namespace Intel8080
+namespace bEmu.Intel8080
 {
     public class SpaceInvadersGame : Game
     {
@@ -40,25 +40,27 @@ namespace Intel8080
         const int width = 224 * tamanhoPixel;
         const int height = 256 * tamanhoPixel;
         Color backdropColor = Color.FromNonPremultiplied(255, 255, 255, 128);
+        string game;
 
-        public SpaceInvadersGame()
+        public SpaceInvadersGame(string gameToRun)
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = width;
             graphics.PreferredBackBufferHeight = height;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 5);
+            game = gameToRun;
+            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 8);
         }
 
         protected override void Initialize()
         {
-            var gameInfos = JsonConvert.DeserializeObject<IList<GameInfo>>(File.ReadAllText("games.json"));
-            var gameInfo = gameInfos.FirstOrDefault(x => x.zipName == "invaders");
+            var gameInfos = JsonConvert.DeserializeObject<IList<GameInfo>>(File.ReadAllText("Intel8080/games.json"));
+            var gameInfo = gameInfos.FirstOrDefault(x => x.zipName == game);
 
             var entries = new Dictionary<string, byte[]>();
             
-            using (var zipFile = ZipFile.OpenRead($"Content/{gameInfo.zipName}.zip"))
+            using (var zipFile = ZipFile.OpenRead($"Intel8080/Content/{gameInfo.zipName}.zip"))
             {
                 foreach (var fileName in gameInfo.fileNames)
                 {
@@ -110,23 +112,12 @@ namespace Intel8080
 
         protected override void Update(GameTime gameTime)
         {
+            double totalMilliseconds = (gameTime.TotalGameTime - lastInterruptTime).TotalMilliseconds;
+
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            UpdateButtons();
-            UpdateSounds();
-
-            if ((gameTime.TotalGameTime - lastInterruptTime).TotalMilliseconds >= 5)
-            {
-                if (cpu.State.EnableInterrupts)
-                {
-                    lastInterruptTime = gameTime.TotalGameTime;
-                    lastInterrupt = lastInterrupt == 1 ? 2 : 1;
-                    GenerateInterrupt(lastInterrupt);
-                }
-            }
-
-            int cycle = 1000;
+            int cycle = 3000;
 
             while (cycle-- >= 0)
             {
@@ -137,6 +128,19 @@ namespace Intel8080
                 else if (opcode == 0xD3) //OUT
                     Out();
             }
+
+            if (totalMilliseconds >= 8)
+            {
+                if (cpu.State.EnableInterrupts)
+                {
+                    lastInterrupt = lastInterrupt == 1 ? 2 : 1;
+                    GenerateInterrupt(lastInterrupt);
+                    lastInterruptTime = gameTime.TotalGameTime;
+                }
+            }
+
+            UpdateButtons();
+            UpdateSounds();
 
             base.Update(gameTime);
         }

@@ -1,6 +1,6 @@
 using System;
 
-namespace Intel8080
+namespace bEmu.Intel8080
 {
     public partial class CPU
     {

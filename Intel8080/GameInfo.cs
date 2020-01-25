@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Intel8080
+namespace bEmu.Intel8080
 {
     public class GameInfo
     {

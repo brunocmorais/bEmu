@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace Intel8080
+namespace bEmu.Intel8080
 {
     public struct State
     {

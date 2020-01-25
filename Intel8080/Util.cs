@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace Intel8080
+namespace bEmu.Intel8080
 {
     public static class Util
     {

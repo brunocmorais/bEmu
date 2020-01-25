@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
-namespace Intel8080
+namespace bEmu.Intel8080
 {
     public class Generic8080Game : Game
     {
@@ -30,6 +30,7 @@ namespace Intel8080
         string zipName;
         const int width = 224 * tamanhoPixel;
         const int height = 256 * tamanhoPixel;
+        const int delay = 8;
         
         public Generic8080Game(string zipName, string[] fileNames, string[] memoryPositions)
         {
@@ -38,7 +39,7 @@ namespace Intel8080
             graphics.PreferredBackBufferHeight = height;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 8);
+            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, delay);
             this.fileNames = fileNames;
             this.memoryPositions = memoryPositions; 
             this.zipName = zipName;
@@ -48,7 +49,7 @@ namespace Intel8080
         {
             var entries = new Dictionary<string, byte[]>();
             
-            using (var zipFile = ZipFile.OpenRead($"Content/{zipName}.zip"))
+            using (var zipFile = ZipFile.OpenRead($"Intel8080/Content/{zipName}.zip"))
             {
                 foreach (var fileName in fileNames)
                 {
@@ -88,23 +89,12 @@ namespace Intel8080
 
         protected override void Update(GameTime gameTime)
         {
+            double totalMilliseconds = (gameTime.TotalGameTime - lastInterruptTime).TotalMilliseconds;
+
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            UpdateButtons();
-            UpdateSounds();
-
-            if ((gameTime.TotalGameTime - lastInterruptTime).TotalMilliseconds >= 8)
-            {
-                if (cpu.State.EnableInterrupts)
-                {
-                    lastInterruptTime = gameTime.TotalGameTime;
-                    lastInterrupt = lastInterrupt == 1 ? 2 : 1;
-                    GenerateInterrupt(lastInterrupt);
-                }
-            }
-
-            int cycle = 1000;
+            int cycle = 3000;
 
             while (cycle-- >= 0)
             {
@@ -115,6 +105,19 @@ namespace Intel8080
                 else if (opcode == 0xD3) //OUT
                     Out();
             }
+
+            if (totalMilliseconds >= delay)
+            {
+                if (cpu.State.EnableInterrupts)
+                {
+                    lastInterruptTime = gameTime.TotalGameTime;
+                    lastInterrupt = lastInterrupt == 1 ? 2 : 1;
+                    GenerateInterrupt(lastInterrupt);
+                }
+            }
+
+            UpdateButtons();
+            UpdateSounds();
 
             base.Update(gameTime);
         }
