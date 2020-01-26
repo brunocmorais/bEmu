@@ -17,22 +17,22 @@ namespace bEmu.Intel8080
                 if (args.Length == 0)
                     throw new Exception("Informe o nome do jogo.");
 
-                    string gameToRun = args[0];
+                    string gameToRun = Path.GetFileNameWithoutExtension(args[0]);
 
                     if (gameToRun == "invaders" || gameToRun == "invadpt2")
                     {
-                        using (var game = new SpaceInvadersGame(gameToRun))
+                        using (var game = new SpaceInvadersGame(gameToRun, args[0]))
                             game.Run();
                     }
                     else
                     {
-                        var gameInfos = JsonConvert.DeserializeObject<IList<GameInfo>>(File.ReadAllText("Intel8080/games.json"));
+                        var gameInfos = JsonConvert.DeserializeObject<IList<GameInfo>>(File.ReadAllText("games.json"));
                         var gameInfo = gameInfos.FirstOrDefault(x => x.zipName == gameToRun);
 
                         if (gameInfo == null)
-                            throw new Exception("Jogo não suportado.");
+                            throw new Exception($"O jogo {gameToRun} não é suportado. Jogos suportados: {string.Join(", ", gameInfos.Select(x => x.zipName))}");
 
-                        using (var game = new Generic8080Game(gameInfo.zipName, gameInfo.fileNames, gameInfo.memoryPositions))
+                        using (var game = new Generic8080Game(args[0], gameInfo.fileNames, gameInfo.memoryPositions))
                             game.Run();
                     }
             }

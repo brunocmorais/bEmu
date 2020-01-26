@@ -41,8 +41,9 @@ namespace bEmu.Intel8080
         const int height = 256 * tamanhoPixel;
         Color backdropColor = Color.FromNonPremultiplied(255, 255, 255, 128);
         string game;
+        string romPath;
 
-        public SpaceInvadersGame(string gameToRun)
+        public SpaceInvadersGame(string gameToRun, string romPath)
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = width;
@@ -50,17 +51,18 @@ namespace bEmu.Intel8080
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             game = gameToRun;
+            this.romPath = romPath;
             TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 8);
         }
 
         protected override void Initialize()
         {
-            var gameInfos = JsonConvert.DeserializeObject<IList<GameInfo>>(File.ReadAllText("Intel8080/games.json"));
+            var gameInfos = JsonConvert.DeserializeObject<IList<GameInfo>>(File.ReadAllText("games.json"));
             var gameInfo = gameInfos.FirstOrDefault(x => x.zipName == game);
 
             var entries = new Dictionary<string, byte[]>();
             
-            using (var zipFile = ZipFile.OpenRead($"Intel8080/Content/{gameInfo.zipName}.zip"))
+            using (var zipFile = ZipFile.OpenRead(romPath))
             {
                 foreach (var fileName in gameInfo.fileNames)
                 {

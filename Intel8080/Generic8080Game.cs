@@ -49,7 +49,7 @@ namespace bEmu.Intel8080
         {
             var entries = new Dictionary<string, byte[]>();
             
-            using (var zipFile = ZipFile.OpenRead($"Intel8080/Content/{zipName}.zip"))
+            using (var zipFile = ZipFile.OpenRead($"{zipName}"))
             {
                 foreach (var fileName in fileNames)
                 {

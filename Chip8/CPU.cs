@@ -21,6 +21,11 @@ namespace bEmu.Chip8
             state.Stack = new ushort[16];
             state.Keys = new bool[16];
 
+            UpdateNumbersInMemory();
+        }
+
+        private void UpdateNumbersInMemory()
+        {
             for (int i = 0; i < State.Numbers.Length; i++)
                 state.Memory[i] = State.Numbers[i];
         }
@@ -32,10 +37,27 @@ namespace bEmu.Chip8
             switch (op.Value & 0xF000)
             {
                 case 0x0000: 
-                    switch (op.Value & 0x00FF)
+                    switch (op.Value & 0x00F0)
                     {
-                        case 0x00E0: Cls(); break;
-                        case 0x00EE: Ret(); break;
+                        case 0x00B0: ScrollUp(op.Nibble); break;
+                        case 0x00C0: ScrollDown(op.Nibble); break;
+                        case 0x00E0:
+                            switch (op.Value & 0x000F)
+                            {
+                                case 0x0000: Cls(); break;
+                                case 0x000E: Ret(); break;
+                            }
+                            break;
+                        case 0x00F0:
+                            switch (op.Value & 0x000F)
+                            {
+                                case 0x000B: ScrollLeft(); break;
+                                case 0x000C: ScrollRight(); break;
+                                case 0x000D: Quit(); break;
+                                case 0x000E: Chip8Mode(); break;
+                                case 0x000F: SuperChipMode(); break;
+                            }
+                            break;
                     }
                     break;
                 case 0x1000: Jp(op.Nnn); break;
@@ -80,9 +102,12 @@ namespace bEmu.Chip8
                         case 0x0018: LdStVx(op.X); break;
                         case 0x001E: AddIVx(op.X); break;
                         case 0x0029: LdFVx(op.X); break;
+                        case 0x0030: LdHFVx(op.X); break;
                         case 0x0033: LdBVx(op.X); break;
                         case 0x0055: LdIVx(op.X); break;
                         case 0x0065: LdVxI(op.X); break;
+                        case 0x0075: LdRVx(op.X); break;
+                        case 0x0085: LdVxR(op.X); break;
                     }
                     break;
             }

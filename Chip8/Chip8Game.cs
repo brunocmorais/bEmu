@@ -11,24 +11,28 @@ namespace bEmu.Chip8
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Texture2D whiteRect;
+        Texture2D whiteRectHiRes;
         CPU cpu;
-        const int tamanhoPixel = 10;
+        const int tamanhoPixel = 6;
+        const int tamanhoPixelHiRes = 3;
         const int width = 64 * tamanhoPixel;
         const int height = 32 * tamanhoPixel;
+        string rom;
         
-        public Chip8Game()
+        public Chip8Game(string rom)
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = width;
             graphics.PreferredBackBufferHeight = height;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            this.rom = rom;
         }
 
         protected override void Initialize()
         {
             cpu = new CPU();
-            cpu.State.LoadProgram(File.ReadAllBytes("Chip8/roms/test_opcode.ch8"));
+            cpu.State.LoadProgram(File.ReadAllBytes(rom));
 
             base.Initialize();
         }
@@ -37,18 +41,24 @@ namespace bEmu.Chip8
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             whiteRect = new Texture2D(GraphicsDevice, tamanhoPixel, tamanhoPixel);
+            whiteRectHiRes = new Texture2D(GraphicsDevice, tamanhoPixelHiRes, tamanhoPixelHiRes);
 
             Color[] whiteColor = new Color[tamanhoPixel * tamanhoPixel];
+            Color[] whiteColorHiRes = new Color[tamanhoPixelHiRes * tamanhoPixelHiRes];
             
             for(int i = 0; i < whiteColor.Length; i++) 
                 whiteColor[i] = Color.White;
+
+            for(int i = 0; i < whiteColorHiRes.Length; i++) 
+                whiteColorHiRes[i] = Color.White;
             
             whiteRect.SetData(whiteColor);
+            whiteRectHiRes.SetData(whiteColorHiRes);
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape) || cpu.State.Quit)
                 Exit();
 
             if (cpu.State.Delay > 0)
@@ -57,7 +67,7 @@ namespace bEmu.Chip8
             if (cpu.State.Sound > 0)
                 cpu.State.Sound--;
 
-            int cycle = 15;
+            int cycle = 10;
 
             while (cycle-- >= 0)
                 cpu.StepCycle();
@@ -97,11 +107,14 @@ namespace bEmu.Chip8
 
 			GraphicsDevice.Clear (Color.Black);
             spriteBatch.Begin ();
+
+            var texture = cpu.State.SuperChipMode ? whiteRectHiRes : whiteRect;
+            int pixelSize = cpu.State.SuperChipMode ? tamanhoPixelHiRes : tamanhoPixel;
             
-			for (int i = 0; i < 64; i++) 
-				for (int j = 0; j < 32; j++)
+			for (int i = 0; i < cpu.State.Gfx.GetLength(0); i++) 
+				for (int j = 0; j < cpu.State.Gfx.GetLength(1); j++)
                     if (cpu.State.Gfx[i, j]) 
-                        spriteBatch.Draw (whiteRect, new Vector2(i * tamanhoPixel, j * tamanhoPixel), Color.White);
+                        spriteBatch.Draw (texture, new Vector2(i * pixelSize, j * pixelSize), Color.White);
 
 			spriteBatch.End ();
             cpu.State.Draw = false;

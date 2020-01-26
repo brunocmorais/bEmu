@@ -10,8 +10,8 @@ namespace bEmu.Chip8
 
         public void Cls()
         {
-            for (int i = 0; i < 64; i++)
-                for (int j = 0; j < 32; j++)
+            for (int i = 0; i < state.Gfx.GetLength(0); i++)
+                for (int j = 0; j < state.Gfx.GetLength(1); j++)
                 state.Gfx[i, j] = false;
 
             state.Draw = true;
@@ -59,6 +59,12 @@ namespace bEmu.Chip8
         {
             byte value = state.V[x];
             state.I = (byte) (0x5 * value);
+        }
+
+        private void LdHFVx(byte x)
+        {
+            byte value = state.V[x];
+            state.I = (byte) (0xA * value);
         }
 
         private void AddIVx(byte x)
@@ -111,38 +117,83 @@ namespace bEmu.Chip8
 
         private void Drw(byte x, byte y, byte n)
         {
-            byte[] sprite = new byte[n];
+            if (n == 0)
+                DrwSuperChip(x, y);
+            else
+            {
+                byte[] sprite = new byte[n];
 
-            for (int i = 0; i < n; i++)
-                sprite[i] = state.Memory[state.I + i];
+                for (int i = 0; i < n; i++)
+                    sprite[i] = state.Memory[state.I + i];
+
+                byte coordX = state.V[x];
+                byte coordY = state.V[y];
+                bool collision = false;
+
+                for (int i = 0; i < n; i++)
+                {
+                    byte originalSprite = 0;
+
+                    for (int j = 0; j < 8; j++)
+                    {
+                        bool pixel = state.Gfx[(coordX + j) % state.Gfx.GetLength(0), coordY];
+                        originalSprite |= (byte) ((pixel ? 1 : 0) << (7 - j));
+                    }
+                    
+                    byte resultSprite = (byte) (originalSprite ^ sprite[i]);
+
+                    if ((originalSprite & resultSprite) != originalSprite)
+                        collision = true;
+
+                    for (int j = 7; j >= 0; j--)
+                    {
+                        bool pixel = ((resultSprite & (0x1 << j)) >> j) == 1; 
+                        state.Gfx[(byte) ((coordX + (7 - j)) % state.Gfx.GetLength(0)), coordY] = pixel;
+                    }
+
+                    coordY++;
+                    coordY %= (byte) state.Gfx.GetLength(1);
+                }
+
+                state.V[0xF] = (byte) (collision ? 1 : 0);
+                state.Draw = true;
+            }
+        }
+
+        private void DrwSuperChip(byte x, byte y)
+        {
+            ushort[] sprite = new ushort[16];
+
+            for (int i = 0; i < 16; i++)
+                sprite[i] = (ushort) ((state.Memory[state.I + (2 * i)] << 8) | (state.Memory[state.I + (2 * i) + 1]));
 
             byte coordX = state.V[x];
             byte coordY = state.V[y];
             bool collision = false;
 
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < 16; i++)
             {
-                byte originalSprite = 0;
+                ushort originalSprite = 0;
 
-                for (int j = 0; j < 8; j++)
+                for (int j = 0; j < 16; j++)
                 {
-                    bool pixel = state.Gfx[(coordX + j) % 64, coordY];
-                    originalSprite |= (byte) ((pixel ? 1 : 0) << (7 - j));
+                    bool pixel = state.Gfx[(coordX + j) % state.Gfx.GetLength(0), coordY];
+                    originalSprite |= (ushort) ((pixel ? 1 : 0) << (15 - j));
                 }
                 
-                byte resultSprite = (byte) (originalSprite ^ sprite[i]);
+                ushort resultSprite = (ushort) (originalSprite ^ sprite[i]);
 
                 if ((originalSprite & resultSprite) != originalSprite)
                     collision = true;
 
-                for (int j = 7; j >= 0; j--)
+                for (int j = 15; j >= 0; j--)
                 {
                     bool pixel = ((resultSprite & (0x1 << j)) >> j) == 1; 
-                    state.Gfx[(byte) ((coordX + (7 - j)) % 64), coordY] = pixel;
+                    state.Gfx[(byte) ((coordX + (15 - j)) % state.Gfx.GetLength(0)), coordY] = pixel;
                 }
 
                 coordY++;
-                coordY %= 32;
+                coordY %= (byte) state.Gfx.GetLength(1);
             }
 
             state.V[0xF] = (byte) (collision ? 1 : 0);
@@ -247,6 +298,68 @@ namespace bEmu.Chip8
         {
             if (state.V[x] == kk)
                 state.PC += 2;
+        }
+
+        private void ScrollDown(byte nibble)
+        {
+            var newGfx = new bool[state.Gfx.GetLength(0), state.Gfx.GetLength(1)];
+
+            for (int i = 0; i < newGfx.GetLength(0); i++)
+                for (int j = 0; j < newGfx.GetLength(1); j++)
+                    newGfx[i, (j + nibble) % newGfx.GetLength(1)] = state.Gfx[i, j];
+
+            state.Gfx = newGfx;
+        }
+
+        private void ScrollUp(byte nibble)
+        {
+            var newGfx = new bool[state.Gfx.GetLength(0), state.Gfx.GetLength(1)];
+
+            for (int i = 0; i < newGfx.GetLength(0); i++)
+                for (int j = 0; j < newGfx.GetLength(1); j++)
+                    newGfx[i, (j - nibble) % newGfx.GetLength(1)] = state.Gfx[i, j];
+
+            state.Gfx = newGfx;
+        }
+
+        private void Quit()
+        {
+            state.Quit = true;
+        }
+
+        private void SuperChipMode()
+        {
+            state.SuperChipMode = true;
+            state.Gfx = new bool[128, 64];
+            state.R = new byte[8];
+            UpdateNumbersInMemory();
+        }
+
+        private void Chip8Mode()
+        {
+            state.SuperChipMode = false;
+            state.Gfx = new bool[64, 32];
+            UpdateNumbersInMemory();
+        }
+
+        private void LdVxR(byte x)
+        {
+            state.V[x] = state.R[x];
+        }
+
+        private void LdRVx(byte x)
+        {
+            state.R[x] = state.V[x];
+        }
+
+        private void ScrollRight()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ScrollLeft()
+        {
+            throw new NotImplementedException();
         }
     }
 }
