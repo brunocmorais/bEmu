@@ -28,6 +28,9 @@ namespace bEmu.Chip8
         {
             for (int i = 0; i < State.Numbers.Length; i++)
                 state.Memory[i] = State.Numbers[i];
+
+            for (int i = 0; i < State.NumbersHiRes.Length; i++)
+                state.Memory[i + 0x50] = State.NumbersHiRes[i];
         }
 
         public void StepCycle()

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -12,9 +13,11 @@ namespace bEmu.Chip8
         SpriteBatch spriteBatch;
         Texture2D whiteRect;
         Texture2D whiteRectHiRes;
+        SoundEffect tone;
+        SoundEffectInstance soundEffectInstance;
         CPU cpu;
-        const int tamanhoPixel = 6;
-        const int tamanhoPixelHiRes = 3;
+        const int tamanhoPixel = 10;
+        const int tamanhoPixelHiRes = tamanhoPixel / 2;
         const int width = 64 * tamanhoPixel;
         const int height = 32 * tamanhoPixel;
         string rom;
@@ -54,6 +57,9 @@ namespace bEmu.Chip8
             
             whiteRect.SetData(whiteColor);
             whiteRectHiRes.SetData(whiteColorHiRes);
+
+            tone = Content.Load<SoundEffect>("tone");
+            soundEffectInstance = tone.CreateInstance();
         }
 
         protected override void Update(GameTime gameTime)
@@ -61,20 +67,33 @@ namespace bEmu.Chip8
             if (Keyboard.GetState().IsKeyDown(Keys.Escape) || cpu.State.Quit)
                 Exit();
 
+            if (Keyboard.GetState().IsKeyDown(Keys.F1))
+                Initialize();
+
             if (cpu.State.Delay > 0)
                 cpu.State.Delay--;
             
             if (cpu.State.Sound > 0)
                 cpu.State.Sound--;
 
-            int cycle = 10;
-
-            while (cycle-- >= 0)
-                cpu.StepCycle();
-
             UpdateKeys(Keyboard.GetState());
+            UpdateSound();
 
             base.Update(gameTime);
+        }
+
+        private void UpdateSound()
+        {
+            if (cpu.State.Sound == 0)
+            {
+                soundEffectInstance.IsLooped = false;
+                soundEffectInstance.Stop();
+            }
+            else if (cpu.State.Sound > 0 && !soundEffectInstance.IsLooped)
+            {
+                soundEffectInstance.IsLooped = true;
+                soundEffectInstance.Play();
+            }
         }
 
         private void UpdateKeys(KeyboardState keyboardState)
@@ -100,10 +119,15 @@ namespace bEmu.Chip8
 
         protected override void Draw (GameTime gameTime)
 		{
-            base.Draw (gameTime);	
+            int cycle = 10;
+
+            while (cycle-- >= 0)
+                cpu.StepCycle();
 
             if (!cpu.State.Draw)
                 return;
+
+            base.Draw (gameTime);
 
 			GraphicsDevice.Clear (Color.Black);
             spriteBatch.Begin ();

@@ -12,7 +12,7 @@ namespace bEmu.Chip8
         {
             for (int i = 0; i < state.Gfx.GetLength(0); i++)
                 for (int j = 0; j < state.Gfx.GetLength(1); j++)
-                state.Gfx[i, j] = false;
+                    state.Gfx[i, j] = false;
 
             state.Draw = true;
         }
@@ -64,7 +64,7 @@ namespace bEmu.Chip8
         private void LdHFVx(byte x)
         {
             byte value = state.V[x];
-            state.I = (byte) (0xA * value);
+            state.I = (byte) (0x50 + (0xA * value));
         }
 
         private void AddIVx(byte x)
@@ -305,10 +305,11 @@ namespace bEmu.Chip8
             var newGfx = new bool[state.Gfx.GetLength(0), state.Gfx.GetLength(1)];
 
             for (int i = 0; i < newGfx.GetLength(0); i++)
-                for (int j = 0; j < newGfx.GetLength(1); j++)
-                    newGfx[i, (j + nibble) % newGfx.GetLength(1)] = state.Gfx[i, j];
+                for (int j = 0; j < newGfx.GetLength(1) - nibble; j++)
+                    newGfx[i, (j + nibble)] = state.Gfx[i, j];
 
             state.Gfx = newGfx;
+            state.Draw = true;
         }
 
         private void ScrollUp(byte nibble)
@@ -316,10 +317,11 @@ namespace bEmu.Chip8
             var newGfx = new bool[state.Gfx.GetLength(0), state.Gfx.GetLength(1)];
 
             for (int i = 0; i < newGfx.GetLength(0); i++)
-                for (int j = 0; j < newGfx.GetLength(1); j++)
-                    newGfx[i, (j - nibble) % newGfx.GetLength(1)] = state.Gfx[i, j];
+                for (int j = nibble; j < newGfx.GetLength(1); j++)
+                    newGfx[i, (j - nibble)] = state.Gfx[i, j];
 
             state.Gfx = newGfx;
+            state.Draw = true;
         }
 
         private void Quit()
@@ -332,14 +334,12 @@ namespace bEmu.Chip8
             state.SuperChipMode = true;
             state.Gfx = new bool[128, 64];
             state.R = new byte[8];
-            UpdateNumbersInMemory();
         }
 
         private void Chip8Mode()
         {
             state.SuperChipMode = false;
             state.Gfx = new bool[64, 32];
-            UpdateNumbersInMemory();
         }
 
         private void LdVxR(byte x)
@@ -354,12 +354,32 @@ namespace bEmu.Chip8
 
         private void ScrollRight()
         {
-            throw new NotImplementedException();
+            for (int i = state.Gfx.GetLength(0) - 1; i >= 0; i--)
+            {
+                for (int j = state.Gfx.GetLength(1) - 1; j >= 0; j--)
+                {
+                    if ((i - 4) < 0)
+                        state.Gfx[i, j] = false;
+                    else
+                        state.Gfx[i, j] = state.Gfx[i - 4, j];
+                }   
+            }
         }
 
         private void ScrollLeft()
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < state.Gfx.GetLength(0); i++)
+            {
+                for (int j = 0; j < state.Gfx.GetLength(1); j++)
+                {
+                    if ((i + 4) > state.Gfx.GetLength(0))
+                        state.Gfx[i, j] = false;
+                    else
+                        state.Gfx[i, j] = state.Gfx[i + 4, j];
+                }   
+            }
+
+            state.Draw = true;
         }
     }
 }
