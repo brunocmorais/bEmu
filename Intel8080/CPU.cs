@@ -152,7 +152,7 @@ namespace bEmu.Intel8080
             }
         }
 
-        public byte EmularCiclo()
+        public byte StepCycle()
         {
             byte opcode = GetNextByte();
             state.Instructions++;

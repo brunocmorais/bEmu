@@ -98,7 +98,7 @@ namespace bEmu.Intel8080
 
             while (cycle-- >= 0)
             {
-                byte opcode = cpu.EmularCiclo();
+                byte opcode = cpu.StepCycle();
 
                 if (opcode == 0xDB) //IN
                     In();
