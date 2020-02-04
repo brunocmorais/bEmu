@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace bEmu.Intel8080
 {
@@ -464,9 +465,9 @@ namespace bEmu.Intel8080
 
         public void Cpi()
         {
-            byte value = GetNextByte();
+            byte value = GetNextByte();                
             ushort result = (ushort)(state.A - value);
-            state.Flags.Carry = (result & 0xF000) == 0xF000;
+            state.Flags.Carry = (result & 0xF000) == 0xF000;                
             UpdateZSP((byte) ((state.A - value)));
             state.Cycles += 7;
         }
@@ -550,7 +551,7 @@ namespace bEmu.Intel8080
             state.Flags.Zero = ((psw >> 6) & 1) == 1;
             state.Flags.AuxiliaryCarry = ((psw >> 4) & 1) == 1;
             state.Flags.Parity = ((psw >> 2) & 1) == 1;
-            state.Flags.Carry = ((psw >> 7) & 1) == 1;
+            state.Flags.Carry = (psw & 1) == 1;
 
             state.Cycles += 10;
         }
@@ -570,7 +571,8 @@ namespace bEmu.Intel8080
 
         public void Jmp()
         {
-            state.PC = GetNextWord();
+            ushort addr = GetNextWord();
+            state.PC = addr;
             state.Cycles += 10;
         }
 

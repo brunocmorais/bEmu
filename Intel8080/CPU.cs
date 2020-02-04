@@ -25,7 +25,7 @@ namespace bEmu.Intel8080
             state.SP = 0xf000;
             state.PC = pc;
             state.EnableInterrupts = false;
-            state.Memory = new byte[0x10000]; // 16KB RAM
+            state.Memory = new byte[0x10000];
             state.Flags = new Flags();
             state.Ports = new Ports();
             state.Cycles = 0;

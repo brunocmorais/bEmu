@@ -11,8 +11,8 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/Intel8080/bin/Debug/netcoreapp3.0/Intel8080.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}",
+            "args": ["/home/bruno/ROMs/intel8080/invaders.zip"],
+            "cwd": "${workspaceFolder}/Intel8080",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "integratedTerminal",
             "stopAtEntry": false
