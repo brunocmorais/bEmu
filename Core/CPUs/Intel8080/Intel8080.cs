@@ -71,11 +71,12 @@ namespace bEmu.Core.CPUs.Intel8080
             state.Memory[addr + 1] = a;
         }
 
-        void UpdateZSP(byte value)
+        void UpdateZSPA(byte value)
         {
             state.Flags.Zero = CheckZero(value);
             state.Flags.Sign = CheckSign(value);
             state.Flags.Parity = CheckParity(value);
+            state.Flags.AuxiliaryCarry = false;
         }
 
         ushort PopStack()
@@ -165,25 +166,10 @@ namespace bEmu.Core.CPUs.Intel8080
 
         bool CheckAuxiliaryCarryAdd(params byte[] bytes)
         {
-            // for (int i = 0; i < bytes.Length; i++)
-            //     bytes[i] &= 0x0F;
+            for (int i = 0; i < bytes.Length; i++)
+                bytes[i] &= 0x0F;
 
-            // return bytes.Sum(x => x) >= 0x10;
-            return state.Flags.AuxiliaryCarry;
-        }
-
-        bool CheckAuxiliaryCarrySub(params byte[] bytes)
-        {
-            // for (int i = 0; i < bytes.Length; i++)
-            //     bytes[i] &= 0x0F;
-
-            // int value = 0x10;
-
-            // foreach (byte b in bytes)
-            //     value -= b;
-
-            // return value < 0;
-            return state.Flags.AuxiliaryCarry;
+            return bytes.Sum(x => x) >= 0x10;
         }
 
         public override IOpcode StepCycle()

@@ -78,17 +78,17 @@ namespace bEmu.Core.CPUs.Intel8080
         {
             switch (register)
             {
-                case Register.A: state.A++; UpdateZSP(state.A); break;
-                case Register.B: state.B++; UpdateZSP(state.B); break;
-                case Register.C: state.C++; UpdateZSP(state.C); break;
-                case Register.D: state.D++; UpdateZSP(state.D); break;
-                case Register.E: state.E++; UpdateZSP(state.E); break;
-                case Register.H: state.H++; UpdateZSP(state.H); break;
-                case Register.L: state.L++; UpdateZSP(state.L); break;
+                case Register.A: state.A++; UpdateZSPA(state.A); break;
+                case Register.B: state.B++; UpdateZSPA(state.B); break;
+                case Register.C: state.C++; UpdateZSPA(state.C); break;
+                case Register.D: state.D++; UpdateZSPA(state.D); break;
+                case Register.E: state.E++; UpdateZSPA(state.E); break;
+                case Register.H: state.H++; UpdateZSPA(state.H); break;
+                case Register.L: state.L++; UpdateZSPA(state.L); break;
                 case Register.HL: 
                     byte value = ReadByteFromMemory(state.HL);
                     WriteByteToMemory(state.HL, ++value); 
-                    UpdateZSP(value); 
+                    UpdateZSPA(value); 
                     state.Cycles += 5; 
                     break;
             }
@@ -100,17 +100,17 @@ namespace bEmu.Core.CPUs.Intel8080
         {
             switch (register)
             {
-                case Register.A: state.A--; UpdateZSP(state.A); break;
-                case Register.B: state.B--; UpdateZSP(state.B); break;
-                case Register.C: state.C--; UpdateZSP(state.C); break;
-                case Register.D: state.D--; UpdateZSP(state.D); break;
-                case Register.E: state.E--; UpdateZSP(state.E); break;
-                case Register.H: state.H--; UpdateZSP(state.H); break;
-                case Register.L: state.L--; UpdateZSP(state.L); break;
+                case Register.A: state.A--; UpdateZSPA(state.A); break;
+                case Register.B: state.B--; UpdateZSPA(state.B); break;
+                case Register.C: state.C--; UpdateZSPA(state.C); break;
+                case Register.D: state.D--; UpdateZSPA(state.D); break;
+                case Register.E: state.E--; UpdateZSPA(state.E); break;
+                case Register.H: state.H--; UpdateZSPA(state.H); break;
+                case Register.L: state.L--; UpdateZSPA(state.L); break;
                 case Register.HL: 
                     byte value = ReadByteFromMemory(state.HL);
                     WriteByteToMemory(state.HL, --value); 
-                    UpdateZSP(value); 
+                    UpdateZSPA(value); 
                     state.Cycles += 5; 
                     break;
             }
@@ -201,7 +201,7 @@ namespace bEmu.Core.CPUs.Intel8080
             }
 
             state.A += correction;
-            UpdateZSP(state.A);
+            UpdateZSPA(state.A);
             state.Flags.Carry = carry;
         }
 
@@ -294,7 +294,7 @@ namespace bEmu.Core.CPUs.Intel8080
                 state.Cycles += 3;
 
             int result = state.A + value;
-            UpdateZSP((byte) result);
+            UpdateZSPA((byte) result);
             state.Flags.Carry = (result & 0x100) == 0x100; 
             state.Flags.AuxiliaryCarry = CheckAuxiliaryCarryAdd(state.A, value);
             state.A = (byte) (state.A + value);
@@ -305,8 +305,9 @@ namespace bEmu.Core.CPUs.Intel8080
         {
             byte value = GetNextByte();
             int result = state.A + value;
-            UpdateZSP((byte) result);
+            UpdateZSPA((byte) result);
             state.Flags.Carry = (result & 0x100) == 0x100; 
+            state.Flags.AuxiliaryCarry = CheckAuxiliaryCarryAdd(state.A, value);
             state.A = (byte) (state.A + value);
             state.Cycles += 7;
         }
@@ -316,8 +317,9 @@ namespace bEmu.Core.CPUs.Intel8080
             byte value = GetNextByte();
             int carryValue = state.Flags.Carry ? 1 : 0;
             int result = state.A + value + carryValue;
-            UpdateZSP((byte) result);
+            UpdateZSPA((byte) result);
             state.Flags.Carry = (result & 0x100) == 0x100; 
+            state.Flags.AuxiliaryCarry = CheckAuxiliaryCarryAdd(state.A, value);
             state.A = (byte) (state.A + value + carryValue);
             state.Cycles += 7;
         }
@@ -331,7 +333,7 @@ namespace bEmu.Core.CPUs.Intel8080
                 state.Cycles += 3;
 
             int result = state.A + value + carryValue;
-            UpdateZSP((byte) result);
+            UpdateZSPA((byte) result);
             state.Flags.Carry = (result & 0x100) == 0x100; 
             state.Flags.AuxiliaryCarry = CheckAuxiliaryCarryAdd(state.A, value, (byte) carryValue);
             state.A = (byte) (state.A + value + carryValue);
@@ -346,9 +348,8 @@ namespace bEmu.Core.CPUs.Intel8080
                 state.Cycles += 3;
 
             int result = state.A - value;
-            UpdateZSP((byte) result);
+            UpdateZSPA((byte) result);
             state.Flags.Carry = result < 0;
-            state.Flags.AuxiliaryCarry = CheckAuxiliaryCarrySub(state.A, value);
             state.A = (byte) (state.A - value);
             state.Cycles += 4;   
         }
@@ -357,7 +358,7 @@ namespace bEmu.Core.CPUs.Intel8080
         {
             byte value = GetNextByte();
             int result = state.A - value;
-            UpdateZSP((byte) result);
+            UpdateZSPA((byte) result);
             state.Flags.Carry = result < 0; 
             state.A = (byte) (state.A - value);
             state.Cycles += 7;   
@@ -368,7 +369,7 @@ namespace bEmu.Core.CPUs.Intel8080
             byte value = GetNextByte();
             int carryValue = state.Flags.Carry ? 1 : 0;
             int result = state.A - value - carryValue;
-            UpdateZSP((byte) result);
+            UpdateZSPA((byte) result);
             state.Flags.Carry = result < 0; 
             state.A = (byte) (state.A - value - carryValue);
             state.Cycles += 7;   
@@ -383,9 +384,8 @@ namespace bEmu.Core.CPUs.Intel8080
                 state.Cycles += 3;
 
             int result = state.A - value - carryValue;
-            UpdateZSP((byte) result);
+            UpdateZSPA((byte) result);
             state.Flags.Carry = result < 0; 
-            state.Flags.AuxiliaryCarry = CheckAuxiliaryCarrySub(state.A, value, (byte) carryValue);
             state.A = (byte) (state.A - value - carryValue);
             state.Cycles += 4;   
         }
@@ -399,7 +399,7 @@ namespace bEmu.Core.CPUs.Intel8080
 
             state.Flags.Carry = false;
             state.A &= value;
-            UpdateZSP(state.A);
+            UpdateZSPA(state.A);
             state.Cycles += 4;
         }
 
@@ -408,7 +408,7 @@ namespace bEmu.Core.CPUs.Intel8080
             byte value = GetNextByte();
             state.Flags.Carry = false;
             state.A &= value;
-            UpdateZSP(state.A);
+            UpdateZSPA(state.A);
             state.Cycles += 7;
         }
 
@@ -421,7 +421,7 @@ namespace bEmu.Core.CPUs.Intel8080
 
             state.Flags.Carry = false;
             state.A ^= value;
-            UpdateZSP(state.A);
+            UpdateZSPA(state.A);
             state.Cycles += 4;
         }
 
@@ -430,7 +430,7 @@ namespace bEmu.Core.CPUs.Intel8080
             byte value = GetNextByte();
             state.Flags.Carry = false;
             state.A ^= value;
-            UpdateZSP(state.A);
+            UpdateZSPA(state.A);
             state.Cycles += 7;
         }
 
@@ -443,7 +443,7 @@ namespace bEmu.Core.CPUs.Intel8080
 
             state.Flags.Carry = false;
             state.A |= value;
-            UpdateZSP(state.A);
+            UpdateZSPA(state.A);
             state.Cycles += 4;
         }
 
@@ -452,7 +452,7 @@ namespace bEmu.Core.CPUs.Intel8080
             byte value = GetNextByte();
             state.Flags.Carry = false;
             state.A |= value;
-            UpdateZSP(state.A);
+            UpdateZSPA(state.A);
             state.Cycles += 7;
         }
 
@@ -465,7 +465,7 @@ namespace bEmu.Core.CPUs.Intel8080
 
             ushort result = (ushort)(state.A - value);
             state.Flags.Carry = (result & 0xF000) == 0xF000;
-            UpdateZSP((byte) ((state.A - value)));
+            UpdateZSPA((byte) ((state.A - value)));
             state.Cycles += 4;
         }
 
@@ -474,7 +474,7 @@ namespace bEmu.Core.CPUs.Intel8080
             byte value = GetNextByte();                
             ushort result = (ushort)(state.A - value);
             state.Flags.Carry = (result & 0xF000) == 0xF000;                
-            UpdateZSP((byte) ((state.A - value)));
+            UpdateZSPA((byte) ((state.A - value)));
             state.Cycles += 7;
         }
 
