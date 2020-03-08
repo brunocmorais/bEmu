@@ -2,53 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using bEmu.Core;
 
 namespace bEmu.Core.CPUs.Intel8080
 {
-    public class Disassembler
+
+    public class Disassembler : Core.Disassembler
     {
-        private readonly byte[] codeBuffer;
-        public Disassembler(string fileName)
-        {
-            codeBuffer = File.ReadAllBytes(fileName);
-        }
+        public Disassembler(string fileName) : base(fileName) { }
+        public Disassembler(byte[] codebuffer) : base(codebuffer) { }
 
-        public Disassembler(byte[] codebuffer)
-        {
-            this.codeBuffer = codebuffer;
-        }
-
-        public string GetInstructionsText()
-        {
-            var sb = new StringBuilder();
-            var instructions = GetInstructions();
-
-            foreach (var instruction in instructions)
-            {
-                sb.AppendLine(instruction.ToString());
-            }
-
-            return sb.ToString();
-        }
-
-        public IEnumerable<Instruction> GetInstructions()
-        {
-            int pointer = 0;
-
-            while (pointer < codeBuffer.Length)
-            {
-                var instruction = GetInstruction(pointer);
-                pointer += instruction.Length;
-                yield return instruction;
-            }
-        }
-
-        public Instruction GetInstruction(int pointer)
+        public override Instruction GetInstruction(int pointer)
         {
             byte opcode = codeBuffer[pointer];
-            byte minInstruction = pointer + 1 < codeBuffer.Length ? codeBuffer[pointer + 1] : (byte) 0;
+            byte minInstruction = pointer + 1 < codeBuffer.Length ? codeBuffer[pointer + 1] : (byte)0;
             int maxInstruction = pointer + 2 < codeBuffer.Length ? (codeBuffer[pointer + 2] << 8) | minInstruction : 0;
-            
+
             switch (opcode)
             {
                 case 0x00:

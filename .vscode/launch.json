@@ -5,13 +5,26 @@
    "version": "0.2.0",
    "configurations": [
         {
-            "name": "Start Emulator",
+            "name": "Start 8080",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bEmu/bin/Debug/netcoreapp3.0/bEmu.dll",
-            "args": ["SpaceInvaders8080", "/home/bruno/ROMs/intel8080/invadpt2.zip"],
+            "args": ["Generic8080", "/home/bruno/ROMs/intel8080/invaders.zip"],
+            "cwd": "${workspaceFolder}/bEmu",
+            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Start Chip-8",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/bEmu/bin/Debug/netcoreapp3.0/bEmu.dll",
+            "args": ["Chip8", "/home/bruno/ROMs/ch8/CAR"],
             "cwd": "${workspaceFolder}/bEmu",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "integratedTerminal",

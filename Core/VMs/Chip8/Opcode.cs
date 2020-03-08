@@ -1,8 +1,8 @@
-using bEmu.Core.Model;
+using bEmu.Core;
 
 namespace bEmu.Core.VMs.Chip8
 {
-    public class Opcode : BaseOpcode
+    public class Opcode : Core.Opcode
     {
         public Opcode(byte byte1, byte byte2) : base(byte1, byte2) { }
 

@@ -1,42 +1,16 @@
 using System;
-using bEmu.Core.Model;
+using bEmu.Core;
+using bEmu.Core.Systems.Chip8;
 
 namespace bEmu.Core.VMs.Chip8
 {
-    public partial class Chip8 : BaseCPU
+    public partial class Chip8 : VM<bEmu.Core.Systems.Chip8.State, bEmu.Core.Systems.Chip8.PPU>
     {
-        private State state;
-
-        public override IState State
-        {
-            get { return state; }
-        }
-
-        public Chip8()
-        {
-            state = new State();
-            state.Memory = new byte[0x1000];
-            state.Gfx = new bool[64, 32];
-            state.PC = 0x200;
-            state.V = new byte[16];
-            state.Stack = new ushort[16];
-            state.Keys = new bool[16];
-
-            UpdateNumbersInMemory();
-        }
-
-        private void UpdateNumbersInMemory()
-        {
-            for (int i = 0; i < state.Numbers.Length; i++)
-                state.Memory[i] = state.Numbers[i];
-
-            for (int i = 0; i < state.NumbersHiRes.Length; i++)
-                state.Memory[i + 0x50] = state.NumbersHiRes[i];
-        }
+        public Chip8(ISystem system) : base(system) { }
 
         public override IOpcode StepCycle()
         {
-            var opcode = new Opcode(state.Memory[state.PC++], state.Memory[state.PC++]);
+            var opcode = new Opcode(MMU[State.PC++], MMU[State.PC++]);
             base.StepCycle();
 
             switch (opcode.UShort & 0xF000)
@@ -44,23 +18,23 @@ namespace bEmu.Core.VMs.Chip8
                 case 0x0000: 
                     switch (opcode.UShort & 0x00F0)
                     {
-                        case 0x00B0: ScrollUp(opcode.Nibble); break;
-                        case 0x00C0: ScrollDown(opcode.Nibble); break;
+                        case 0x00B0: PPU.ScrollUp(opcode.Nibble); break;
+                        case 0x00C0: PPU.ScrollDown(opcode.Nibble); break;
                         case 0x00E0:
                             switch (opcode.UShort & 0x000F)
                             {
-                                case 0x0000: Cls(); break;
+                                case 0x0000: PPU.ClearScreen(); break;
                                 case 0x000E: Ret(); break;
                             }
                             break;
                         case 0x00F0:
                             switch (opcode.UShort & 0x000F)
                             {
-                                case 0x000B: ScrollLeft(); break;
-                                case 0x000C: ScrollRight(); break;
+                                case 0x000B: PPU.ScrollLeft(); break;
+                                case 0x000C: PPU.ScrollRight(); break;
                                 case 0x000D: Quit(); break;
-                                case 0x000E: Chip8Mode(); break;
-                                case 0x000F: SuperChipMode(); break;
+                                case 0x000E: (System as Systems.Chip8.System).SetChip8Mode(); break;
+                                case 0x000F: (System as Systems.Chip8.System).SetSuperChipMode(); break;
                             }
                             break;
                     }
@@ -90,7 +64,7 @@ namespace bEmu.Core.VMs.Chip8
                 case 0xA000: LdI(opcode.Nnn); break; 
                 case 0xB000: JpV0(opcode.Nnn); break;
                 case 0xC000: Rnd(opcode.X, opcode.Kk); break;
-                case 0xD000: Drw(opcode.X, opcode.Y, opcode.Nibble); break;
+                case 0xD000: PPU.Drw(opcode.X, opcode.Y, opcode.Nibble); break;
                 case 0xE000: 
                     switch (opcode.UShort & 0x00FF)
                     {

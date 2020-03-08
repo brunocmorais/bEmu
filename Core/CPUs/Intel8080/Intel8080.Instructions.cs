@@ -1,741 +1,743 @@
 using System;
 using System.Diagnostics;
-using bEmu.Core.Model;
+using bEmu.Core;
 using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.Intel8080
 {
-     partial class Intel8080 : ICPU
+    public partial class Intel8080<TState> : CPU<TState> where TState : State
     {
-       void Nop()
+        private void Nop()
         {
-            state.Cycles += 4;
+            IncreaseCycles(4);
         }
 
-       void Lxi(Register register)
+        private void Lxi(Register register)
         {
             switch (register)
             {
                 case Register.BC:
-                    state.C = state.Memory[state.PC++];
-                    state.B = state.Memory[state.PC++];
+                    State.C = MMU[State.PC++];
+                    State.B = MMU[State.PC++];
                     break;
                 case Register.DE:
-                    state.E = state.Memory[state.PC++];
-                    state.D = state.Memory[state.PC++];
+                    State.E = MMU[State.PC++];
+                    State.D = MMU[State.PC++];
                     break;
                 case Register.HL:
-                    state.L = state.Memory[state.PC++];
-                    state.H = state.Memory[state.PC++];
+                    State.L = MMU[State.PC++];
+                    State.H = MMU[State.PC++];
                     break;
                 case Register.SP:
-                    state.SP = GeneralUtils.Get16BitNumber(state.Memory[state.PC++], state.Memory[state.PC++]);
+                    State.SP = BitUtils.GetWordFrom2Bytes(MMU[State.PC++], MMU[State.PC++]);
                     break;
             }
             
-            state.Cycles += 10;
+            IncreaseCycles(10);
         }
 
-       void Stax(Register register)
+        private void Stax(Register register)
         {
             if (register == Register.BC)
-                state.Memory[state.BC] = state.A;
+                MMU[State.BC] = State.A;
             else if (register == Register.DE)
-                state.Memory[state.DE] = state.A;
+                MMU[State.DE] = State.A;
 
-            state.Cycles += 7;
+            IncreaseCycles(7);
         }
 
-       void Shld()
+        private void Shld()
         {
-            ushort value = state.HL;
+            ushort value = State.HL;
             ushort addr = GetNextWord();
             WriteWordToMemory(addr, value);
-            state.Cycles += 16;
+            IncreaseCycles(16);
         }
 
-       void Sta()
+        private void Sta()
         {
-            WriteByteToMemory(GetNextWord(), state.A);
-            state.Cycles += 13;
+            WriteByteToMemory(GetNextWord(), State.A);
+            IncreaseCycles(13);
         }
 
-       void Inx(Register registers)
+        private void Inx(Register registers)
         {
             switch (registers)
             {
-                case Register.BC: state.BC++; break;
-                case Register.DE: state.DE++; break;
-                case Register.HL: state.HL++; break;
-                case Register.SP: state.SP++; break;
+                case Register.BC: State.BC++; break;
+                case Register.DE: State.DE++; break;
+                case Register.HL: State.HL++; break;
+                case Register.SP: State.SP++; break;
             }
 
-            state.Cycles += 5;
+            IncreaseCycles(5);
 
         }
 
-       void Inr(Register register)
+        private void Inr(Register register)
         {
             switch (register)
             {
-                case Register.A: state.A++; UpdateZSPA(state.A); break;
-                case Register.B: state.B++; UpdateZSPA(state.B); break;
-                case Register.C: state.C++; UpdateZSPA(state.C); break;
-                case Register.D: state.D++; UpdateZSPA(state.D); break;
-                case Register.E: state.E++; UpdateZSPA(state.E); break;
-                case Register.H: state.H++; UpdateZSPA(state.H); break;
-                case Register.L: state.L++; UpdateZSPA(state.L); break;
+                case Register.A: State.A++; UpdateFlags(State.A); break;
+                case Register.B: State.B++; UpdateFlags(State.B); break;
+                case Register.C: State.C++; UpdateFlags(State.C); break;
+                case Register.D: State.D++; UpdateFlags(State.D); break;
+                case Register.E: State.E++; UpdateFlags(State.E); break;
+                case Register.H: State.H++; UpdateFlags(State.H); break;
+                case Register.L: State.L++; UpdateFlags(State.L); break;
                 case Register.HL: 
-                    byte value = ReadByteFromMemory(state.HL);
-                    WriteByteToMemory(state.HL, ++value); 
-                    UpdateZSPA(value); 
-                    state.Cycles += 5; 
+                    byte value = ReadByteFromMemory(State.HL);
+                    WriteByteToMemory(State.HL, ++value); 
+                    UpdateFlags(value); 
+                    IncreaseCycles(5); 
                     break;
             }
 
-            state.Cycles += 5;
+            IncreaseCycles(5);
         }
 
-       void Dcr(Register register)
+        private void Dcr(Register register)
         {
             switch (register)
             {
-                case Register.A: state.A--; UpdateZSPA(state.A); break;
-                case Register.B: state.B--; UpdateZSPA(state.B); break;
-                case Register.C: state.C--; UpdateZSPA(state.C); break;
-                case Register.D: state.D--; UpdateZSPA(state.D); break;
-                case Register.E: state.E--; UpdateZSPA(state.E); break;
-                case Register.H: state.H--; UpdateZSPA(state.H); break;
-                case Register.L: state.L--; UpdateZSPA(state.L); break;
+                case Register.A: State.A--; UpdateFlags(State.A); break;
+                case Register.B: State.B--; UpdateFlags(State.B); break;
+                case Register.C: State.C--; UpdateFlags(State.C); break;
+                case Register.D: State.D--; UpdateFlags(State.D); break;
+                case Register.E: State.E--; UpdateFlags(State.E); break;
+                case Register.H: State.H--; UpdateFlags(State.H); break;
+                case Register.L: State.L--; UpdateFlags(State.L); break;
                 case Register.HL: 
-                    byte value = ReadByteFromMemory(state.HL);
-                    WriteByteToMemory(state.HL, --value); 
-                    UpdateZSPA(value); 
-                    state.Cycles += 5; 
+                    byte value = ReadByteFromMemory(State.HL);
+                    WriteByteToMemory(State.HL, --value); 
+                    UpdateFlags(value); 
+                    IncreaseCycles(5); 
                     break;
             }
 
-            state.Cycles += 5;
+            IncreaseCycles(5);
         }
 
-       void Mvi(Register register)
+        private void Mvi(Register register)
         {
             switch (register)
             {
-                case Register.A: state.A = GetNextByte(); break;
-                case Register.B: state.B = GetNextByte(); break;
-                case Register.C: state.C = GetNextByte(); break;
-                case Register.D: state.D = GetNextByte(); break;
-                case Register.E: state.E = GetNextByte(); break;
-                case Register.H: state.H = GetNextByte(); break;
-                case Register.L: state.L = GetNextByte(); break;
+                case Register.A: State.A = GetNextByte(); break;
+                case Register.B: State.B = GetNextByte(); break;
+                case Register.C: State.C = GetNextByte(); break;
+                case Register.D: State.D = GetNextByte(); break;
+                case Register.E: State.E = GetNextByte(); break;
+                case Register.H: State.H = GetNextByte(); break;
+                case Register.L: State.L = GetNextByte(); break;
                 case Register.HL: 
-                    WriteByteToMemory(state.HL, GetNextByte()); 
-                    state.Cycles += 3; 
+                    WriteByteToMemory(State.HL, GetNextByte()); 
+                    IncreaseCycles(3); 
                     break;
             }
 
-            state.Cycles += 7;   
+            IncreaseCycles(7);   
         }
 
-       void Rlc()
+        private void Rlc()
         {
-            state.Flags.Carry = ((state.A & 0x80) >> 7) == 1;
-            state.A <<= 1;
+            State.Flags.Carry = ((State.A & 0x80) >> 7) == 1;
+            State.A <<= 1;
 
-            if (state.Flags.Carry)
-                state.A |= 1;
+            if (State.Flags.Carry)
+                State.A |= 1;
 
-            state.Cycles += 4;
+            IncreaseCycles(4);
         }
 
-       void Rrc()
+        private void Rrc()
         {
-            state.Flags.Carry = (state.A & 0x1) == 1;
-            state.A >>= 1;
+            State.Flags.Carry = (State.A & 0x1) == 1;
+            State.A >>= 1;
 
-            if (state.Flags.Carry)
-                state.A |= 0x80;
+            if (State.Flags.Carry)
+                State.A |= 0x80;
 
-            state.Cycles += 4;
+            IncreaseCycles(4);
         }
 
-        void Ral()
+        private void Ral()
         {
-            bool previousCarry = state.Flags.Carry;
-            state.Flags.Carry = ((state.A & 0x80) >> 7) == 1;
-            state.A <<= 1;
+            bool previousCarry = State.Flags.Carry;
+            State.Flags.Carry = ((State.A & 0x80) >> 7) == 1;
+            State.A <<= 1;
 
             if (previousCarry)
-                state.A |= 1;
+                State.A |= 1;
 
-            state.Cycles += 4;
+            IncreaseCycles(4);
         }
 
-        void Rar()
+        private void Rar()
         {
-            bool previousCarry = state.Flags.Carry;
-            state.Flags.Carry = (state.A & 0x1) == 1;
-            state.A >>= 1;
+            bool previousCarry = State.Flags.Carry;
+            State.Flags.Carry = (State.A & 0x1) == 1;
+            State.A >>= 1;
 
             if (previousCarry)
-                state.A |= 0x80;
+                State.A |= 0x80;
 
-            state.Cycles += 4;
+            IncreaseCycles(4);
         }
 
-        void Daa()
+        private void Daa()
         {
-            bool carry = state.Flags.Carry;
+            bool carry = State.Flags.Carry;
             byte correction = 0;
 
-            byte lsb = (byte) (state.A & 0x0F);
-            byte msb = (byte) (state.A >> 4);
+            byte lsb = (byte) (State.A & 0x0F);
+            byte msb = (byte) (State.A >> 4);
 
-            if (state.Flags.AuxiliaryCarry || lsb > 9) {
+            if (State.Flags.AuxiliaryCarry || lsb > 9) {
                 correction += 0x06;
             }
-            if (state.Flags.Carry || msb > 9 || (msb >= 9 && lsb > 9)) {
+            if (State.Flags.Carry || msb > 9 || (msb >= 9 && lsb > 9)) {
                 correction += 0x60;
                 carry = true;
             }
 
-            state.A += correction;
-            UpdateZSPA(state.A);
-            state.Flags.Carry = carry;
+            State.A += correction;
+            UpdateFlags(State.A);
+            State.Flags.Carry = carry;
+
+            IncreaseCycles(4);
         }
 
-        void Stc()
+        private void Stc()
         {
-            state.Flags.Carry = true;
-            state.Cycles += 4;
+            State.Flags.Carry = true;
+            IncreaseCycles(4);
         }
 
-        void Dad(Register register)
+        private void Dad(Register register)
         {
             ushort word = GetWordFromRegister(register);
-            state.Flags.Carry = ((state.HL + word) & 0x10000) == 0x10000;
-            state.HL += word;
-            state.Cycles += 4;
+            State.Flags.Carry = ((State.HL + word) & 0x10000) == 0x10000;
+            State.HL += word;
+            IncreaseCycles(4);
         }
 
-        void Ldax(Register register)
+        private void Ldax(Register register)
         {
             byte value = GetByteFromRegister(register);
-            state.A = value;
-            state.Cycles += 7;
+            State.A = value;
+            IncreaseCycles(7);
         }
 
-        void Lhld()
+        private void Lhld()
         {
             ushort addr = GetNextWord();
-            state.HL = ReadWordFromMemory(addr);
-            state.Cycles += 16;
+            State.HL = ReadWordFromMemory(addr);
+            IncreaseCycles(16);
         }
 
-        void Lda()
+        private void Lda()
         {
-            state.A = ReadByteFromMemory(GetNextWord());
-            state.Cycles += 13;
+            State.A = ReadByteFromMemory(GetNextWord());
+            IncreaseCycles(13);
         }
 
-        void Dcx(Register register)
+        private void Dcx(Register register)
         {
             switch (register)
             {
-                case Register.BC: state.BC--; break;
-                case Register.DE: state.DE--; break;
-                case Register.HL: state.HL--; break;
-                case Register.SP: state.SP--; break;
+                case Register.BC: State.BC--; break;
+                case Register.DE: State.DE--; break;
+                case Register.HL: State.HL--; break;
+                case Register.SP: State.SP--; break;
             }
 
-            state.Cycles += 5;
+            IncreaseCycles(5);
         }
 
-        void Cma()
+        private void Cma()
         {
-            state.A = (byte)~state.A;
-            state.Cycles += 4;
+            State.A = (byte)~State.A;
+            IncreaseCycles(4);
         }
 
-        void Cmc()
+        private void Cmc()
         {
-            state.Flags.Carry = !state.Flags.Carry;
-            state.Cycles += 4;
+            State.Flags.Carry = !State.Flags.Carry;
+            IncreaseCycles(4);
         }
 
-        void Mov(Register registerA, Register registerB)
+        private void Mov(Register registerA, Register registerB)
         {
             byte value = GetByteFromRegister(registerB);
 
             if (registerB == Register.HL)
-                state.Cycles += 2;
+                IncreaseCycles(2);
 
             switch (registerA)
             {
-                case Register.A: state.A = value; break;
-                case Register.B: state.B = value; break;
-                case Register.C: state.C = value; break;
-                case Register.D: state.D = value; break;
-                case Register.E: state.E = value; break;
-                case Register.H: state.H = value; break;
-                case Register.L: state.L = value; break;
-                case Register.HL: WriteByteToMemory(state.HL, value); state.Cycles += 2; break;
+                case Register.A: State.A = value; break;
+                case Register.B: State.B = value; break;
+                case Register.C: State.C = value; break;
+                case Register.D: State.D = value; break;
+                case Register.E: State.E = value; break;
+                case Register.H: State.H = value; break;
+                case Register.L: State.L = value; break;
+                case Register.HL: WriteByteToMemory(State.HL, value); IncreaseCycles(2); break;
             }
 
-            state.Cycles += 5;
+            IncreaseCycles(5);
         }
 
-        void Add(Register register)
+        private void Add(Register register)
         {
             byte value = GetByteFromRegister(register);
 
             if (register == Register.HL)
-                state.Cycles += 3;
+                IncreaseCycles(3);
 
-            int result = state.A + value;
-            UpdateZSPA((byte) result);
-            state.Flags.Carry = (result & 0x100) == 0x100; 
-            state.Flags.AuxiliaryCarry = CheckAuxiliaryCarryAdd(state.A, value);
-            state.A = (byte) (state.A + value);
-            state.Cycles += 4;
+            int result = State.A + value;
+            UpdateFlags((byte) result);
+            State.Flags.Carry = (result & 0x100) == 0x100; 
+            State.Flags.AuxiliaryCarry = CheckAuxiliaryCarryAdd(State.A, value);
+            State.A = (byte) (State.A + value);
+            IncreaseCycles(4);
         }
 
-        void Adi()
+        private void Adi()
         {
             byte value = GetNextByte();
-            int result = state.A + value;
-            UpdateZSPA((byte) result);
-            state.Flags.Carry = (result & 0x100) == 0x100; 
-            state.Flags.AuxiliaryCarry = CheckAuxiliaryCarryAdd(state.A, value);
-            state.A = (byte) (state.A + value);
-            state.Cycles += 7;
+            int result = State.A + value;
+            UpdateFlags((byte) result);
+            State.Flags.Carry = (result & 0x100) == 0x100; 
+            State.Flags.AuxiliaryCarry = CheckAuxiliaryCarryAdd(State.A, value);
+            State.A = (byte) (State.A + value);
+            IncreaseCycles(7);
         }
 
-        void Aci()
+        private void Aci()
         {
             byte value = GetNextByte();
-            int carryValue = state.Flags.Carry ? 1 : 0;
-            int result = state.A + value + carryValue;
-            UpdateZSPA((byte) result);
-            state.Flags.Carry = (result & 0x100) == 0x100; 
-            state.Flags.AuxiliaryCarry = CheckAuxiliaryCarryAdd(state.A, value);
-            state.A = (byte) (state.A + value + carryValue);
-            state.Cycles += 7;
+            int carryValue = State.Flags.Carry ? 1 : 0;
+            int result = State.A + value + carryValue;
+            UpdateFlags((byte) result);
+            State.Flags.Carry = (result & 0x100) == 0x100; 
+            State.Flags.AuxiliaryCarry = CheckAuxiliaryCarryAdd(State.A, value);
+            State.A = (byte) (State.A + value + carryValue);
+            IncreaseCycles(7);
         }
 
-        void Adc(Register register)
+        private void Adc(Register register)
         {
             byte value = GetByteFromRegister(register);
-            int carryValue = state.Flags.Carry ? 1 : 0;
+            int carryValue = State.Flags.Carry ? 1 : 0;
 
             if (register == Register.HL)
-                state.Cycles += 3;
+                IncreaseCycles(3);
 
-            int result = state.A + value + carryValue;
-            UpdateZSPA((byte) result);
-            state.Flags.Carry = (result & 0x100) == 0x100; 
-            state.Flags.AuxiliaryCarry = CheckAuxiliaryCarryAdd(state.A, value, (byte) carryValue);
-            state.A = (byte) (state.A + value + carryValue);
-            state.Cycles += 4;
+            int result = State.A + value + carryValue;
+            UpdateFlags((byte) result);
+            State.Flags.Carry = (result & 0x100) == 0x100; 
+            State.Flags.AuxiliaryCarry = CheckAuxiliaryCarryAdd(State.A, value, (byte) carryValue);
+            State.A = (byte) (State.A + value + carryValue);
+            IncreaseCycles(4);
         }
 
-        void Sub(Register register)
+        private void Sub(Register register)
         {
             byte value = GetByteFromRegister(register);
 
             if (register == Register.HL)
-                state.Cycles += 3;
+                IncreaseCycles(3);
 
-            int result = state.A - value;
-            UpdateZSPA((byte) result);
-            state.Flags.Carry = result < 0;
-            state.A = (byte) (state.A - value);
-            state.Cycles += 4;   
+            int result = State.A - value;
+            UpdateFlags((byte) result);
+            State.Flags.Carry = result < 0;
+            State.A = (byte) (State.A - value);
+            IncreaseCycles(4);   
         }
 
-        void Sui()
+        private void Sui()
         {
             byte value = GetNextByte();
-            int result = state.A - value;
-            UpdateZSPA((byte) result);
-            state.Flags.Carry = result < 0; 
-            state.A = (byte) (state.A - value);
-            state.Cycles += 7;   
+            int result = State.A - value;
+            UpdateFlags((byte) result);
+            State.Flags.Carry = result < 0; 
+            State.A = (byte) (State.A - value);
+            IncreaseCycles(7);   
         }
 
-        void Sbi()
+        private void Sbi()
         {
             byte value = GetNextByte();
-            int carryValue = state.Flags.Carry ? 1 : 0;
-            int result = state.A - value - carryValue;
-            UpdateZSPA((byte) result);
-            state.Flags.Carry = result < 0; 
-            state.A = (byte) (state.A - value - carryValue);
-            state.Cycles += 7;   
+            int carryValue = State.Flags.Carry ? 1 : 0;
+            int result = State.A - value - carryValue;
+            UpdateFlags((byte) result);
+            State.Flags.Carry = result < 0; 
+            State.A = (byte) (State.A - value - carryValue);
+            IncreaseCycles(7);   
         }
 
-        void Sbb(Register register)
+        private void Sbb(Register register)
         {
             byte value = GetByteFromRegister(register);
-            int carryValue = state.Flags.Carry ? 1 : 0;
+            int carryValue = State.Flags.Carry ? 1 : 0;
 
             if (register == Register.HL)
-                state.Cycles += 3;
+                IncreaseCycles(3);
 
-            int result = state.A - value - carryValue;
-            UpdateZSPA((byte) result);
-            state.Flags.Carry = result < 0; 
-            state.A = (byte) (state.A - value - carryValue);
-            state.Cycles += 4;   
+            int result = State.A - value - carryValue;
+            UpdateFlags((byte) result);
+            State.Flags.Carry = result < 0; 
+            State.A = (byte) (State.A - value - carryValue);
+            IncreaseCycles(4);   
         }
 
-        void Ana(Register register)
+        private void Ana(Register register)
         {
             byte value = GetByteFromRegister(register);
 
             if (register == Register.HL)
-                state.Cycles += 3;
+                IncreaseCycles(3);
 
-            state.Flags.Carry = false;
-            state.A &= value;
-            UpdateZSPA(state.A);
-            state.Cycles += 4;
+            State.Flags.Carry = false;
+            State.A &= value;
+            UpdateFlags(State.A);
+            IncreaseCycles(4);
         }
 
-        void Ani()
+        private void Ani()
         {
             byte value = GetNextByte();
-            state.Flags.Carry = false;
-            state.A &= value;
-            UpdateZSPA(state.A);
-            state.Cycles += 7;
+            State.Flags.Carry = false;
+            State.A &= value;
+            UpdateFlags(State.A);
+            IncreaseCycles(7);
         }
 
-        void Xra(Register register)
+        private void Xra(Register register)
         {
             byte value = GetByteFromRegister(register);
 
             if (register == Register.HL)
-                state.Cycles += 3;
+                IncreaseCycles(3);
 
-            state.Flags.Carry = false;
-            state.A ^= value;
-            UpdateZSPA(state.A);
-            state.Cycles += 4;
+            State.Flags.Carry = false;
+            State.A ^= value;
+            UpdateFlags(State.A);
+            IncreaseCycles(4);
         }
 
-        void Xri()
+        private void Xri()
         {
             byte value = GetNextByte();
-            state.Flags.Carry = false;
-            state.A ^= value;
-            UpdateZSPA(state.A);
-            state.Cycles += 7;
+            State.Flags.Carry = false;
+            State.A ^= value;
+            UpdateFlags(State.A);
+            IncreaseCycles(7);
         }
 
-        void Ora(Register register)
+        private void Ora(Register register)
         {
             byte value = GetByteFromRegister(register);
 
             if (register == Register.HL)
-                state.Cycles += 3;
+                IncreaseCycles(3);
 
-            state.Flags.Carry = false;
-            state.A |= value;
-            UpdateZSPA(state.A);
-            state.Cycles += 4;
+            State.Flags.Carry = false;
+            State.A |= value;
+            UpdateFlags(State.A);
+            IncreaseCycles(4);
         }
 
-        void Ori()
+        private void Ori()
         {
             byte value = GetNextByte();
-            state.Flags.Carry = false;
-            state.A |= value;
-            UpdateZSPA(state.A);
-            state.Cycles += 7;
+            State.Flags.Carry = false;
+            State.A |= value;
+            UpdateFlags(State.A);
+            IncreaseCycles(7);
         }
 
-        void Cmp(Register register)
+        private void Cmp(Register register)
         {
             byte value = GetByteFromRegister(register);
 
             if (register == Register.HL)
-                state.Cycles += 3;
+                IncreaseCycles(3);
 
-            ushort result = (ushort)(state.A - value);
-            state.Flags.Carry = (result & 0xF000) == 0xF000;
-            UpdateZSPA((byte) ((state.A - value)));
-            state.Cycles += 4;
+            ushort result = (ushort)(State.A - value);
+            State.Flags.Carry = (result & 0xF000) == 0xF000;
+            UpdateFlags((byte) ((State.A - value)));
+            IncreaseCycles(4);
         }
 
-        void Cpi()
+        private void Cpi()
         {
             byte value = GetNextByte();                
-            ushort result = (ushort)(state.A - value);
-            state.Flags.Carry = (result & 0xF000) == 0xF000;                
-            UpdateZSPA((byte) ((state.A - value)));
-            state.Cycles += 7;
+            ushort result = (ushort)(State.A - value);
+            State.Flags.Carry = (result & 0xF000) == 0xF000;                
+            UpdateFlags((byte) ((State.A - value)));
+            IncreaseCycles(7);
         }
 
-        void Ret()
+        private void Ret()
         {
-            state.PC = PopStack();
-            state.Cycles += 10;
+            State.PC = PopStack();
+            IncreaseCycles(10);
         }
 
-        void ConditionalRet(bool condition)
+        private void ConditionalRet(bool condition)
         {
             if (condition)
             {
                 Ret();
-                state.Cycles += 1;
+                IncreaseCycles(1);
             }
             else
-                state.Cycles += 5;
+                IncreaseCycles(5);
         }
 
-        void Rnz()
+        private void Rnz()
         {
-            ConditionalRet(!state.Flags.Zero);
+            ConditionalRet(!State.Flags.Zero);
         }
 
-        void Rnc()
+        private void Rnc()
         {
-            ConditionalRet(!state.Flags.Carry);
+            ConditionalRet(!State.Flags.Carry);
         }
 
-        void Rpo()
+        private void Rpo()
         {
-            ConditionalRet(!state.Flags.Parity);
+            ConditionalRet(!State.Flags.Parity);
         }
 
-        void Rp()
+        private void Rp()
         {
-            ConditionalRet(!state.Flags.Sign);
+            ConditionalRet(!State.Flags.Sign);
         }
 
-        void Rz()
+        private void Rz()
         {
-            ConditionalRet(state.Flags.Zero);
+            ConditionalRet(State.Flags.Zero);
         }
 
-        void Rc()
+        private void Rc()
         {
-            ConditionalRet(state.Flags.Carry);
+            ConditionalRet(State.Flags.Carry);
         }
 
-        void Rpe()
+        private void Rpe()
         {
-            ConditionalRet(state.Flags.Parity);
+            ConditionalRet(State.Flags.Parity);
         }
 
-        void Rm()
+        private void Rm()
         {
-            ConditionalRet(state.Flags.Sign);
+            ConditionalRet(State.Flags.Sign);
         }
 
-        void Pop(Register register)
+        private void Pop(Register register)
         {
             switch (register)
             {
-                case Register.BC: state.BC = PopStack(); break;
-                case Register.DE: state.DE = PopStack(); break;
-                case Register.HL: state.HL = PopStack(); break;
+                case Register.BC: State.BC = PopStack(); break;
+                case Register.DE: State.DE = PopStack(); break;
+                case Register.HL: State.HL = PopStack(); break;
             }
 
-            state.Cycles += 10;
+            IncreaseCycles(10);
         }
 
-        void PopPsw()
+        private void PopPsw()
         {
             ushort af = PopStack();
-            state.A = (byte)(af >> 8);
+            State.A = (byte)(af >> 8);
             byte psw = (byte) (af & 0xFF);
             
-            state.Flags.Sign = ((psw >> 7) & 1) == 1;
-            state.Flags.Zero = ((psw >> 6) & 1) == 1;
-            state.Flags.AuxiliaryCarry = ((psw >> 4) & 1) == 1;
-            state.Flags.Parity = ((psw >> 2) & 1) == 1;
-            state.Flags.Carry = (psw & 1) == 1;
+            State.Flags.Sign = ((psw >> 7) & 1) == 1;
+            State.Flags.Zero = ((psw >> 6) & 1) == 1;
+            State.Flags.AuxiliaryCarry = ((psw >> 4) & 1) == 1;
+            State.Flags.Parity = ((psw >> 2) & 1) == 1;
+            State.Flags.Carry = (psw & 1) == 1;
 
-            state.Cycles += 10;
+            IncreaseCycles(10);
         }
 
-        void Push(Register register)
+        private void Push(Register register)
         {
             switch (register)
             {
-                case Register.BC: PushStack(state.BC); break;
-                case Register.DE: PushStack(state.DE); break;
-                case Register.HL: PushStack(state.HL); break;
-                case Register.AF: PushStack(state.AF); break;
+                case Register.BC: PushStack(State.BC); break;
+                case Register.DE: PushStack(State.DE); break;
+                case Register.HL: PushStack(State.HL); break;
+                case Register.AF: PushStack(State.AF); break;
             }
 
-            state.Cycles += 11;
+            IncreaseCycles(11);
         }
 
-        void Jmp()
+        private void Jmp()
         {
             ushort addr = GetNextWord();
-            state.PC = addr;
-            state.Cycles += 10;
+            State.PC = addr;
+            IncreaseCycles(10);
         }
 
-        void Jmp(ushort addr)
+        private void Jmp(ushort addr)
         {
-            state.PC = addr;
-            state.Cycles += 10;
+            State.PC = addr;
+            IncreaseCycles(10);
         }
 
-        void ConditionalJmp(bool condition)
+        private void ConditionalJmp(bool condition)
         {
             if (condition)
                 Jmp();
             else
                 GetNextWord();
 
-            state.Cycles += 3;
+            IncreaseCycles(3);
         }
 
-        void Jnz()
+        private void Jnz()
         {
-            ConditionalJmp(!state.Flags.Zero);
+            ConditionalJmp(!State.Flags.Zero);
         }
 
-        void Jnc()
+        private void Jnc()
         {
-            ConditionalJmp(!state.Flags.Carry);
+            ConditionalJmp(!State.Flags.Carry);
         }
 
-        void Jpo()
+        private void Jpo()
         {
-            ConditionalJmp(!state.Flags.Parity);
+            ConditionalJmp(!State.Flags.Parity);
         }
 
-        void Jp()
+        private void Jp()
         {
-            ConditionalJmp(!state.Flags.Sign);
+            ConditionalJmp(!State.Flags.Sign);
         }
 
-        void Jz()
+        private void Jz()
         {
-            ConditionalJmp(state.Flags.Zero);
+            ConditionalJmp(State.Flags.Zero);
         }
 
-        void Jc()
+        private void Jc()
         {
-            ConditionalJmp(state.Flags.Carry);
+            ConditionalJmp(State.Flags.Carry);
         }
 
-        void Jpe()
+        private void Jpe()
         {
-            ConditionalJmp(state.Flags.Parity);
+            ConditionalJmp(State.Flags.Parity);
         }
 
-        void Jm()
+        private void Jm()
         {
-            ConditionalJmp(state.Flags.Sign);
+            ConditionalJmp(State.Flags.Sign);
         }
 
-        void In()
+        private void In()
 		{
-            state.Cycles += 10;
+            IncreaseCycles(10);
 		}
 
-        void Out()
+        private void Out()
         {
-            state.Cycles += 10;
+            IncreaseCycles(10);
         }
 
-        void Xthl()
+        private void Xthl()
         {
-            ushort value = ReadWordFromMemory(state.SP);
-            WriteWordToMemory(state.SP, state.HL);
-            state.HL = value;
+            ushort value = ReadWordFromMemory(State.SP);
+            WriteWordToMemory(State.SP, State.HL);
+            State.HL = value;
 
-            state.Cycles += 18;
+            IncreaseCycles(18);
         }
 
-        void Di()
+        private void Di()
         {
-            state.EnableInterrupts = false;
-            state.Cycles += 4;
+            State.EnableInterrupts = false;
+            IncreaseCycles(4);
         }
 
-        void Ei()
+        private void Ei()
         {
-            state.EnableInterrupts = true;
-            state.Cycles += 4;
+            State.EnableInterrupts = true;
+            IncreaseCycles(4);
         }
 
-        void Call()
+        private void Call()
         {
             ushort addr = GetNextWord();
-            PushStack(state.PC);
+            PushStack(State.PC);
             Jmp(addr);
-            state.Cycles += 7;
+            IncreaseCycles(7);
         }
 
-        void Call(ushort addr)
+        private void Call(ushort addr)
         {
-            PushStack(state.PC);
+            PushStack(State.PC);
             Jmp(addr);
-            state.Cycles += 7;
+            IncreaseCycles(7);
         }
 
-        void ConditionalCall(bool condition)
+        private void ConditionalCall(bool condition)
         {
             if (condition)
                 Call();
             else
             {
                 GetNextWord();
-                state.Cycles += 11;
+                IncreaseCycles(11);
             }
         }
 
-        void Cnz()
+        private void Cnz()
         {
-            ConditionalCall(!state.Flags.Zero);
+            ConditionalCall(!State.Flags.Zero);
         }
 
-        void Cnc()
+        private void Cnc()
         {
-            ConditionalCall(!state.Flags.Carry);
+            ConditionalCall(!State.Flags.Carry);
         }
 
-        void Cpo()
+        private void Cpo()
         {
-            ConditionalCall(!state.Flags.Parity);
+            ConditionalCall(!State.Flags.Parity);
         }
 
-        void Cp()
+        private void Cp()
         {
-            ConditionalCall(!state.Flags.Sign);
+            ConditionalCall(!State.Flags.Sign);
         }
 
-        void Cz()
+        private void Cz()
         {
-            ConditionalCall(state.Flags.Zero);
+            ConditionalCall(State.Flags.Zero);
         }
 
-        void Cc()
+        private void Cc()
         {
-            ConditionalCall(state.Flags.Carry);
+            ConditionalCall(State.Flags.Carry);
         }
 
-        void Cpe()
+        private void Cpe()
         {
-            ConditionalCall(state.Flags.Parity);
+            ConditionalCall(State.Flags.Parity);
         }
 
-        void Cm()
+        private void Cm()
         {
-            ConditionalCall(state.Flags.Sign);
+            ConditionalCall(State.Flags.Sign);
         }
 
-        void Rst(int num)
+        private void Rst(int num)
         {
             switch (num)
             {
@@ -749,35 +751,33 @@ namespace bEmu.Core.CPUs.Intel8080
                 case 7: Call(0x38); break;
             }
 
-            state.Cycles += 11;
+            IncreaseCycles(11);
         }
 
-        void Pchl()
+        private void Pchl()
         {
-            state.PC = state.HL;
-            state.Cycles += 5;
+            State.PC = State.HL;
+            IncreaseCycles(5);
         }
 
-        void Sphl()
+        private void Sphl()
         {
-            state.SP = state.HL;
-            state.Cycles += 5;
+            State.SP = State.HL;
+            IncreaseCycles(5);
         }
 
-        void Xchg()
+        private void Xchg()
         {
-            ushort de = state.DE;
-            state.DE = state.HL;
-            state.HL = de;
-            state.Cycles += 5;
+            ushort de = State.DE;
+            State.DE = State.HL;
+            State.HL = de;
+            IncreaseCycles(5);
         }
 
-
-
-        void Hlt()
+        private void Hlt()
         {
-            state.Halted = true;
-            state.Cycles += 7;
+            State.Halted = true;
+            IncreaseCycles(7);
         }
     }
 }

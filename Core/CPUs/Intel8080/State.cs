@@ -1,11 +1,8 @@
-using System;
-using System.IO;
-using bEmu.Core.Model;
 using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.Intel8080
 {
-    public class State : BaseState
+    public class State : Core.State
     {
         public byte A { get; set; }
         public byte B { get; set; }
@@ -15,15 +12,14 @@ namespace bEmu.Core.CPUs.Intel8080
         public byte H { get; set; }
         public byte L { get; set; }
         public Flags Flags;
-        public Ports Ports;
         public bool EnableInterrupts { get; set; }
-
+        
         public ushort BC
         {
-            get { return GeneralUtils.Get16BitNumber(C, B); }
+            get { return BitUtils.GetWordFrom2Bytes(C, B); }
             set
             {
-                GeneralUtils.WordTo2Bytes(value, out byte b, out byte c);
+                BitUtils.Get2BytesFromWord(value, out byte b, out byte c);
                 B = b;
                 C = c;
             }
@@ -31,10 +27,10 @@ namespace bEmu.Core.CPUs.Intel8080
 
         public ushort DE
         {
-            get { return GeneralUtils.Get16BitNumber(E, D); }
+            get { return BitUtils.GetWordFrom2Bytes(E, D); }
             set
             {
-                GeneralUtils.WordTo2Bytes(value, out byte d, out byte e);
+                BitUtils.Get2BytesFromWord(value, out byte d, out byte e);
                 D = d;
                 E = e;
             }
@@ -42,10 +38,10 @@ namespace bEmu.Core.CPUs.Intel8080
 
         public ushort HL
         {
-            get { return GeneralUtils.Get16BitNumber(L, H); }
+            get { return BitUtils.GetWordFrom2Bytes(L, H); }
             set
             {
-                GeneralUtils.WordTo2Bytes(value, out byte h, out byte l);
+                BitUtils.Get2BytesFromWord(value, out byte h, out byte l);
                 H = h;
                 L = l;
             }
@@ -66,22 +62,7 @@ namespace bEmu.Core.CPUs.Intel8080
 
         public ushort AF
         {
-            get { return (ushort) GeneralUtils.Get16BitNumber(F, A); }
-        }
-
-        public void UpdatePorts(int number, byte value)
-        {
-            switch (number)
-            {
-                case 1:
-                    Ports.Read1 = value;
-                    break;
-                case 2:
-                    Ports.Read2 = value;
-                    break;
-                case 3:
-                    break;
-            }
+            get { return (ushort) BitUtils.GetWordFrom2Bytes(F, A); }
         }
 
         public override string ToString()

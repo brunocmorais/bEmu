@@ -1,4 +1,4 @@
-namespace bEmu.Core.Model
+namespace bEmu.Core
 {
     public interface IOpcode
     {

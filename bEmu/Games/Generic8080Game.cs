@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using bEmu.Core;
 using bEmu.Core.CPUs.Intel8080;
+using bEmu.Core.Systems.Generic8080;
 using bEmu.Core.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using State = bEmu.Core.Systems.Generic8080.State;
 
 namespace bEmu
 {
@@ -15,7 +18,7 @@ namespace bEmu
         protected GraphicsDeviceManager graphics;
         protected SpriteBatch spriteBatch;
         protected Texture2D whiteRect;
-        protected Intel8080 cpu;
+        protected Core.Systems.Generic8080.System system;
         protected TimeSpan lastInterruptTime = TimeSpan.Zero;
         protected int lastInterrupt = 1;
         protected const int tamanhoPixel = 2;
@@ -30,7 +33,8 @@ namespace bEmu
         protected const int CycleCount = 3000;
         protected int alpha = 255;
 
-        protected State State { get { return cpu.State as State; } }
+        protected State State => system.State as State;
+        protected Intel8080<State> CPU => system.Runner as Intel8080<State>;
 
         public Generic8080Game(string zipName, string[] fileNames, string[] memoryPositions)
         {
@@ -63,10 +67,10 @@ namespace bEmu
                 }
             }
 
-            cpu = new Intel8080();
+            system = new Core.Systems.Generic8080.System();
 
             for (int i = 0; i < fileNames.Length; i++)
-                cpu.State.LoadProgram(entries[fileNames[i]], Convert.ToInt32(memoryPositions[i], 16));
+                system.MMU.LoadProgram(entries[fileNames[i]], Convert.ToInt32(memoryPositions[i], 16));
 
             base.Initialize();
         }
@@ -83,8 +87,8 @@ namespace bEmu
             
             whiteRect.SetData(whiteColor);
 
-            cpu.UpdatePorts(1, 0x01);
-            cpu.UpdatePorts(2, 0x00);
+            State.UpdatePorts(1, 0x01);
+            State.UpdatePorts(2, 0x00);
         }
 
         protected override void Update(GameTime gameTime)
@@ -98,7 +102,7 @@ namespace bEmu
 
             while (cycle-- >= 0)
             {
-                var opcode = cpu.StepCycle();
+                var opcode = CPU.StepCycle();
 
                 if (opcode.Byte == 0xDB) //IN
                     In();
@@ -141,7 +145,7 @@ namespace bEmu
             if (Keyboard.GetState().IsKeyDown(Keys.Right))
                 read1 = (byte) (read1 | (1 << 6));
 
-            cpu.UpdatePorts(1, read1);
+            State.UpdatePorts(1, read1);
         }
 
         protected override void Draw (GameTime gameTime)
@@ -152,29 +156,22 @@ namespace bEmu
             spriteBatch.Begin ();
             Color color;
 			
-			for (int i = 0; i < 224; i++) 
+            for (int i = 0; i < system.PPU.Width; i++) 
 			{
-				for (int j = 0; j < 256; j += 8)
+				for (int j = 0; j < system.PPU.Height; j++)
 				{
-                    byte sprite = cpu.State.Memory [0x2400 + ((i * 256 / 8) + j / 8)];
-
-					for (int pixel = 0; pixel < 8; pixel++) 
-                    {
-                        int x = (j + pixel) * tamanhoPixel;
-                        int y = i * tamanhoPixel;
-
-                        Vector2 coor = new Vector2(y, (256 * tamanhoPixel) - x);
+                    Pixel pixel = system.PPU[i, j];
+                    
+                    Vector2 coor = new Vector2(j * tamanhoPixel, (system.PPU.Width * tamanhoPixel) - (i * tamanhoPixel));
                         
-                        if (coor.Y < (50 * tamanhoPixel))
-                            color = Color.FromNonPremultiplied(255, 0, 0, alpha);
-                        else if (coor.Y > (180 * tamanhoPixel))
-                            color = Color.FromNonPremultiplied(0, 255, 0, alpha);
-                        else
-                            color = Color.FromNonPremultiplied(255, 255, 255, alpha);
-
-                        if ((sprite & (1 << pixel)) > 0) 
-                                spriteBatch.Draw (whiteRect, coor, color);
-					}
+                    if (coor.Y < (50 * tamanhoPixel))
+                        color = Color.FromNonPremultiplied(255 & pixel.R, 0, 0, alpha & pixel.A);
+                    else if (coor.Y > (180 * tamanhoPixel))
+                        color = Color.FromNonPremultiplied(0, 255 & pixel.G, 0, alpha & pixel.A);
+                    else
+                        color = Color.FromNonPremultiplied(255 & pixel.R, 255 & pixel.G, 255 & pixel.B, alpha & pixel.A);
+                    
+                    spriteBatch.Draw (whiteRect, coor, color);
 				}
 			}
 
@@ -185,12 +182,12 @@ namespace bEmu
 
         protected virtual void GenerateInterrupt(int interruptNumber)
         {
-            cpu.GenerateInterrupt(interruptNumber);
+            CPU.GenerateInterrupt(interruptNumber);
         }
 
         protected virtual void In()
         {
-            byte port = cpu.GetNextByte();
+            byte port = CPU.GetNextByte();
 
             switch (port)
 			{
@@ -201,7 +198,7 @@ namespace bEmu
                     State.A = State.Ports.Read2;
                     break;
                 case 3:
-                    ushort value = GeneralUtils.Get16BitNumber(State.Ports.Shift0, State.Ports.Shift1);
+                    ushort value = BitUtils.GetWordFrom2Bytes(State.Ports.Shift0, State.Ports.Shift1);
                     State.A = (byte)((value >> (8 - State.Ports.Write2)) & 0xFF);
                     break;
                 default:
@@ -211,7 +208,7 @@ namespace bEmu
 
         protected virtual void Out()
         {
-            byte port = cpu.GetNextByte();
+            byte port = CPU.GetNextByte();
 
             switch (port)
 			{

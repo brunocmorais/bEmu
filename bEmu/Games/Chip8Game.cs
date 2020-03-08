@@ -1,10 +1,9 @@
-using System;
-using System.IO;
-using bEmu.Core.VMs.Chip8;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using bEmu.Core;
+using State = bEmu.Core.Systems.Chip8.State;
 
 namespace bEmu
 {
@@ -16,7 +15,7 @@ namespace bEmu
         Texture2D whiteRectHiRes;
         SoundEffect tone;
         SoundEffectInstance soundEffectInstance;
-        Chip8 interpreter;
+        Core.Systems.Chip8.System system;
         const int tamanhoPixel = 10;
         const int tamanhoPixelHiRes = tamanhoPixel / 2;
         const int width = 64 * tamanhoPixel;
@@ -34,10 +33,12 @@ namespace bEmu
             this.rom = rom;
         }
 
+        State State => system.State as State;
+
         protected override void Initialize()
         {
-            interpreter = new Chip8();
-            interpreter.State.LoadProgram(rom, 0x200);
+            system = new Core.Systems.Chip8.System();
+            system.MMU.LoadProgram(rom, 0x200);
 
             base.Initialize();
         }
@@ -66,9 +67,7 @@ namespace bEmu
 
         protected override void Update(GameTime gameTime)
         {
-            var state = interpreter.State as State;
-
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape) || state.Halted)
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape) || State.Halted)
                 Exit();
 
             if (Keyboard.GetState().IsKeyDown(Keys.F1))
@@ -77,16 +76,16 @@ namespace bEmu
             int cycle = CycleCount;
 
             while (cycle-- >= 0)
-                interpreter.StepCycle();
+                system.Runner.StepCycle();
 
-            if (state.Delay > 0)
-                state.Delay--;
+            if (State.Delay > 0)
+                State.Delay--;
             
-            if (state.Sound > 0)
-                state.Sound--;
+            if (State.Sound > 0)
+                State.Sound--;
 
-            UpdateKeys(Keyboard.GetState(), state);
-            UpdateSound(state);
+            UpdateKeys(Keyboard.GetState(), State);
+            UpdateSound(State);
 
             base.Update(gameTime);
         }
@@ -128,24 +127,24 @@ namespace bEmu
 
         protected override void Draw (GameTime gameTime)
 		{
-            var state = interpreter.State as State;
-
-            if (!state.Draw)
+            if (!State.Draw)
                 return;
 
 			GraphicsDevice.Clear (Color.Black);
             spriteBatch.Begin ();
 
-            var texture = state.SuperChipMode ? whiteRectHiRes : whiteRect;
-            int pixelSize = state.SuperChipMode ? tamanhoPixelHiRes : tamanhoPixel;
+            var texture = State.SuperChipMode ? whiteRectHiRes : whiteRect;
+            int pixelSize = State.SuperChipMode ? tamanhoPixelHiRes : tamanhoPixel;
             
-			for (int i = 0; i < state.Gfx.GetLength(0); i++) 
-				for (int j = 0; j < state.Gfx.GetLength(1); j++)
-                    if (state.Gfx[i, j]) 
-                        spriteBatch.Draw (texture, new Vector2(i * pixelSize, j * pixelSize), Color.White);
+			for (int i = 0; i < system.PPU.Width; i++) 
+				for (int j = 0; j < system.PPU.Height; j++)
+                {
+                    Pixel pixel = system.PPU[i, j];
+                    spriteBatch.Draw(texture, new Vector2(i * pixelSize, j * pixelSize), Color.FromNonPremultiplied(pixel.R, pixel.G, pixel.B, 255));
+                }
 
-			spriteBatch.End ();
-            state.Draw = false;
+            spriteBatch.End ();
+            State.Draw = false;
 
             base.Draw (gameTime);
 		}

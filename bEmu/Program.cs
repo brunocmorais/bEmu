@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using bEmu.Core;
+using bEmu.Core.Systems;
 using Newtonsoft.Json;
 
 namespace bEmu
@@ -15,7 +16,7 @@ namespace bEmu
         {
             try
             {
-                string supportedSystems = string.Join("\n", Enum.GetNames(typeof(Systems)));
+                string supportedSystems = string.Join("\n", Enum.GetNames(typeof(SupportedSystems)));
 
                 if (args.Length == 0)
                     throw new Exception("Informe o sistema. Sistemas suportados: \n\n" + supportedSystems);
@@ -23,12 +24,12 @@ namespace bEmu
                 if (args.Length == 1)
                     throw new Exception("Informe o caminho da ROM.");
 
-                switch (Enum.Parse<Systems>(args[0]))
+                switch (Enum.Parse<SupportedSystems>(args[0]))
                 {
-                    case Systems.SpaceInvaders8080:
-                    LaunchSpaceInvaders8080(args);
+                    case SupportedSystems.Generic8080:
+                    LaunchGeneric8080(args);
                     break;
-                    case Systems.Chip8:
+                    case SupportedSystems.Chip8:
                     LaunchChip8(args);
                     break;
                     default:
@@ -47,7 +48,7 @@ namespace bEmu
                 game.Run();
         }
 
-        private static void LaunchSpaceInvaders8080(string[] args)
+        private static void LaunchGeneric8080(string[] args)
         {
             string gameToRun = Path.GetFileNameWithoutExtension(args[1]);
 

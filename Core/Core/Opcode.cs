@@ -1,24 +1,24 @@
 using bEmu.Core.Util;
 
-namespace bEmu.Core.Model
+namespace bEmu.Core
 {
-    public abstract class BaseOpcode : IOpcode
+    public abstract class Opcode : IOpcode
     {
         private byte byte1;
         private byte byte2;
 
-        public BaseOpcode(byte opcode)
+        public Opcode(byte opcode)
         {
             byte1 = opcode;
         }
 
-        public BaseOpcode(byte byte1, byte byte2)
+        public Opcode(byte byte1, byte byte2)
         {
             this.byte1 = byte1;
             this.byte2 = byte2;
         }
 
-        public BaseOpcode(ushort opcode)
+        public Opcode(ushort opcode)
         {
             byte1 = (byte) ((opcode >> 8) & 0xFF);
             byte2 = (byte) (opcode & 0xFF);
@@ -26,6 +26,6 @@ namespace bEmu.Core.Model
 
         public byte Byte { get { return byte1; } }
 
-        public ushort UShort { get { return GeneralUtils.Get16BitNumber(byte2, byte1); } }
+        public ushort UShort { get { return BitUtils.GetWordFrom2Bytes(byte2, byte1); } }
     }
 }

@@ -1,4 +1,4 @@
-namespace bEmu.Core.CPUs.Intel8080
+namespace bEmu.Core
 {
     public struct Instruction
     {

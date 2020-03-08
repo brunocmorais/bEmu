@@ -1,6 +1,6 @@
 using bEmu.Core;
 
-namespace bEmu.Core.CPUs.Intel8080
+namespace bEmu.Core.CPUs.LR35902
 {
     public class Opcode : Core.Opcode
     {

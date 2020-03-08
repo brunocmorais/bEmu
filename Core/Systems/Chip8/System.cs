@@ -1,19 +1,47 @@
-using bEmu.Core.Model;
+using bEmu.Core;
 
-namespace bEmu.Core.VMs.Chip8
+namespace bEmu.Core.Systems.Chip8
 {
-    public class State : BaseState
+    public class System : Core.System
     {
-        public byte[] V { get; set; }
-        public bool[] Keys { get; set; }
-        public ushort I { get; set; }
-        public ushort[] Stack { get; set; }
-        public bool[,] Gfx { get; set; }
-        public byte Delay { get; set; }
-        public byte Sound { get; set; }
-        public bool Draw { get; set; }
-        public bool SuperChipMode { get; set; }
-        public byte[] R { get; set; }
+        public void SetSuperChipMode()
+        {
+            State state = (State as State);
+            state.SuperChipMode = true;
+            PPU = new PPU(this, 128, 64);
+            state.R = new byte[8];
+        }
+
+        public void SetChip8Mode()
+        {
+            (State as State).SuperChipMode = false;
+            PPU = new PPU(this, 64, 32);
+        }
+
+        public override IState GetInitialState()
+        {
+            var state = new State();
+            state.PC = 0x200;
+            state.V = new byte[16];
+            state.Stack = new ushort[16];
+            state.Keys = new bool[16];
+
+            return state;
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            MMU = new MMU(0x1000);
+            SetChip8Mode();
+            Runner = new VMs.Chip8.Chip8(this);
+
+            for (int i = 0; i < Numbers.Length; i++)
+                MMU[i] = Numbers[i];
+
+            for (int i = 0; i < NumbersHiRes.Length; i++)
+                MMU[i + 0x50] = NumbersHiRes[i];
+        }
 
         public readonly byte[] Numbers = 
         {

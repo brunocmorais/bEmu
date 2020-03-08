@@ -1,129 +1,104 @@
 using System;
 using System.Linq;
 using System.Text;
-using bEmu.Core.Model;
+using bEmu.Core;
 using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.Intel8080
 {
-    public partial class Intel8080 : BaseCPU
+    public partial class Intel8080<TState> : CPU<TState> where TState : State
     {
-        private State state;
+        public Intel8080(ISystem system) : base(system) { }
 
-        public override IState State
+        protected ushort GetNextWord()
         {
-            get { return state; }
-        }
-
-        public Intel8080(ushort pc = 0)
-        {
-            state = new State();
-            state.A = 0;
-            state.B = 0;
-            state.C = 0;
-            state.D = 0;
-            state.E = 0;
-            state.H = 0;
-            state.SP = 0xf000;
-            state.PC = pc;
-            state.EnableInterrupts = false;
-            state.Memory = new byte[0x10000];
-            state.Flags = new Flags();
-            state.Ports = new Ports();
-            state.Cycles = 0;
-            state.Halted = false;
-            state.Instructions = 0;
-        }
-
-        ushort GetNextWord()
-        {
-            byte b1 = state.Memory[state.PC++];
-            byte b2 = state.Memory[state.PC++];
-            return GeneralUtils.Get16BitNumber(b1, b2);
+            byte b1 = MMU[State.PC++];
+            byte b2 = MMU[State.PC++];
+            return BitUtils.GetWordFrom2Bytes(b1, b2);
         }
 
         public byte GetNextByte()
         {
-            return state.Memory[state.PC++];
+            return MMU[State.PC++];
         }
 
-        byte ReadByteFromMemory(ushort addr)
+        protected byte ReadByteFromMemory(ushort addr)
         {
-            return state.Memory[addr];
+            return MMU[addr];
         }
 
-        void WriteByteToMemory(ushort addr, byte value)
+        protected void WriteByteToMemory(ushort addr, byte value)
         {
-            state.Memory[addr] = value;
+            MMU[addr] = value;
         }
 
-        ushort ReadWordFromMemory(ushort addr)
+        protected ushort ReadWordFromMemory(ushort addr)
         {
-            byte a = state.Memory[addr];
-            byte b = state.Memory[addr + 1];
-            return GeneralUtils.Get16BitNumber(a, b);
+            byte a = MMU[addr];
+            byte b = MMU[addr + 1];
+            return BitUtils.GetWordFrom2Bytes(a, b);
         }
 
-        void WriteWordToMemory(ushort addr, ushort word)
+        protected void WriteWordToMemory(ushort addr, ushort word)
         {
-            GeneralUtils.WordTo2Bytes(word, out byte a, out byte b);
-            state.Memory[addr] = b;
-            state.Memory[addr + 1] = a;
+            BitUtils.Get2BytesFromWord(word, out byte a, out byte b);
+            MMU[addr] = b;
+            MMU[addr + 1] = a;
         }
 
-        void UpdateZSPA(byte value)
+        private void UpdateFlags(byte value)
         {
-            state.Flags.Zero = CheckZero(value);
-            state.Flags.Sign = CheckSign(value);
-            state.Flags.Parity = CheckParity(value);
-            state.Flags.AuxiliaryCarry = false;
+            State.Flags.Zero = CheckZero(value);
+            State.Flags.Sign = CheckSign(value);
+            State.Flags.Parity = CheckParity(value);
+            State.Flags.AuxiliaryCarry = false;
         }
 
-        ushort PopStack()
+        protected ushort PopStack()
         {
-            ushort word = ReadWordFromMemory(state.SP);
-            state.SP += 2;
+            ushort word = ReadWordFromMemory(State.SP);
+            State.SP += 2;
             return word;
         }
 
-        void PushStack(ushort value)
+        protected void PushStack(ushort value)
         {
-            state.SP -= 2;
-            WriteWordToMemory(state.SP, value);
+            State.SP -= 2;
+            WriteWordToMemory(State.SP, value);
         }
 
-        byte GetByteFromRegister(Register register)
+        protected byte GetByteFromRegister(Register register)
         {
             switch (register)
             {
-                case Register.A: return state.A;
-                case Register.B: return state.B;
-                case Register.C: return state.C;
-                case Register.D: return state.D;
-                case Register.E: return state.E;
-                case Register.H: return state.H;
-                case Register.L: return state.L;
-                case Register.AF: return ReadByteFromMemory(state.AF);
-                case Register.BC: return ReadByteFromMemory(state.BC);
-                case Register.DE: return ReadByteFromMemory(state.DE);
-                case Register.HL: return ReadByteFromMemory(state.HL);
-                case Register.SP: return ReadByteFromMemory(state.SP);
-                case Register.PC: return ReadByteFromMemory(state.PC);
+                case Register.A: return State.A;
+                case Register.B: return State.B;
+                case Register.C: return State.C;
+                case Register.D: return State.D;
+                case Register.E: return State.E;
+                case Register.H: return State.H;
+                case Register.L: return State.L;
+                case Register.AF: return ReadByteFromMemory(State.AF);
+                case Register.BC: return ReadByteFromMemory(State.BC);
+                case Register.DE: return ReadByteFromMemory(State.DE);
+                case Register.HL: return ReadByteFromMemory(State.HL);
+                case Register.SP: return ReadByteFromMemory(State.SP);
+                case Register.PC: return ReadByteFromMemory(State.PC);
                 default:
                     throw new Exception("Registrador desconhecido.");
             }
         }
 
-        ushort GetWordFromRegister(Register register)
+        protected ushort GetWordFromRegister(Register register)
         {
             switch (register)
             {
-                case Register.AF: return state.AF;
-                case Register.BC: return state.BC;
-                case Register.DE: return state.DE;
-                case Register.HL: return state.HL;
-                case Register.SP: return state.SP;
-                case Register.PC: return state.PC;
+                case Register.AF: return State.AF;
+                case Register.BC: return State.BC;
+                case Register.DE: return State.DE;
+                case Register.HL: return State.HL;
+                case Register.SP: return State.SP;
+                case Register.PC: return State.PC;
                 default:
                     throw new Exception("Registrador não permitido.");
             }
@@ -131,30 +106,25 @@ namespace bEmu.Core.CPUs.Intel8080
 
         public void GenerateInterrupt(int interruptNumber)
         {
-            if (state.EnableInterrupts)
+            if (State.EnableInterrupts)
             {
-                PushStack(state.PC);
+                PushStack(State.PC);
                 Di();
-                state.PC = (ushort) (8 * interruptNumber);
+                State.PC = (ushort) (8 * interruptNumber);
             }
         }
 
-        public void UpdatePorts(int number, byte value)
-        {
-            state.UpdatePorts(number, value);
-        }
-
-        bool CheckZero(byte value)
+        protected bool CheckZero(byte value)
         {
             return value == 0;
         }
 
-        bool CheckSign(byte value)
+        protected bool CheckSign(byte value)
         {
             return (value & 0x80) == 0x80;
         }
 
-        bool CheckParity(byte value)
+        protected bool CheckParity(byte value)
         {
             byte numberOfOneBits = 0;
 
@@ -164,12 +134,20 @@ namespace bEmu.Core.CPUs.Intel8080
             return (numberOfOneBits & 1) == 0;
         }
 
-        bool CheckAuxiliaryCarryAdd(params byte[] bytes)
+        protected bool CheckAuxiliaryCarryAdd(params byte[] bytes)
         {
             for (int i = 0; i < bytes.Length; i++)
                 bytes[i] &= 0x0F;
 
             return bytes.Sum(x => x) >= 0x10;
+        }
+
+        protected bool CheckAuxiliaryCarryAdd(params ushort[] words)
+        {
+            for (int i = 0; i < words.Length; i++)
+                words[i] &= 0x0FFF;
+
+            return words.Sum(x => x) >= 0x1000;
         }
 
         public override IOpcode StepCycle()
@@ -442,19 +420,19 @@ namespace bEmu.Core.CPUs.Intel8080
 
         public string CallDiagnosticsRoutine()
         {
-            if (state.PC == 5)
+            if (State.PC == 5)
             {
-                if (state.C == 9)
+                if (State.C == 9)
                 {
                     var sb = new StringBuilder();
-                    ushort offset = GeneralUtils.Get16BitNumber(state.E, state.D);
+                    ushort offset = BitUtils.GetWordFrom2Bytes(State.E, State.D);
                     offset += 3;
-                    char c = Convert.ToChar(state.Memory[offset]);
+                    char c = Convert.ToChar(MMU[offset]);
 
                     while (c != '$')
                     {
                         sb.Append(c);
-                        c = Convert.ToChar(state.Memory[++offset]);
+                        c = Convert.ToChar(MMU[++offset]);
                     }
 
                     Hlt();
