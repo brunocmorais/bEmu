@@ -18,5 +18,7 @@ namespace bEmu.Core
             string pos = Position.ToString("X").PadLeft(4, '0');
             return $"{pos}: {Mnemonic}";
         }
+
+        public static Instruction Empty => default(Instruction);
     }
 }

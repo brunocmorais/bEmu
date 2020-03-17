@@ -17,7 +17,7 @@ namespace Tests
             var system = new bEmu.Core.Systems.Generic8080.System();
             system.SetStartPoint(Pc);
             system.MMU.LoadProgram("cpudiag", Pc);
-            Disassembler disassembler = new Disassembler("cpudiag");
+            Disassembler disassembler = new Disassembler(system);
             var sb = new StringBuilder();
             string diag = "";
 

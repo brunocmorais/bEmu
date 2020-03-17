@@ -503,7 +503,7 @@ namespace bEmu.Core.CPUs.LR35902
 
             ushort result = (ushort)(State.A - value);
             State.Flags.Carry = (result & 0xF000) == 0xF000;
-            State.Flags.Zero = State.A == value;
+            State.Flags.Zero = CheckZero((byte) result);
             State.Flags.Subtract = true;
             State.Flags.HalfCarry = CheckAuxiliaryCarrySub(State.A, value);
 
@@ -736,7 +736,7 @@ namespace bEmu.Core.CPUs.LR35902
                 Jr();
             else
             {
-                GetNextWord();
+                GetNextByte();
                 IncreaseCycles(8);
             }
         }
@@ -866,7 +866,7 @@ namespace bEmu.Core.CPUs.LR35902
                 case Register.C: 
                     State.C--; 
                     State.Flags.Zero = CheckZero(State.C);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarrySub(1, State.A);
+                    State.Flags.HalfCarry = CheckAuxiliaryCarrySub(1, State.C);
                     break;
                 case Register.D: 
                     State.D--; 
@@ -970,7 +970,7 @@ namespace bEmu.Core.CPUs.LR35902
             else if (register == Register.DE)
                 MMU[State.DE] = State.A;
             else if (register == Register.HL)
-                MMU[State.DE] = State.A;
+                MMU[State.HL] = State.A;
 
             if (action == Action.Increment)
                 State.HL++;

@@ -14,6 +14,6 @@ namespace bEmu.Core
             Height = height;
         }
 
-        public abstract Pixel this[int x, int y] { get; set; }
+        public abstract Pixel this[int x, int y] { get; }
     }
 }

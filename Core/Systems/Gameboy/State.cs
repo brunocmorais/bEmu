@@ -8,6 +8,11 @@ namespace bEmu.Core.Systems.Gameboy
 {
     public class State : CPUs.LR35902.State
     {
-        
+        public State(ISystem system)
+        {
+            System = system;
+        }
     }
+
+    
 }

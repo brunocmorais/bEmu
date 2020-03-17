@@ -41,6 +41,7 @@ namespace bEmu.Core.CPUs.LR35902
         public override IOpcode StepCycle()
         {
             var opcode = new Opcode(GetNextByte());
+            State.Instructions++;
 
             switch (opcode.Byte)
             {
@@ -302,7 +303,29 @@ namespace bEmu.Core.CPUs.LR35902
                 case 0xFF: Rst(0x38); break;
             }
 
+            HandleInterrupts();
+
             return opcode;
+        }
+
+        private void HandleInterrupts()
+        {
+            if (State.EnableInterrupts)
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    int mask = (0x1 << i);
+
+                    if ((State.IE & mask) == mask && ((State.IF & mask) == mask))
+                    {
+                        PushStack(State.PC);
+                        State.EnableInterrupts = false;
+                        State.PC = (ushort) (0x40 + (0x8 * i));
+                        State.IF &= (byte) ~mask;
+                        break;
+                    }
+                }
+            }
         }
 
         public void Cb()
@@ -571,8 +594,3 @@ namespace bEmu.Core.CPUs.LR35902
         }
     }
 }
-
-//https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html
-//https://rednex.github.io/rgbds/gbz80.7.html
-//https://pastraiser.com/cpu/i8080/i8080_opcodes.html
-//http://jgmalcolm.com/z80/advanced/shif#sla

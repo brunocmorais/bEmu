@@ -1,0 +1,6 @@
+https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html
+https://rednex.github.io/rgbds/gbz80.7.html
+https://pastraiser.com/cpu/i8080/i8080_opcodes.html
+http://jgmalcolm.com/z80/advanced/shif#sla
+https://cturt.github.io/cinoop.html
+http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-The-CPU

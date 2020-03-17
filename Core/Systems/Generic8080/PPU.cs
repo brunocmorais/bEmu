@@ -17,11 +17,10 @@ namespace bEmu.Core.Systems.Generic8080
                 byte sprite = System.MMU [0x2400 + ((coordY * 256 / 8) + coordX / 8)];
 
                 if ((sprite & (1 << offsetX)) > 0)
-                    return Pixel.On;
+                    return Pixel.White;
                 else
-                    return Pixel.Off;
+                    return Pixel.Black;
             }
-            set { }
         }
     }
 }

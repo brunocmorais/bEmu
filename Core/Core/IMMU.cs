@@ -1,10 +1,12 @@
+using System;
+
 namespace bEmu.Core
 {
     public interface IMMU
     {
-        ISystem System { get; }
-        byte this[long index] { get; set; }
-        void LoadProgram(string fileName, int startAddress);
-        void LoadProgram(byte[] bytes, int startAddress);
+        byte this[int addr] { get; set; }
+        void LoadProgram(string fileName, int startAddress = 0);
+        void LoadProgram(byte[] bytes, int startAddress = 0);
+        int Length { get; }
     }
 }

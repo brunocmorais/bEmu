@@ -4,7 +4,7 @@ namespace bEmu.Core
     {
         public ISystem System { get; set; }
         public TState State => (System.State as TState);
-        public MMU MMU => (System.MMU as MMU);
+        public IMMU MMU => (System.MMU);
 
         public CPU(ISystem system)
         {

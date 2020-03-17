@@ -62,7 +62,7 @@ namespace bEmu.Core.CPUs.Intel8080
 
         public ushort AF
         {
-            get { return (ushort) BitUtils.GetWordFrom2Bytes(F, A); }
+            get { return BitUtils.GetWordFrom2Bytes(F, A); }
         }
 
         public override string ToString()

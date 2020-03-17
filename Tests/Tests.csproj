@@ -17,8 +17,4 @@
     <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="cpudiag" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
 </Project>

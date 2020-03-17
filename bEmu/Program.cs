@@ -27,11 +27,14 @@ namespace bEmu
                 switch (Enum.Parse<SupportedSystems>(args[0]))
                 {
                     case SupportedSystems.Generic8080:
-                    LaunchGeneric8080(args);
-                    break;
+                        LaunchGeneric8080(args);
+                        break;
                     case SupportedSystems.Chip8:
-                    LaunchChip8(args);
-                    break;
+                        LaunchChip8(args);
+                        break;
+                    case SupportedSystems.Gameboy:
+                        LaunchGameboy(args);
+                        break;
                     default:
                     throw new Exception("Sistema não suportado. Sistemas suportados: \n\n" + supportedSystems);
                 }
@@ -40,6 +43,12 @@ namespace bEmu
             {
                 Console.WriteLine(ex.Message + ex.StackTrace);
             }
+        }
+
+        private static void LaunchGameboy(string[] args)
+        {
+            using (GameboyGame game = new GameboyGame(args[1]))
+                game.Run();
         }
 
         private static void LaunchChip8(string[] args)
