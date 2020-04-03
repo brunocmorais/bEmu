@@ -16,7 +16,7 @@ namespace bEmu.Core.Systems.Gameboy
             state.HL = 0x014D;
             state.SP = 0xFFFE;
 
-            MMU[0xFF00] = 0xFF;
+            //MMU[0xFF00] = 0xFF;
             
             MMU[0xFF05] = 0x00;
             MMU[0xFF06] = 0x00;
@@ -56,13 +56,14 @@ namespace bEmu.Core.Systems.Gameboy
             state.Cycles = 0;
             state.Halted = false;
             state.Instructions = 0;
+            state.Joypad = new Joypad();
 
             return state;
         }
 
         public override void Initialize()
         {
-            MMU = new MMU();
+            MMU = new MMU(this);
             PPU = new GPU(this, 160, 144);
             Runner = new LR35902<CPUs.LR35902.State>(this);
             base.Initialize();

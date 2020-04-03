@@ -13,7 +13,9 @@ namespace bEmu.Core.CPUs.LR35902
             if (register == Register.HL)
                 IncreaseCycles(8);
 
-            bool bit = ((GetByteFromRegister(register) >> bitNumber) & 0x1) == 1;
+            byte value = GetByteFromRegister(register);
+            byte mask = (byte) (0x1 << bitNumber);
+            bool bit = (value & mask) == mask;
             State.Flags.Zero = !bit;
             State.Flags.Subtract = false;
             State.Flags.HalfCarry = true;
@@ -23,7 +25,10 @@ namespace bEmu.Core.CPUs.LR35902
 
         private void Set(int bitNumber, Register register)
         {
-            SetByteToRegister(register, (byte) (GetByteFromRegister(register) | (0x1 << bitNumber)));
+            byte value = GetByteFromRegister(register);
+            value |= (byte) (0x1 << bitNumber);
+
+            SetByteToRegister(register, value);
 
             if (register == Register.HL)
                 IncreaseCycles(8);
@@ -33,7 +38,9 @@ namespace bEmu.Core.CPUs.LR35902
 
         private void Res(int bitNumber, Register register)
         {
-            SetByteToRegister(register, (byte) (GetByteFromRegister(register) | (byte) ~(0x1 << bitNumber)));
+            byte value = GetByteFromRegister(register);
+            value &= (byte) ~(0x1 << bitNumber);
+            SetByteToRegister(register, value);
 
             if (register == Register.HL)
                 IncreaseCycles(8);
@@ -240,9 +247,9 @@ namespace bEmu.Core.CPUs.LR35902
             byte value = GetNextByte();                
             ushort result = (ushort)(State.A - value);
             State.Flags.Carry = (result & 0xF000) == 0xF000;                
-            State.Flags.Zero = CheckZero(State.A);
+            State.Flags.Zero = CheckZero((byte) (State.A - value));
             State.Flags.Subtract = true;
-            State.Flags.HalfCarry = CheckAuxiliaryCarrySub(State.A, value);
+            State.Flags.HalfCarry = CheckAuxiliaryCarrySub((byte) (State.A - value), value);
             IncreaseCycles(7);
         }
 

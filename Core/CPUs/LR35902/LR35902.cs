@@ -38,9 +38,45 @@ namespace bEmu.Core.CPUs.LR35902
             return false;
         }
 
+        public void HandleInterrupts()
+        {
+            if (State.GetType() == typeof(Systems.Gameboy.State))
+            {
+                var state = State as Systems.Gameboy.State;
+
+                for (int i = 0; i < 5; i++)
+                {
+                    var interruptType = (InterruptType) i;
+                    int mask = (0x1 << i);
+
+                    if ((state.IE & mask) == mask && ((state.IF & mask) == mask))
+                    {
+                        State.Halted = false;
+                        
+                        if (!State.EnableInterrupts)
+                            return;
+
+                        PushStack(state.PC);
+                        state.EnableInterrupts = false;
+                        state.PC = (ushort)(0x40 + (0x8 * i));
+                        state.IF &= (byte) ~mask;
+                        break;
+                    }
+                }
+            }
+        }
+
         public override IOpcode StepCycle()
         {
+            if (State.Halted)
+            {
+                HandleInterrupts();
+                IncreaseCycles(4);
+                return default(Opcode);
+            }
+
             var opcode = new Opcode(GetNextByte());
+
             State.Instructions++;
 
             switch (opcode.Byte)
@@ -306,26 +342,6 @@ namespace bEmu.Core.CPUs.LR35902
             HandleInterrupts();
 
             return opcode;
-        }
-
-        private void HandleInterrupts()
-        {
-            if (State.EnableInterrupts)
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    int mask = (0x1 << i);
-
-                    if ((State.IE & mask) == mask && ((State.IF & mask) == mask))
-                    {
-                        PushStack(State.PC);
-                        State.EnableInterrupts = false;
-                        State.PC = (ushort) (0x40 + (0x8 * i));
-                        State.IF &= (byte) ~mask;
-                        break;
-                    }
-                }
-            }
         }
 
         public void Cb()

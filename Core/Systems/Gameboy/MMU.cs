@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace bEmu.Core.Systems.Gameboy
@@ -13,8 +14,16 @@ namespace bEmu.Core.Systems.Gameboy
         byte[] oam = InitializeRAMPart(160);
         byte[] io = InitializeRAMPart(128);
         byte[] zp = InitializeRAMPart(128);
+        State state => (System.State as bEmu.Core.Systems.Gameboy.State);
 
         public int Length => 0x10000;
+        public char? Debug { get; private set; }
+        public ISystem System { get; }
+
+        public MMU(ISystem system)
+        {
+            System = system;
+        }
 
         private static byte[] InitializeRAMPart(int size)
         {
@@ -46,7 +55,12 @@ namespace bEmu.Core.Systems.Gameboy
                 if (addr >= 0xFE00 && addr <= 0xFE9F)
                     return oam[addr - 0xFE00];
                 if (addr >= 0xFF00 && addr <= 0xFF7F)
+                {
+                    if (addr == 0xFF00) // joypad
+                        return state.Joypad.GetJoypadInfo();
+
                     return io[addr - 0xFF00];
+                }
                 if (addr >= 0xFF80 && addr <= 0xFFFF)
                     return zp[addr - 0xFF80];
                 
@@ -54,6 +68,8 @@ namespace bEmu.Core.Systems.Gameboy
             }
             set
             {
+                Debug = null;
+
                 if (addr >= 0x8000 && addr <= 0x9FFF)
                     vram[addr - 0x8000] = value;
                 if (addr >= 0xA000 && addr <= 0xBFFF)
@@ -65,7 +81,23 @@ namespace bEmu.Core.Systems.Gameboy
                 if (addr >= 0xFE00 && addr <= 0xFE9F)
                     oam[addr - 0xFE00] = value;
                 if (addr >= 0xFF00 && addr <= 0xFF7F)
+                {
+                    if (addr == 0xFF00) // joypad
+                        state.Joypad.SetJoypadColumn(value);
+
+                    if (addr == 0xFF02 && value == 0x0081)
+                        Debug = (char) this[0xFF01];
+
+                    if (addr == 0xFF46)
+                    {
+                        ushort oamStartAddress = (ushort) (value << 8);
+
+                        for (int i = 0; i < 0x9F; i++)
+                            oam[i] = this[oamStartAddress + i];
+                    }
+
                     io[addr - 0xFF00] = value;
+                }
                 if (addr >= 0xFF80 && addr <= 0xFFFF)
                     zp[addr - 0xFF80] = value;
             }

@@ -49,6 +49,26 @@ namespace bEmu
         {
             using (GameboyGame game = new GameboyGame(args[1]))
                 game.Run();
+
+            /*var system = new bEmu.Core.Systems.Gameboy.System();
+            string fileName = "/home/bruno/Projetos/NET/bEmu/Tests/test_roms/gb/10-bit ops.gb";
+
+            system.MMU.LoadProgram(fileName);
+            int counter = 0;
+
+            Console.WriteLine();
+            IOpcode opcode = default;
+
+            while (!system.State.Halted)
+            {
+                char? debug = (system.MMU as bEmu.Core.Systems.Gameboy.MMU).Debug;
+
+                if (debug.HasValue)
+                    Console.Write(debug);
+
+                counter++;
+                opcode = system.Runner.StepCycle();
+            }*/
         }
 
         private static void LaunchChip8(string[] args)

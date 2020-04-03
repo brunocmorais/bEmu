@@ -5,7 +5,13 @@ namespace bEmu.Core
 {
     public class MMU : IMMU
     {
+        public ISystem System { get; }
         byte[] ram;
+
+        public MMU(ISystem system)
+        {
+            System = system;
+        }
 
         public int Length => ram.Length;
 
