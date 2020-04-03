@@ -16,8 +16,6 @@ namespace bEmu.Core.Systems.Gameboy
             state.HL = 0x014D;
             state.SP = 0xFFFE;
 
-            //MMU[0xFF00] = 0xFF;
-            
             MMU[0xFF05] = 0x00;
             MMU[0xFF06] = 0x00;
             MMU[0xFF07] = 0x00;

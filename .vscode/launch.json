@@ -48,7 +48,7 @@
             //11-op a,(hl).gb
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bEmu/bin/Debug/netcoreapp3.0/bEmu.dll",
-            "args": ["Gameboy", "${workspaceFolder}/Tests/test_roms/gb/drmario.gb"],
+            "args": ["Gameboy", "${workspaceFolder}/Tests/test_roms/gb/bgbtest.gb"],
             "cwd": "${workspaceFolder}/bEmu",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "integratedTerminal",

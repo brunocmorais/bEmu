@@ -59,6 +59,9 @@ namespace bEmu.Core.Systems.Gameboy
                     if (addr == 0xFF00) // joypad
                         return state.Joypad.GetJoypadInfo();
 
+                    if (addr == 0xFF04)
+                        return (byte) new Random().Next();
+
                     return io[addr - 0xFF00];
                 }
                 if (addr >= 0xFF80 && addr <= 0xFFFF)

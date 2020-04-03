@@ -70,39 +70,13 @@ namespace bEmu
             if (Keyboard.GetState().IsKeyDown(Keys.F1))
                 Initialize();
 
-            int cycle = CycleCount;
-
             UpdateKeys();
-
-            while (cycle >= 0)
-            {
-                // char? debug = (system.MMU as bEmu.Core.Systems.Gameboy.MMU).Debug;
-                // Debug.WriteIf(debug.HasValue, debug);
-
-                int prevCycles = State.Cycles;
-                system.Runner.StepCycle();
-                int afterCycles = State.Cycles;
-
-                int cyclesLastOperation = afterCycles - prevCycles;
-                cycle -= cyclesLastOperation;
-                Gpu.StepCycle(cyclesLastOperation / 2);
-            }
-
-            //base.Update(gameTime);
         }
 
         public void UpdateKeys()
         {
             KeyboardState keyboardState = Keyboard.GetState();
 
-            if (keyboardState.IsKeyDown(Keys.Right))
-                State.Joypad.Column2 &= 0xE;
-            if (keyboardState.IsKeyDown(Keys.Left))
-                State.Joypad.Column2 &= 0xD;
-            if (keyboardState.IsKeyDown(Keys.Up))
-                State.Joypad.Column2 &= 0xB;
-            if (keyboardState.IsKeyDown(Keys.Down))
-                State.Joypad.Column2 &= 0x7;
             if (keyboardState.IsKeyDown(Keys.Z))
                 State.Joypad.Column1 &= 0xE;
             if (keyboardState.IsKeyDown(Keys.X))
@@ -111,15 +85,16 @@ namespace bEmu
                 State.Joypad.Column1 &= 0xB;
             if (keyboardState.IsKeyDown(Keys.Enter))
                 State.Joypad.Column1 &= 0x7;
+            if (keyboardState.IsKeyDown(Keys.Right))
+                State.Joypad.Column2 &= 0xE;
+            if (keyboardState.IsKeyDown(Keys.Left))
+                State.Joypad.Column2 &= 0xD;
+            if (keyboardState.IsKeyDown(Keys.Up))
+                State.Joypad.Column2 &= 0xB;
+            if (keyboardState.IsKeyDown(Keys.Down))
+                State.Joypad.Column2 &= 0x7;
 
-            if (keyboardState.IsKeyUp(Keys.Right))
-                State.Joypad.Column2 |= 0x1;
-            if (keyboardState.IsKeyUp(Keys.Left))
-                State.Joypad.Column2 |= 0x2;
-            if (keyboardState.IsKeyUp(Keys.Up))
-                State.Joypad.Column2 |= 0x4;
-            if (keyboardState.IsKeyUp(Keys.Down))
-                State.Joypad.Column2 |= 0x8;
+
             if (keyboardState.IsKeyUp(Keys.Z))
                 State.Joypad.Column1 |= 0x1;
             if (keyboardState.IsKeyUp(Keys.X))
@@ -128,6 +103,14 @@ namespace bEmu
                 State.Joypad.Column1 |= 0x4;
             if (keyboardState.IsKeyUp(Keys.Enter))
                 State.Joypad.Column1 |= 0x8;
+            if (keyboardState.IsKeyUp(Keys.Right))
+                State.Joypad.Column2 |= 0x1;
+            if (keyboardState.IsKeyUp(Keys.Left))
+                State.Joypad.Column2 |= 0x2;
+            if (keyboardState.IsKeyUp(Keys.Up))
+                State.Joypad.Column2 |= 0x4;
+            if (keyboardState.IsKeyUp(Keys.Down))
+                State.Joypad.Column2 |= 0x8;
 
             if (State.Joypad.Column1 != 0xF || State.Joypad.Column2 != 0xF)
                 State.RequestInterrupt(InterruptType.Joypad);
@@ -135,6 +118,21 @@ namespace bEmu
 
         protected override void Draw (GameTime gameTime)
 		{
+            State.Cycles = 0;
+            State.Instructions = 0;
+
+            while (State.Cycles < CycleCount)
+            {
+                // char? debug = (system.MMU as bEmu.Core.Systems.Gameboy.MMU).Debug;
+                // Debug.WriteIf(debug.HasValue, debug);
+
+                int prevCycles = State.Cycles;
+                system.Runner.StepCycle();
+                int afterCycles = State.Cycles;
+
+                Gpu.StepCycle((afterCycles - prevCycles));
+            }
+
 			GraphicsDevice.Clear (Microsoft.Xna.Framework.Color.White);
             spriteBatch.Begin ();
 
