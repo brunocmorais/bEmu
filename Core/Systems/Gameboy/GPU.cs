@@ -156,7 +156,7 @@ namespace bEmu.Core.Systems.Gameboy
                 int lineOffset = State.LCD.LY - y;
 
                 if ((attr & 0x40) == 0x40)
-                    lineOffset = spriteSize - lineOffset;
+                    lineOffset = spriteSize - lineOffset - 1;
 
                 if (lineOffset >= 0 && lineOffset < spriteSize)
                 {
@@ -173,7 +173,7 @@ namespace bEmu.Core.Systems.Gameboy
                             if ((attr & 0x20) == 0x20)
                                 coordX = ((palette.Length - j) + x) - 1;
                             else
-                                coordX = j + x - 1;
+                                coordX = j + x;
                             
                             if (coordX >= 0 && coordX < 160)
                                 frameBuffer[coordX, State.LCD.LY] = palette[j].Value;

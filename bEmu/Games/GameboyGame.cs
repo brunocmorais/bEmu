@@ -77,23 +77,6 @@ namespace bEmu
 
             State.Cycles = 0;
             State.Instructions = 0;
-
-            while (State.Cycles < CycleCount)
-            {
-                // char? debug = (system.MMU as bEmu.Core.Systems.Gameboy.MMU).Debug;
-                // Debug.WriteIf(debug.HasValue, debug);
-
-                if (State.PC == 0xDEFA && system.MMU[0xDEF8] == 0xE8)
-                    Debug.WriteLine(State);
-
-                int prevCycles = State.Cycles;
-                var opcode = system.Runner.StepCycle();
-                int afterCycles = State.Cycles;
-
-                int lastCycleCount = (afterCycles - prevCycles);
-                Gpu.StepCycle(lastCycleCount * 2);
-                UpdateTimers(lastCycleCount);
-            }
         }
 
         private void UpdateTimers(int lastCycleCount)
@@ -156,6 +139,26 @@ namespace bEmu
 
         protected override void Draw (GameTime gameTime)
 		{
+            while (State.Cycles < CycleCount)
+            {
+                char? c = (system.MMU as bEmu.Core.Systems.Gameboy.MMU).Debug;
+                Debug.WriteIf(c.HasValue, c);
+
+                if (State.PC == 0xDEFA)
+                    //debug = true;
+
+                //if (debug)
+                    Debug.WriteLine(State);
+
+                int prevCycles = State.Cycles;
+                var opcode = system.Runner.StepCycle();
+                int afterCycles = State.Cycles;
+
+                int lastCycleCount = (afterCycles - prevCycles);
+                Gpu.StepCycle(lastCycleCount * 4);
+                UpdateTimers(lastCycleCount);
+            }
+
 			GraphicsDevice.Clear (Microsoft.Xna.Framework.Color.White);
             spriteBatch.Begin ();
 

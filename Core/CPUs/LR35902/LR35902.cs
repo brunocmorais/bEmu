@@ -33,30 +33,14 @@ namespace bEmu.Core.CPUs.LR35902
             }
         }
 
-        protected bool CheckHalfCarryAdd(params byte[] bytes)
+        protected bool CheckHalfCarry(ushort a, ushort b, ushort result)
         {
-            for (int i = 0; i < bytes.Length; i++)
-                bytes[i] &= 0x0F;
-
-            return bytes.Sum(x => x) >= 0x10;
+            return (((a ^ b ^ result) & 0x10) == 0x10);
         }
 
-        protected bool CheckHalfCarryAdd(params ushort[] words)
+        protected bool CheckHalfCarry(byte a, byte b, byte result)
         {
-            for (int i = 0; i < words.Length; i++)
-                words[i] &= 0x0FFF;
-
-            return words.Sum(x => x) >= 0x1000;
-        }
-
-        protected bool CheckHalfCarrySub(params byte[] bytes)
-        {
-            return false;
-        }
-
-        protected bool CheckHalfCarrySub(params ushort[] bytes)
-        {
-            return false;
+            return (((a ^ b ^ result) & 0x10) == 0x10);
         }
 
         public void HandleInterrupts()
