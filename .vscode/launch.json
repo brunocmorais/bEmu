@@ -37,7 +37,7 @@
             "preLaunchTask": "build",
             //01-special.gb = (DAA)
             //02-interrupts.gb = (Timer)
-            //03-op sp,hl.gb
+            //03-op sp,hl.gb = Passed
             //04-op r,imm.gb
             //05-op rp.gb = Passed
             //06-ld r,r.gb = Passed
@@ -48,7 +48,7 @@
             //11-op a,(hl).gb
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bEmu/bin/Debug/netcoreapp3.0/bEmu.dll",
-            "args": ["Gameboy", "${workspaceFolder}/Tests/test_roms/gb/testGame.gb"],
+            "args": ["Gameboy", "${workspaceFolder}/Tests/test_roms/gb/04-op r,imm.gb"],
             "cwd": "${workspaceFolder}/bEmu",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "integratedTerminal",

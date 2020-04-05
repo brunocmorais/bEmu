@@ -214,7 +214,7 @@ namespace bEmu.Core.CPUs.LR35902
             int carryValue = State.Flags.Carry ? 1 : 0;
             int result = State.A + value + carryValue;
             State.Flags.Carry = (result & 0x100) == 0x100; 
-            State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(State.A, value);
+            State.Flags.HalfCarry = CheckHalfCarryAdd(State.A, value);
             State.A = (byte) (State.A + value + carryValue);
             State.Flags.Zero = CheckZero(State.A);
             State.Flags.Subtract = false;
@@ -227,7 +227,7 @@ namespace bEmu.Core.CPUs.LR35902
             int carryValue = State.Flags.Carry ? 1 : 0;
             int result = State.A - value - carryValue;
             State.Flags.Carry = result < 0;
-            State.Flags.HalfCarry = CheckAuxiliaryCarrySub(State.A, value); 
+            State.Flags.HalfCarry = CheckHalfCarrySub(State.A, value); 
             State.A = (byte) (State.A - value - carryValue);
             State.Flags.Subtract = true;
             State.Flags.Zero = CheckZero(State.A);
@@ -252,7 +252,7 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.Carry = (result & 0xF000) == 0xF000;                
             State.Flags.Zero = CheckZero((byte) (State.A - value));
             State.Flags.Subtract = true;
-            State.Flags.HalfCarry = CheckAuxiliaryCarrySub((byte) (State.A - value), value);
+            State.Flags.HalfCarry = CheckHalfCarrySub((byte) (State.A - value), value);
             IncreaseCycles(7);
         }
 
@@ -276,19 +276,11 @@ namespace bEmu.Core.CPUs.LR35902
             sbyte value = (sbyte) GetNextByte();
             ushort sp = State.SP;
             State.SP = (ushort) (sp + value);
+
             State.Flags.Zero = false;
             State.Flags.Subtract = false;
-
-            if (value > 0)
-            {
-                State.Flags.Carry = (sp + value) > 65535;
-                State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(sp, (ushort) value);
-            }
-            else if (value < 0)
-            {
-                State.Flags.Carry = (sp + value) < 0;
-                //State.Flags.HalfCarry = CheckAuxiliaryCarrySub(sp, (ushort) value);
-            }
+            State.Flags.Carry = (((sp ^ value ^ State.SP) & 0x100) == 0x100); 
+            State.Flags.HalfCarry = (((sp ^ value ^ State.SP) & 0x10) == 0x10); 
             
             IncreaseCycles(16);
         }
@@ -296,7 +288,14 @@ namespace bEmu.Core.CPUs.LR35902
         private void Ld_HL_SPr8()
         {
             sbyte value = (sbyte) GetNextByte();
+            ushort sp = State.SP;
             State.HL = (ushort) (State.SP + value);
+
+            State.Flags.Zero = false;
+            State.Flags.Subtract = false;
+            State.Flags.Carry = (((sp ^ value ^ State.HL) & 0x100) == 0x100); 
+            State.Flags.HalfCarry = (((sp ^ value ^ State.HL) & 0x10) == 0x10); 
+
             IncreaseCycles(12);
         }
 
@@ -347,7 +346,7 @@ namespace bEmu.Core.CPUs.LR35902
             int result = State.A + value;
 
             State.Flags.Carry = (result & 0x100) == 0x100; 
-            State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(State.A, value);
+            State.Flags.HalfCarry = CheckHalfCarryAdd(State.A, value);
             State.A = (byte) (State.A + value);
             State.Flags.Zero = CheckZero(State.A);
             State.Flags.Subtract = false;
@@ -363,7 +362,7 @@ namespace bEmu.Core.CPUs.LR35902
             State.A = (byte) (State.A - value);
             State.Flags.Zero = CheckZero(State.A);
             State.Flags.Subtract = true;
-            State.Flags.HalfCarry = CheckAuxiliaryCarrySub(State.A, value);
+            State.Flags.HalfCarry = CheckHalfCarrySub(State.A, value);
             IncreaseCycles(7);   
         }
 
@@ -530,7 +529,7 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.Carry = (result & 0xF000) == 0xF000;
             State.Flags.Zero = CheckZero((byte) result);
             State.Flags.Subtract = true;
-            State.Flags.HalfCarry = CheckAuxiliaryCarrySub(State.A, value);
+            State.Flags.HalfCarry = CheckHalfCarrySub(State.A, value);
 
             IncreaseCycles(4);
         }
@@ -589,7 +588,7 @@ namespace bEmu.Core.CPUs.LR35902
 
             int result = State.A - value;
             State.Flags.Carry = result < 0;
-            State.Flags.HalfCarry = CheckAuxiliaryCarrySub(State.A, value);
+            State.Flags.HalfCarry = CheckHalfCarrySub(State.A, value);
             State.A = (byte) (State.A - value);
             State.Flags.Zero = CheckZero(State.A);
             State.Flags.Subtract = true;
@@ -605,7 +604,7 @@ namespace bEmu.Core.CPUs.LR35902
 
             int result = State.A - value;
             State.Flags.Carry = result < 0;
-            State.Flags.HalfCarry = CheckAuxiliaryCarrySub(State.A, value);
+            State.Flags.HalfCarry = CheckHalfCarrySub(State.A, value);
             State.A = (byte) (State.A - value);
             State.Flags.Zero = CheckZero(State.A);
             State.Flags.Subtract = true;
@@ -622,7 +621,7 @@ namespace bEmu.Core.CPUs.LR35902
 
             int result = State.A + value + carryValue;
             State.Flags.Carry = (result & 0x100) == 0x100; 
-            State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(State.A, value, (byte) carryValue);
+            State.Flags.HalfCarry = CheckHalfCarryAdd(State.A, value, (byte) carryValue);
             State.A = (byte) (State.A + value + carryValue);
             State.Flags.Zero = CheckZero(State.A);
             State.Flags.Subtract = false;
@@ -640,7 +639,7 @@ namespace bEmu.Core.CPUs.LR35902
 
             State.Flags.Subtract = false;
             State.Flags.Carry = (result & 0x100) == 0x100; 
-            State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(State.A, value);
+            State.Flags.HalfCarry = CheckHalfCarryAdd(State.A, value);
             State.A = (byte) (State.A + value);
             State.Flags.Zero = CheckZero(State.A);
             IncreaseCycles(4);
@@ -740,7 +739,7 @@ namespace bEmu.Core.CPUs.LR35902
             ushort word = GetWordFromRegister(register);
             State.Flags.Carry = ((State.HL + word) & 0x10000) == 0x10000;
             State.Flags.Subtract = false;
-            State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(State.HL, word);
+            State.Flags.HalfCarry = CheckHalfCarryAdd(State.HL, word);
             State.HL += word;
             IncreaseCycles(8);
         }
@@ -886,7 +885,7 @@ namespace bEmu.Core.CPUs.LR35902
             MMU[State.HL]--;
             IncreaseCycles(12);
             State.Flags.Zero = CheckZero(MMU[State.HL]);
-            State.Flags.HalfCarry = CheckAuxiliaryCarrySub(1, MMU[State.HL]);
+            State.Flags.HalfCarry = CheckHalfCarrySub(1, MMU[State.HL]);
             State.Flags.Subtract = true;
         }
 
@@ -897,37 +896,37 @@ namespace bEmu.Core.CPUs.LR35902
                 case Register.A: 
                     State.A--; 
                     State.Flags.Zero = CheckZero(State.A);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarrySub(1, State.A);
+                    State.Flags.HalfCarry = CheckHalfCarrySub(1, State.A);
                     break;
                 case Register.B: 
                     State.B--; 
                     State.Flags.Zero = CheckZero(State.B);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarrySub(1, State.B);
+                    State.Flags.HalfCarry = CheckHalfCarrySub(1, State.B);
                     break;
                 case Register.C: 
                     State.C--; 
                     State.Flags.Zero = CheckZero(State.C);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarrySub(1, State.C);
+                    State.Flags.HalfCarry = CheckHalfCarrySub(1, State.C);
                     break;
                 case Register.D: 
                     State.D--; 
                     State.Flags.Zero = CheckZero(State.D);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarrySub(1, State.D);
+                    State.Flags.HalfCarry = CheckHalfCarrySub(1, State.D);
                     break;
                 case Register.E: 
                     State.E--; 
                     State.Flags.Zero = CheckZero(State.E);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarrySub(1, State.E);
+                    State.Flags.HalfCarry = CheckHalfCarrySub(1, State.E);
                     break;
                 case Register.H: 
                     State.H--; 
                     State.Flags.Zero = CheckZero(State.H);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarrySub(1, State.H);
+                    State.Flags.HalfCarry = CheckHalfCarrySub(1, State.H);
                     break;
                 case Register.L: 
                     State.L--; 
                     State.Flags.Zero = CheckZero(State.L);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarrySub(1, State.L);
+                    State.Flags.HalfCarry = CheckHalfCarrySub(1, State.L);
                     break;
             }
 
@@ -954,7 +953,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(12);
 
             State.Flags.Zero = CheckZero(MMU[State.HL]);
-            State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(1, MMU[State.HL]);
+            State.Flags.HalfCarry = CheckHalfCarryAdd(1, MMU[State.HL]);
             State.Flags.Subtract = false;
         }
 
@@ -965,37 +964,37 @@ namespace bEmu.Core.CPUs.LR35902
                 case Register.A: 
                     State.A++; 
                     State.Flags.Zero = CheckZero(State.A);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(1, State.A);
+                    State.Flags.HalfCarry = CheckHalfCarryAdd(1, State.A);
                     break;
                 case Register.B: 
                     State.B++; 
                     State.Flags.Zero = CheckZero(State.B);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(1, State.B);
+                    State.Flags.HalfCarry = CheckHalfCarryAdd(1, State.B);
                     break;
                 case Register.C: 
                     State.C++; 
                     State.Flags.Zero = CheckZero(State.C);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(1, State.A);
+                    State.Flags.HalfCarry = CheckHalfCarryAdd(1, State.A);
                     break;
                 case Register.D: 
                     State.D++; 
                     State.Flags.Zero = CheckZero(State.D);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(1, State.D);
+                    State.Flags.HalfCarry = CheckHalfCarryAdd(1, State.D);
                     break;
                 case Register.E: 
                     State.E++; 
                     State.Flags.Zero = CheckZero(State.E);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(1, State.E);
+                    State.Flags.HalfCarry = CheckHalfCarryAdd(1, State.E);
                     break;
                 case Register.H: 
                     State.H++; 
                     State.Flags.Zero = CheckZero(State.H);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(1, State.H);
+                    State.Flags.HalfCarry = CheckHalfCarryAdd(1, State.H);
                     break;
                 case Register.L: 
                     State.L++; 
                     State.Flags.Zero = CheckZero(State.L);
-                    State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(1, State.L);
+                    State.Flags.HalfCarry = CheckHalfCarryAdd(1, State.L);
                     break;
             }
 

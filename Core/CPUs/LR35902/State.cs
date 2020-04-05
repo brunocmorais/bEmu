@@ -41,12 +41,12 @@ namespace bEmu.Core.CPUs.LR35902
 
         public override string ToString()
         {
-            return " af = " + AF.ToString("x").PadLeft(4, '0') +
-                   " bc = " + BC.ToString("x").PadLeft(4, '0') +
-                   " de = " + DE.ToString("x").PadLeft(4, '0') +
-                   " hl = " + HL.ToString("x").PadLeft(4, '0') +
-                   " sp = " + SP.ToString("x").PadLeft(4, '0') +
-                   " pc = " + PC.ToString("x").PadLeft(4, '0'); //+
+            return " AF = " + AF.ToString("x").PadLeft(4, '0').ToUpper() +
+                   " BC = " + BC.ToString("x").PadLeft(4, '0').ToUpper() +
+                   " DE = " + DE.ToString("x").PadLeft(4, '0').ToUpper() +
+                   " HL = " + HL.ToString("x").PadLeft(4, '0').ToUpper() +
+                   " SP = " + SP.ToString("x").PadLeft(4, '0').ToUpper() +
+                   " PC = " + PC.ToString("x").PadLeft(4, '0').ToUpper(); //+
                 //    " cycles = " + Cycles.ToString().PadLeft(6, '0') +
                 //    " inst = "   + Instructions.ToString().PadLeft(6, '0');
         }
