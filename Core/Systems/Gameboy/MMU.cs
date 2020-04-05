@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace bEmu.Core.Systems.Gameboy
 {
@@ -59,9 +60,6 @@ namespace bEmu.Core.Systems.Gameboy
                     if (addr == 0xFF00) // joypad
                         return state.Joypad.GetJoypadInfo();
 
-                    if (addr == 0xFF04)
-                        return (byte) new Random().Next();
-
                     return io[addr - 0xFF00];
                 }
                 if (addr >= 0xFF80 && addr <= 0xFFFF)
@@ -91,7 +89,10 @@ namespace bEmu.Core.Systems.Gameboy
                     if (addr == 0xFF02 && value == 0x0081)
                         Debug = (char) this[0xFF01];
 
-                    if (addr == 0xFF46)
+                    if (addr == 0xFF04) // DIV timer
+                        io[addr - 0xFF00] = 0;
+
+                    if (addr == 0xFF46) // OAM DMA
                     {
                         ushort oamStartAddress = (ushort) (value << 8);
 
@@ -120,6 +121,24 @@ namespace bEmu.Core.Systems.Gameboy
                     rom0[i] = bytes[i];
                 else
                     romX[i - 16384] = bytes[i];
+            }
+        }
+
+        public string Title
+        {
+            get
+            {
+                var sb = new StringBuilder();
+                
+                for (int i = 0x134; i < 0x143; i++)
+                {
+                    if (this[i] == 0)
+                        break;
+
+                    sb.Append((char) this[i]);
+                }
+
+                return sb.ToString();
             }
         }
     }

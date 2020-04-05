@@ -208,6 +208,7 @@ namespace bEmu.Core.Systems.Gameboy
                 var palette = GetPaletteFromBytes(PaletteType.BGP, System.MMU[paletteAddr], System.MMU[paletteAddr + 1]);
 
                 for (int j = 0; j < palette.Length; j++)
+                {
                     if (palette[j].HasValue)
                     {
                         int x = (j + (i * 8)) - (State.LCD.SCX % 8);
@@ -216,6 +217,7 @@ namespace bEmu.Core.Systems.Gameboy
                         if (x >= 0 && x < 160 && y >= 0 && y < 144)
                             frameBuffer[x, y] = palette[j].Value;
                     }
+                }
             }
         }
     }

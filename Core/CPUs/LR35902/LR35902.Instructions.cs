@@ -80,10 +80,11 @@ namespace bEmu.Core.CPUs.LR35902
 
         private void Rl(Register register)
         {
+            bool previousCarry = State.Flags.Carry;
             State.Flags.Carry = ((GetByteFromRegister(register) & 0x80) >> 7) == 1;
             SetByteToRegister(register, (byte) (GetByteFromRegister(register) << 1));
 
-            if (State.Flags.Carry)
+            if (previousCarry)
                 SetByteToRegister(register, (byte) (GetByteFromRegister(register) | 1));
 
             State.Flags.Zero = CheckZero(GetByteFromRegister(register));
@@ -95,10 +96,11 @@ namespace bEmu.Core.CPUs.LR35902
 
         private void Rr(Register register)
         {
+            bool previousCarry = State.Flags.Carry;
             State.Flags.Carry = ((GetByteFromRegister(register) & 0x1)) == 1;
             SetByteToRegister(register, (byte) (GetByteFromRegister(register) >> 1));
 
-            if (State.Flags.Carry)
+            if (previousCarry)
                 SetByteToRegister(register, (byte) (GetByteFromRegister(register) | 0x80));
 
             State.Flags.Zero = CheckZero(GetByteFromRegister(register));
@@ -137,13 +139,14 @@ namespace bEmu.Core.CPUs.LR35902
         private void Swap(Register register)
         {
             byte value = GetByteFromRegister(register);
-            byte mostSignificant = BitUtils.GetMostSignificantNibble(value);
-            byte leastSignificant = BitUtils.GetLeastSignificantNibble(value);
-            BitUtils.SetLeastSignificantNibble(mostSignificant, ref value);
-            BitUtils.SetMostSignificantNibble(leastSignificant, ref value);
-            SetByteToRegister(register, value);
 
-            State.Flags.Zero = CheckZero(value);
+            byte msb = (byte) ((value & 0xF0) >> 4);
+            byte lsb = (byte) ((value & 0x0F));
+            byte result = (byte) ((lsb << 4) | msb);
+
+            SetByteToRegister(register, result);
+
+            State.Flags.Zero = CheckZero(result);
             State.Flags.Subtract = false;
             State.Flags.HalfCarry = false;
             State.Flags.Carry = false;
@@ -270,15 +273,30 @@ namespace bEmu.Core.CPUs.LR35902
 
         private void AddSP()
         {
-            int result = State.SP + (sbyte) GetNextByte();
-            State.SP = (ushort) result;
+            sbyte value = (sbyte) GetNextByte();
+            ushort sp = State.SP;
+            State.SP = (ushort) (sp + value);
+            State.Flags.Zero = false;
+            State.Flags.Subtract = false;
+
+            if (value > 0)
+            {
+                State.Flags.Carry = (sp + value) > 65535;
+                State.Flags.HalfCarry = CheckAuxiliaryCarryAdd(sp, (ushort) value);
+            }
+            else if (value < 0)
+            {
+                State.Flags.Carry = (sp + value) < 0;
+                //State.Flags.HalfCarry = CheckAuxiliaryCarrySub(sp, (ushort) value);
+            }
+            
             IncreaseCycles(16);
         }
 
         private void Ld_HL_SPr8()
         {
-            int result = State.SP + (sbyte) GetNextByte();
-            State.HL = (ushort) result;
+            sbyte value = (sbyte) GetNextByte();
+            State.HL = (ushort) (State.SP + value);
             IncreaseCycles(12);
         }
 
@@ -297,7 +315,7 @@ namespace bEmu.Core.CPUs.LR35902
         private void Jp_HL()
         {
             Jp(State.HL);
-            IncreaseCycles(-6);
+            IncreaseCycles(6);
         }
 
         private void Ld_SPHL()
@@ -682,6 +700,10 @@ namespace bEmu.Core.CPUs.LR35902
             if (previousCarry)
                 State.A |= 0x80;
 
+            State.Flags.Zero = false;
+            State.Flags.Subtract = false;
+            State.Flags.HalfCarry = false;
+
             IncreaseCycles(4);
         }
 
@@ -692,6 +714,10 @@ namespace bEmu.Core.CPUs.LR35902
 
             if (State.Flags.Carry)
                 State.A |= 0x80;
+
+            State.Flags.Zero = false;
+            State.Flags.Subtract = false;
+            State.Flags.HalfCarry = false;
 
             IncreaseCycles(4);
         }
@@ -800,6 +826,10 @@ namespace bEmu.Core.CPUs.LR35902
             if (previousCarry)
                 State.A |= 1;
 
+            State.Flags.Zero = false;
+            State.Flags.Subtract = false;
+            State.Flags.HalfCarry = false;
+
             IncreaseCycles(4);
         }
 
@@ -810,6 +840,10 @@ namespace bEmu.Core.CPUs.LR35902
 
             if (State.Flags.Carry)
                 State.A |= 1;
+
+            State.Flags.Zero = false;
+            State.Flags.Subtract = false;
+            State.Flags.HalfCarry = false;
 
             IncreaseCycles(4);
         }

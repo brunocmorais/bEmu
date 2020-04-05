@@ -45,10 +45,10 @@ namespace bEmu.Core.CPUs.LR35902
                    " bc = " + BC.ToString("x").PadLeft(4, '0') +
                    " de = " + DE.ToString("x").PadLeft(4, '0') +
                    " hl = " + HL.ToString("x").PadLeft(4, '0') +
-                   " pc = " + PC.ToString("x").PadLeft(4, '0') +
                    " sp = " + SP.ToString("x").PadLeft(4, '0') +
-                   " cycles = " + Cycles.ToString().PadLeft(6, '0') +
-                   " inst = "   + Instructions.ToString().PadLeft(6, '0');
+                   " pc = " + PC.ToString("x").PadLeft(4, '0'); //+
+                //    " cycles = " + Cycles.ToString().PadLeft(6, '0') +
+                //    " inst = "   + Instructions.ToString().PadLeft(6, '0');
         }
     }
 }

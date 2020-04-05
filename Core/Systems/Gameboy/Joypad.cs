@@ -14,11 +14,11 @@ namespace bEmu.Core.Systems.Gameboy
         public byte GetJoypadInfo()
         {
             if (activeColumn == 0x10)
-                return (Column1);
-            else if (activeColumn == 0x20)
-                return (Column2);
-            else
-                return 0;
+                return Column1;
+            if (activeColumn == 0x20)
+                return Column2;
+            
+            return 0;
         }
     }
 }

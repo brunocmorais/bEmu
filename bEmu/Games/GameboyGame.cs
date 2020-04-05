@@ -9,6 +9,7 @@ using bEmu.Core.Systems.Gameboy;
 using State = bEmu.Core.Systems.Gameboy.State;
 using bEmu.Core.Util;
 using bEmu.Core.CPUs.LR35902;
+using System.Threading.Tasks;
 
 namespace bEmu
 {
@@ -21,10 +22,11 @@ namespace bEmu
         const int tamanhoPixel = 2;
         const int width = 160 * tamanhoPixel;
         const int height = 144 * tamanhoPixel;
-        const int CycleCount = 70224;
+        const int CycleCount = 70224 / 2;
         string rom;
         bEmu.Core.CPUs.LR35902.Disassembler disassembler;
-        
+        private bool debug = false;
+
         public GameboyGame(string rom)
         {
             graphics = new GraphicsDeviceManager(this);
@@ -43,6 +45,7 @@ namespace bEmu
             system = new Core.Systems.Gameboy.System();
             system.MMU.LoadProgram(rom);
             disassembler = new Core.CPUs.LR35902.Disassembler(system);
+            this.Window.Title = $"bEmu - {(system.MMU as Core.Systems.Gameboy.MMU).Title}";
 
             base.Initialize();
         }
@@ -71,6 +74,25 @@ namespace bEmu
                 Initialize();
 
             UpdateKeys();
+
+            State.Cycles = 0;
+            State.Instructions = 0;
+        }
+
+        private void UpdateTimers(int lastCycleCount)
+        {
+            State.Timer.DIV += (byte) (lastCycleCount / 4);
+
+            if (State.Timer.Enabled)
+            {
+                if (State.Timer.TIMA + State.Timer.Step > 0xFF)
+                {
+                    State.Timer.TIMA = State.Timer.TMA;
+                    State.RequestInterrupt(InterruptType.Timer);
+                }
+
+                State.Timer.TIMA += State.Timer.Step;
+            }
         }
 
         public void UpdateKeys()
@@ -118,19 +140,27 @@ namespace bEmu
 
         protected override void Draw (GameTime gameTime)
 		{
-            State.Cycles = 0;
-            State.Instructions = 0;
-
             while (State.Cycles < CycleCount)
             {
                 // char? debug = (system.MMU as bEmu.Core.Systems.Gameboy.MMU).Debug;
                 // Debug.WriteIf(debug.HasValue, debug);
 
+                // if (State.PC == 0xc45c)
+                // {
+                //     debug = true;
+                //     Debugger.Break();
+                // }
+
+                if (debug)
+                    Debug.WriteLine(State);
+
                 int prevCycles = State.Cycles;
-                system.Runner.StepCycle();
+                var opcode = system.Runner.StepCycle();
                 int afterCycles = State.Cycles;
 
-                Gpu.StepCycle((afterCycles - prevCycles));
+                int lastCycleCount = (afterCycles - prevCycles);
+                Gpu.StepCycle(lastCycleCount * 2);
+                UpdateTimers(lastCycleCount);
             }
 
 			GraphicsDevice.Clear (Microsoft.Xna.Framework.Color.White);
@@ -145,8 +175,6 @@ namespace bEmu
                 }
 
             spriteBatch.End ();
-
-            base.Draw (gameTime);
 		}
     }
 }

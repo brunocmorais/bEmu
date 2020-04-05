@@ -54,7 +54,6 @@ namespace bEmu.Core.Systems.Gameboy
             state.Cycles = 0;
             state.Halted = false;
             state.Instructions = 0;
-            state.Joypad = new Joypad();
 
             return state;
         }
