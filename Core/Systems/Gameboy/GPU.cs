@@ -11,6 +11,7 @@ namespace bEmu.Core.Systems.Gameboy
         GPUMode Mode = GPUMode.HBlank;
         Color[,] frameBuffer = new Color[160, 144];
         State State => System.State as bEmu.Core.Systems.Gameboy.State;
+        Color[] currentLine;
 
         public GPU(ISystem system, int width, int height) : base(system, width, height) { }
 
@@ -74,6 +75,9 @@ namespace bEmu.Core.Systems.Gameboy
 
         public void StepCycle(int cyclesLastOperation)
         {
+            if (!State.LCD.GetLCDCFlag(LCDC.LCDDisplayEnable))
+                return;
+
             cycles += cyclesLastOperation;
             State.LCD.SetSTATMode((int) Mode);
             bool lycCoincidence = State.LCD.LY == State.LCD.LYC;
@@ -135,88 +139,89 @@ namespace bEmu.Core.Systems.Gameboy
 
         private void Renderscan()
         {
-            RenderBackgroundScanline();
-            RenderOAMScanline();
-        }
-
-        private void RenderOAMScanline()
-        {
-            if (!State.LCD.GetLCDCFlag(LCDC.SpriteDisplayEnable))
-                return;
-
-            int spriteSize = State.LCD.GetLCDCFlag(LCDC.SpriteSize) ? 16 : 8;
-
-            for (int i = 0; i < 160; i += 4)
-            {
-                int y = System.MMU[0xFE00 + i + 0] - 16;
-                int x = System.MMU[0xFE00 + i + 1] - 8;
-                byte tile = System.MMU[0xFE00 + i + 2];
-                byte attr = System.MMU[0xFE00 + i + 3];
-                PaletteType paletteType = (attr & 0x10) == 0x10 ? PaletteType.OPB1 : PaletteType.OBP0;
-                int lineOffset = State.LCD.LY - y;
-
-                if ((attr & 0x40) == 0x40)
-                    lineOffset = spriteSize - lineOffset - 1;
-
-                if (lineOffset >= 0 && lineOffset < spriteSize)
-                {
-                    int paletteAddr = 0x8000 + (tile << 4) + (2 * ((lineOffset) % spriteSize));
-
-                    var palette = GetPaletteFromBytes(paletteType, System.MMU[paletteAddr], System.MMU[paletteAddr + 1]);
-
-                    for (int j = 0; j < palette.Length; j++)
-                    {
-                        if (palette[j].HasValue)
-                        {
-                            int coordX;
-
-                            if ((attr & 0x20) == 0x20)
-                                coordX = ((palette.Length - j) + x) - 1;
-                            else
-                                coordX = j + x;
-                            
-                            if (coordX >= 0 && coordX < 160)
-                                frameBuffer[coordX, State.LCD.LY] = palette[j].Value;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void RenderBackgroundScanline()
-        {
-            if (!State.LCD.GetLCDCFlag(LCDC.BGDisplay))
-                return;
-
+            bool bgDisplay = State.LCD.GetLCDCFlag(LCDC.BGDisplay);
+            bool spriteDisplay = State.LCD.GetLCDCFlag(LCDC.SpriteDisplayEnable);
             int tileStartAddress = State.LCD.GetLCDCFlag(LCDC.BGWindowTileDataSelect) ? 0x8000 : 0x8800;
             int mapSelect = State.LCD.GetLCDCFlag(LCDC.BGTileMapDisplaySelect) ? 0x9C00 : 0x9800;
 
-            for (int i = 0; i <= 20; i++)
+            byte line = (byte) ((State.LCD.LY + State.LCD.SCY));
+
+            if (bgDisplay)
+                for (int i = 0; i <= 20; i++) // 20 tiles 8x8
+                    RenderBackgroundScanline(tileStartAddress, mapSelect, i, line);
+            
+            if (spriteDisplay)
+                for (int i = 0; i < 40; i++) // 40 itens OAM
+                    RenderOAMScanline(i);
+        }
+
+        private void RenderOAMScanline(int i)
+        {
+            i *= 4;
+            int spriteSize = State.LCD.GetLCDCFlag(LCDC.SpriteSize) ? 16 : 8;
+
+            byte oamY = System.MMU[0xFE00 + i + 0];
+            byte oamX = System.MMU[0xFE00 + i + 1];
+            byte tile = System.MMU[0xFE00 + i + 2];
+            byte attr = System.MMU[0xFE00 + i + 3];
+
+            if (oamY + oamX + tile + attr == 0)
+                return;
+
+            int y = oamY - 16;
+            int x = oamX - 8;
+            PaletteType paletteType = (attr & 0x10) == 0x10 ? PaletteType.OPB1 : PaletteType.OBP0;
+            int lineOffset = State.LCD.LY - y;
+            bool priority = (attr & 0x80) == 0x80;
+
+            if ((attr & 0x40) == 0x40)
+                lineOffset = spriteSize - lineOffset - 1;
+
+            if (lineOffset >= 0 && lineOffset < spriteSize)
             {
-                int paletteAddr = 0;
-                byte line = (byte) ((State.LCD.LY + State.LCD.SCY));
+                int paletteAddr = 0x8000 + (tile << 4) + (2 * ((lineOffset) % spriteSize));
 
-                int addr = mapSelect + ((i + (State.LCD.SCX / 8)) % 32) + (line / 8 * 32);
-
-                byte tileNumber = System.MMU[addr];
-
-                if (tileStartAddress == 0x8000)
-                    paletteAddr = tileStartAddress + (tileNumber << 4) + (2 * (line % 8));
-                else
-                    paletteAddr = ((tileNumber & 0x80) == 0x80 ? 0x8800 : 0x9000) + ((tileNumber & 0x7F) << 4) + (2 * (line % 8));
-
-                var palette = GetPaletteFromBytes(PaletteType.BGP, System.MMU[paletteAddr], System.MMU[paletteAddr + 1]);
+                var palette = GetPaletteFromBytes(paletteType, System.MMU[paletteAddr], System.MMU[paletteAddr + 1]);
 
                 for (int j = 0; j < palette.Length; j++)
                 {
                     if (palette[j].HasValue)
                     {
-                        int x = (j + (i * 8)) - (State.LCD.SCX % 8);
-                        int y = State.LCD.LY;
+                        int coordX;
 
-                        if (x >= 0 && x < 160 && y >= 0 && y < 144)
-                            frameBuffer[x, y] = palette[j].Value;
+                        if ((attr & 0x20) == 0x20)
+                            coordX = ((palette.Length - j) + x) - 1;
+                        else
+                            coordX = j + x;
+                        
+                        if (coordX >= 0 && coordX < 160)
+                            frameBuffer[coordX, State.LCD.LY] = palette[j].Value;
                     }
+                }
+            }
+        }
+
+        private void RenderBackgroundScanline(int tileStartAddress, int mapSelect, int i, byte line)
+        {
+            int addr = mapSelect + ((i + (State.LCD.SCX / 8)) % 32) + (line / 8 * 32);
+            byte tileNumber = System.MMU[addr];
+            int paletteAddr;
+
+            if (tileStartAddress == 0x8000)
+                paletteAddr = tileStartAddress + (tileNumber << 4) + (2 * (line % 8));
+            else
+                paletteAddr = ((tileNumber & 0x80) == 0x80 ? 0x8800 : 0x9000) + ((tileNumber & 0x7F) << 4) + (2 * (line % 8));
+
+            var palette = GetPaletteFromBytes(PaletteType.BGP, System.MMU[paletteAddr], System.MMU[paletteAddr + 1]);
+
+            for (int j = 0; j < palette.Length; j++)
+            {
+                if (palette[j].HasValue)
+                {
+                    int x = (j + (i * 8)) - (State.LCD.SCX % 8);
+
+                    if (x >= 0 && x < 160 && State.LCD.LY >= 0 && State.LCD.LY < 144)
+                        frameBuffer[x, State.LCD.LY] = palette[j].Value;
                 }
             }
         }

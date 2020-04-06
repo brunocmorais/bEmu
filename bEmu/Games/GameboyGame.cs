@@ -10,6 +10,7 @@ using State = bEmu.Core.Systems.Gameboy.State;
 using bEmu.Core.Util;
 using bEmu.Core.CPUs.LR35902;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace bEmu
 {
@@ -17,7 +18,10 @@ namespace bEmu
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Texture2D pixel;
+        Texture2D white;
+        Texture2D lightGray;
+        Texture2D darkGray;
+        Texture2D black;
         Core.Systems.Gameboy.System system;
         const int tamanhoPixel = 2;
         const int width = 160 * tamanhoPixel;
@@ -52,17 +56,43 @@ namespace bEmu
 
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-            pixel = new Texture2D(GraphicsDevice, tamanhoPixel, tamanhoPixel);
-
             const int pixels = tamanhoPixel * tamanhoPixel;
 
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+            white = new Texture2D(GraphicsDevice, tamanhoPixel, tamanhoPixel);
+            lightGray = new Texture2D(GraphicsDevice, tamanhoPixel, tamanhoPixel);
+            darkGray = new Texture2D(GraphicsDevice, tamanhoPixel, tamanhoPixel);
+            black = new Texture2D(GraphicsDevice, tamanhoPixel, tamanhoPixel);
+
             var whiteColor = new Microsoft.Xna.Framework.Color[pixels];
+            var lightGrayColor = new Microsoft.Xna.Framework.Color[pixels];
+            var darkGrayColor = new Microsoft.Xna.Framework.Color[pixels];
+            var blackColor = new Microsoft.Xna.Framework.Color[pixels];
             
             for (int i = 0; i < pixels; i++) 
+            {
                 whiteColor[i] = Microsoft.Xna.Framework.Color.White;
+                lightGrayColor[i] = Microsoft.Xna.Framework.Color.FromNonPremultiplied(192, 192, 192, 255);
+                darkGrayColor[i] = Microsoft.Xna.Framework.Color.FromNonPremultiplied(96, 96, 96, 255);
+                blackColor[i] = Microsoft.Xna.Framework.Color.Black;
+            }
             
-            pixel.SetData(whiteColor);
+            white.SetData(whiteColor);
+            lightGray.SetData(lightGrayColor);
+            darkGray.SetData(darkGrayColor);
+            black.SetData(blackColor);
+        }
+
+        private Texture2D GetTexture(int number)
+        {
+            switch (number)
+            {
+                case 0: return black;
+                case 96: return darkGray;
+                case 192: return lightGray;
+                case 255: return white;
+                default: return null;
+            }
         }
 
         protected override void Update(GameTime gameTime)
@@ -74,9 +104,6 @@ namespace bEmu
                 Initialize();
 
             UpdateKeys();
-
-            State.Cycles = 0;
-            State.Instructions = 0;
         }
 
         private void UpdateTimers(int lastCycleCount)
@@ -138,39 +165,34 @@ namespace bEmu
         }
 
         protected override void Draw (GameTime gameTime)
-		{
+        {
+            UpdateGame();
+
+            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.White);
+            spriteBatch.Begin();
+
+            for (int i = 0; i < system.PPU.Width; i++)
+                for (int j = 0; j < system.PPU.Height; j++)
+                    spriteBatch.Draw(GetTexture(system.PPU[i, j].R), new Vector2(i * tamanhoPixel, j * tamanhoPixel), Microsoft.Xna.Framework.Color.White);
+
+            spriteBatch.End();
+        }
+
+        private void UpdateGame()
+        {
+            State.Cycles = 0;
+            State.Instructions = 0;
+
             while (State.Cycles < CycleCount)
             {
-                char? c = (system.MMU as bEmu.Core.Systems.Gameboy.MMU).Debug;
-                Debug.WriteIf(c.HasValue, c);
-
-                if (State.PC == 0xDEFA)
-                    //debug = true;
-
-                //if (debug)
-                    Debug.WriteLine(State);
-
                 int prevCycles = State.Cycles;
                 var opcode = system.Runner.StepCycle();
                 int afterCycles = State.Cycles;
 
                 int lastCycleCount = (afterCycles - prevCycles);
-                Gpu.StepCycle(lastCycleCount * 4);
+                Gpu.StepCycle(lastCycleCount * 2);
                 UpdateTimers(lastCycleCount);
             }
-
-			GraphicsDevice.Clear (Microsoft.Xna.Framework.Color.White);
-            spriteBatch.Begin ();
-
-			for (int i = 0; i < system.PPU.Width; i++) 
-				for (int j = 0; j < system.PPU.Height; j++)
-                {
-                    Pixel pixel = system.PPU[i, j];
-                    spriteBatch.Draw(this.pixel, new Vector2(i * tamanhoPixel, j * tamanhoPixel),
-                        Microsoft.Xna.Framework.Color.FromNonPremultiplied(pixel.R, pixel.G, pixel.B, pixel.A));
-                }
-
-            spriteBatch.End ();
-		}
+        }
     }
 }
