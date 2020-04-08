@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using bEmu.Core;
 using bEmu.Core.CPUs.LR35902;
@@ -11,9 +12,15 @@ namespace bEmu.Core.Systems.Gameboy
         GPUMode Mode = GPUMode.HBlank;
         Color[,] frameBuffer = new Color[160, 144];
         State State => System.State as bEmu.Core.Systems.Gameboy.State;
-        Color[] currentLine;
+        IEnumerable<Sprite> spritesCurrentLine;
+        OAM oam;
+        public int Frame { get; private set; } = 0;
 
-        public GPU(ISystem system, int width, int height) : base(system, width, height) { }
+        public GPU(ISystem system, int width, int height) : base(system, width, height) 
+        { 
+            oam = new OAM(system);
+            oam.UpdateSprites();
+        }
 
         private Pixel GetPixel(Color color)
         {
@@ -75,9 +82,6 @@ namespace bEmu.Core.Systems.Gameboy
 
         public void StepCycle(int cyclesLastOperation)
         {
-            if (!State.LCD.GetLCDCFlag(LCDC.LCDDisplayEnable))
-                return;
-
             cycles += cyclesLastOperation;
             State.LCD.SetSTATMode((int) Mode);
             bool lycCoincidence = State.LCD.LY == State.LCD.LYC;
@@ -91,8 +95,9 @@ namespace bEmu.Core.Systems.Gameboy
                 case GPUMode.HBlank:
                     if (cycles >= 204)
                     {
+                        Renderscan();
                         State.LCD.LY++;
-                        cycles = 0;
+                        cycles -= 204;
 
                         if (State.LCD.LY == 144)
                             Mode = GPUMode.VBlank;
@@ -108,13 +113,15 @@ namespace bEmu.Core.Systems.Gameboy
                         if (State.LCD.LY == 144)
                             State.RequestInterrupt(InterruptType.VBlank);
 
-                        cycles = 0;
+                        cycles -= 456;
                         State.LCD.LY++;
 
                         if (State.LCD.LY > 153)
                         {
                             State.LCD.LY = 0;
                             Mode = GPUMode.ScanlineOAM;
+                            oam.UpdateSprites();
+                            Frame++;
                         }
                     }
                     break;
@@ -122,15 +129,15 @@ namespace bEmu.Core.Systems.Gameboy
                     if (cycles >= 80)
                     {
                         Mode = GPUMode.ScanlineVRAM;
-                        cycles = 0;
+                        spritesCurrentLine = oam.GetSpritesOnLine(State.LCD.LY, State.LCD.GetLCDCFlag(LCDC.SpriteSize) ? 16 : 8);
+                        cycles -= 80;
                     }
                     break;
                 case GPUMode.ScanlineVRAM:
                     if (cycles >= 172)
                     {
                         Mode = GPUMode.HBlank;
-                        cycles = 0;
-                        Renderscan();
+                        cycles -= 172;
                     }
 
                     break;
@@ -139,6 +146,9 @@ namespace bEmu.Core.Systems.Gameboy
 
         private void Renderscan()
         {
+            if (State.LCD.LY < 0 && State.LCD.LY > 143)
+                return;
+
             bool bgDisplay = State.LCD.GetLCDCFlag(LCDC.BGDisplay);
             bool spriteDisplay = State.LCD.GetLCDCFlag(LCDC.SpriteDisplayEnable);
             int tileStartAddress = State.LCD.GetLCDCFlag(LCDC.BGWindowTileDataSelect) ? 0x8000 : 0x8800;
@@ -151,37 +161,15 @@ namespace bEmu.Core.Systems.Gameboy
                     RenderBackgroundScanline(tileStartAddress, mapSelect, i, line);
             
             if (spriteDisplay)
-                for (int i = 0; i < 40; i++) // 40 itens OAM
-                    RenderOAMScanline(i);
+                RenderOAMScanline();
         }
 
-        private void RenderOAMScanline(int i)
+        private void RenderOAMScanline()
         {
-            i *= 4;
-            int spriteSize = State.LCD.GetLCDCFlag(LCDC.SpriteSize) ? 16 : 8;
-
-            byte oamY = System.MMU[0xFE00 + i + 0];
-            byte oamX = System.MMU[0xFE00 + i + 1];
-            byte tile = System.MMU[0xFE00 + i + 2];
-            byte attr = System.MMU[0xFE00 + i + 3];
-
-            if (oamY + oamX + tile + attr == 0)
-                return;
-
-            int y = oamY - 16;
-            int x = oamX - 8;
-            PaletteType paletteType = (attr & 0x10) == 0x10 ? PaletteType.OPB1 : PaletteType.OBP0;
-            int lineOffset = State.LCD.LY - y;
-            bool priority = (attr & 0x80) == 0x80;
-
-            if ((attr & 0x40) == 0x40)
-                lineOffset = spriteSize - lineOffset - 1;
-
-            if (lineOffset >= 0 && lineOffset < spriteSize)
+            foreach (var sprite in spritesCurrentLine)
             {
-                int paletteAddr = 0x8000 + (tile << 4) + (2 * ((lineOffset) % spriteSize));
-
-                var palette = GetPaletteFromBytes(paletteType, System.MMU[paletteAddr], System.MMU[paletteAddr + 1]);
+                int paletteAddr = 0x8000 + (sprite.Address << 4) + (2 * ((sprite.LineOffset) % sprite.Size));
+                var palette = GetPaletteFromBytes(sprite.PaletteType, System.MMU[paletteAddr], System.MMU[paletteAddr + 1]);
 
                 for (int j = 0; j < palette.Length; j++)
                 {
@@ -189,10 +177,10 @@ namespace bEmu.Core.Systems.Gameboy
                     {
                         int coordX;
 
-                        if ((attr & 0x20) == 0x20)
-                            coordX = ((palette.Length - j) + x) - 1;
+                        if (sprite.XFlip)
+                            coordX = ((palette.Length - j) + sprite.X) - 1;
                         else
-                            coordX = j + x;
+                            coordX = j + sprite.X;
                         
                         if (coordX >= 0 && coordX < 160)
                             frameBuffer[coordX, State.LCD.LY] = palette[j].Value;
@@ -216,13 +204,10 @@ namespace bEmu.Core.Systems.Gameboy
 
             for (int j = 0; j < palette.Length; j++)
             {
-                if (palette[j].HasValue)
-                {
-                    int x = (j + (i * 8)) - (State.LCD.SCX % 8);
+                int x = (j + (i * 8)) - (State.LCD.SCX % 8);
 
-                    if (x >= 0 && x < 160 && State.LCD.LY >= 0 && State.LCD.LY < 144)
-                        frameBuffer[x, State.LCD.LY] = palette[j].Value;
-                }
+                if (x >= 0 && x < 160)
+                    frameBuffer[x, State.LCD.LY] = palette[j].Value;
             }
         }
     }

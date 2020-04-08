@@ -23,13 +23,13 @@ namespace bEmu
         Texture2D darkGray;
         Texture2D black;
         Core.Systems.Gameboy.System system;
-        const int tamanhoPixel = 2;
+        const int tamanhoPixel = 3;
         const int width = 160 * tamanhoPixel;
         const int height = 144 * tamanhoPixel;
-        const int CycleCount = 70224 / 2;
+        const int CycleCount = 70224;
         string rom;
         bEmu.Core.CPUs.LR35902.Disassembler disassembler;
-        private bool debug = false;
+        int lastRenderedFrame = 0;
 
         public GameboyGame(string rom)
         {
@@ -104,6 +104,7 @@ namespace bEmu
                 Initialize();
 
             UpdateKeys();
+            UpdateGame(gameTime);
         }
 
         private void UpdateTimers(int lastCycleCount)
@@ -166,24 +167,29 @@ namespace bEmu
 
         protected override void Draw (GameTime gameTime)
         {
-            UpdateGame();
-
-            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.White);
+            lastRenderedFrame = Gpu.Frame;
             spriteBatch.Begin();
 
             for (int i = 0; i < system.PPU.Width; i++)
+            {
                 for (int j = 0; j < system.PPU.Height; j++)
-                    spriteBatch.Draw(GetTexture(system.PPU[i, j].R), new Vector2(i * tamanhoPixel, j * tamanhoPixel), Microsoft.Xna.Framework.Color.White);
+                {
+                    var pixel = system.PPU[i, j];
+                    spriteBatch.Draw(white, 
+                        new Vector2(i * tamanhoPixel, j * tamanhoPixel), 
+                        Microsoft.Xna.Framework.Color.FromNonPremultiplied(pixel.R, pixel.G, pixel.B, pixel.A));
+                }
+            }
 
             spriteBatch.End();
         }
 
-        private void UpdateGame()
+        private void UpdateGame(GameTime gameTime)
         {
             State.Cycles = 0;
             State.Instructions = 0;
 
-            while (State.Cycles < CycleCount)
+            while (lastRenderedFrame == Gpu.Frame) 
             {
                 int prevCycles = State.Cycles;
                 var opcode = system.Runner.StepCycle();
