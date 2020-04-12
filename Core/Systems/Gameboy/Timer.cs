@@ -1,51 +1,86 @@
+using bEmu.Core.CPUs.LR35902;
+
 namespace bEmu.Core.Systems.Gameboy
 {
     public class Timer
     {
-        private readonly MMU mmu;
+        private readonly ISystem system;
+        int cycles = 0;
+        int cyclesDivider = 0;
 
-        public Timer(MMU mmu)
+        public Timer(ISystem system)
         {
-            this.mmu = mmu;
+            this.system = system;
+            (system.MMU as bEmu.Core.Systems.Gameboy.MMU).InitTimer();
         }
 
         public byte DIV 
         {
-            get { return mmu[0xFF04];}
-            set { mmu[0xFF04] = value; }
+            get { return system.MMU[0xFF04];}
+            set { system.MMU[0xFF04] = value; }
         }
 
         public byte TIMA
         {
-            get { return mmu[0xFF05]; }
-            set { mmu[0xFF05] = value; }
+            get { return system.MMU[0xFF05]; }
+            set { system.MMU[0xFF05] = value; }
         }
 
         public byte TMA
         {
-            get { return mmu[0xFF06]; }
-            set { mmu[0xFF06] = value; }
+            get { return system.MMU[0xFF06]; }
+            set { system.MMU[0xFF06] = value; }
         }
 
         public byte TAC
         {
-            get { return mmu[0xFF07]; }
-            set { mmu[0xFF07] = value; }
+            get { return system.MMU[0xFF07]; }
+            set { system.MMU[0xFF07] = value; }
         }
 
         public bool Enabled => (TAC & 0x4) == 0x4;
 
-        public byte Step
+        public int Step
         {
             get 
             {
                 switch (TAC & 0x3)
                 {
-                    case 0:  return 0x03;
-                    case 1:  return 0xFF;
-                    case 2:  return 0x30;
-                    case 3:  return 0x10;
+                    case 0:  return 1024;
+                    case 1:  return 16;
+                    case 2:  return 64;
+                    case 3:  return 256;
                     default: return 0x00;
+                }
+            }
+        }
+
+        public void UpdateTimers(int lastCycleCount)
+        {
+            cyclesDivider += lastCycleCount;
+
+            if (cyclesDivider >= 256)
+            {
+                DIV++;
+                cyclesDivider = 0;
+            }
+
+            if (Enabled)
+            {
+                cycles += lastCycleCount;
+
+                if (cycles >= Step)
+                {
+                    if (TIMA == 0xFF)
+                    {
+                        (system.State as bEmu.Core.Systems.Gameboy.State).RequestInterrupt(InterruptType.Timer);
+                        TIMA = TMA;
+                    }
+                    else
+                    {
+                        TIMA++;
+                        cycles = 0;
+                    }
                 }
             }
         }

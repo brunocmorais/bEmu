@@ -13,6 +13,19 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Chip8/tone.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Chip8/tone.wav
+
+#begin Common/Font.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Common/Font.spritefont
+
 #begin SpaceInvaders/backdrop.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -24,12 +37,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:SpaceInvaders/backdrop.png
-
-#begin Chip8/tone.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Chip8/tone.wav
 
 #begin SpaceInvaders/explosion.wav
 /importer:WavImporter

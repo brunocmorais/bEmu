@@ -20,8 +20,17 @@ namespace bEmu.Core.Systems.Gameboy
 
         public IEnumerable<Sprite> GetSpritesOnLine(int ly, int spriteSize)
         {
+            int counter = 0;
+
             foreach (var sprite in Sprites)
             {
+                if (counter == 10) // limite de 10 sprites por linha
+                    yield break;
+
+                if (sprite == null || sprite.X == 0 || sprite.X >= 168 || 
+                    sprite.Y == 0 || sprite.Y >= 160 || (sprite.Y <= 8 && spriteSize == 8))
+                    continue;
+                    
                 int lineOffset = ly - sprite.Y;
 
                 if (sprite.YFlip)
@@ -31,6 +40,7 @@ namespace bEmu.Core.Systems.Gameboy
                 {
                     sprite.LineOffset = lineOffset;
                     sprite.Size = spriteSize;
+                    counter++;
                     yield return sprite;
                 }
             }

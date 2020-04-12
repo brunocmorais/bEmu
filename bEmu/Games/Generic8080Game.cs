@@ -18,6 +18,7 @@ namespace bEmu
         protected GraphicsDeviceManager graphics;
         protected SpriteBatch spriteBatch;
         protected Texture2D whiteRect;
+        protected Texture2D backBuffer;
         protected Core.Systems.Generic8080.System system;
         protected TimeSpan lastInterruptTime = TimeSpan.Zero;
         protected int lastInterrupt = 1;
@@ -27,20 +28,21 @@ namespace bEmu
         protected string[] fileNames;
         protected string[] memoryPositions;
         protected string zipName;
-        protected const int width = 224 * tamanhoPixel;
-        protected const int height = 256 * tamanhoPixel;
+        protected const int width = 224;
+        protected const int height = 256;
         protected const int delay = 8;
         protected const int CycleCount = 3000;
         protected int alpha = 255;
-
+        protected Rectangle destinationRectangle = new Rectangle(0, 0, width * tamanhoPixel, height * tamanhoPixel);
         protected State State => system.State as State;
+        protected Core.Systems.Generic8080.PPU PPU => system.PPU as Core.Systems.Generic8080.PPU;
         protected Intel8080<State> CPU => system.Runner as Intel8080<State>;
 
         public Generic8080Game(string zipName, string[] fileNames, string[] memoryPositions)
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = width;
-            graphics.PreferredBackBufferHeight = height;
+            graphics.PreferredBackBufferWidth = width * tamanhoPixel;
+            graphics.PreferredBackBufferHeight = height * tamanhoPixel;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             TargetElapsedTime = new TimeSpan(0, 0, 0, 0, delay);
@@ -79,6 +81,7 @@ namespace bEmu
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             whiteRect = new Texture2D(GraphicsDevice, tamanhoPixel, tamanhoPixel);
+            backBuffer = new Texture2D(GraphicsDevice, width, height);
 
             Color[] whiteColor = new Color[tamanhoPixel * tamanhoPixel];
             
@@ -108,6 +111,7 @@ namespace bEmu
                     In();
                 else if (opcode.Byte == 0xD3) //OUT
                     Out();
+
             }
 
             if (totalMilliseconds >= delay)
@@ -154,27 +158,9 @@ namespace bEmu
                 GraphicsDevice.Clear (Color.Black);
 
             spriteBatch.Begin ();
-            Color color;
-			
-            for (int i = 0; i < system.PPU.Width; i++) 
-			{
-				for (int j = 0; j < system.PPU.Height; j++)
-				{
-                    Pixel pixel = system.PPU[i, j];
-                    
-                    Vector2 coor = new Vector2(j * tamanhoPixel, (system.PPU.Width * tamanhoPixel) - (i * tamanhoPixel));
-                        
-                    if (coor.Y < (50 * tamanhoPixel))
-                        color = Color.FromNonPremultiplied(255 & pixel.R, 0, 0, alpha & pixel.A);
-                    else if (coor.Y > (180 * tamanhoPixel))
-                        color = Color.FromNonPremultiplied(0, 255 & pixel.G, 0, alpha & pixel.A);
-                    else
-                        color = Color.FromNonPremultiplied(255 & pixel.R, 255 & pixel.G, 255 & pixel.B, alpha & pixel.A);
-                    
-                    spriteBatch.Draw (whiteRect, coor, color);
-				}
-			}
-
+            PPU.UpdateFramebuffer();
+            backBuffer.SetData(PPU.FrameBuffer);
+            spriteBatch.Draw(backBuffer, destinationRectangle, Color.White);
 			spriteBatch.End ();
 
             base.Draw (gameTime);	

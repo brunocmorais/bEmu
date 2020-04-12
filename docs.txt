@@ -5,3 +5,5 @@ http://jgmalcolm.com/z80/advanced/shif#sla
 https://cturt.github.io/cinoop.html
 http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-The-CPU
 https://gbdev.io/pandocs/
+https://gekkio.fi/files/gb-docs/gbctr.pdf
+https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf

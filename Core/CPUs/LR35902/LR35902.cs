@@ -7,9 +7,96 @@ using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.LR35902
 {
-    public partial class LR35902<TState> : CPUs.Intel8080.Intel8080<TState> where TState : State
+    public partial class LR35902<TState> : CPU<TState> where TState : State
     {
         public LR35902(ISystem system) : base(system) { }
+
+
+        protected ushort GetNextWord()
+        {
+            byte b1 = MMU[State.PC++];
+            byte b2 = MMU[State.PC++];
+            return BitUtils.GetWordFrom2Bytes(b1, b2);
+        }
+
+        public byte GetNextByte()
+        {
+            return MMU[State.PC++];
+        }
+
+        protected byte ReadByteFromMemory(ushort addr)
+        {
+            return MMU[addr];
+        }
+
+        protected void WriteByteToMemory(ushort addr, byte value)
+        {
+            MMU[addr] = value;
+        }
+
+        protected ushort ReadWordFromMemory(ushort addr)
+        {
+            byte a = MMU[addr];
+            byte b = MMU[addr + 1];
+            return BitUtils.GetWordFrom2Bytes(a, b);
+        }
+
+        protected void WriteWordToMemory(ushort addr, ushort word)
+        {
+            BitUtils.Get2BytesFromWord(word, out byte a, out byte b);
+            MMU[addr] = b;
+            MMU[addr + 1] = a;
+        }
+
+        protected ushort PopStack()
+        {
+            ushort word = ReadWordFromMemory(State.SP);
+            State.SP += 2;
+            return word;
+        }
+
+        protected void PushStack(ushort value)
+        {
+            State.SP -= 2;
+            WriteWordToMemory(State.SP, value);
+        }
+
+        protected byte GetByteFromRegister(Register register)
+        {
+            switch (register)
+            {
+                case Register.A: return State.A;
+                case Register.B: return State.B;
+                case Register.C: return State.C;
+                case Register.D: return State.D;
+                case Register.E: return State.E;
+                case Register.H: return State.H;
+                case Register.L: return State.L;
+                case Register.AF: return ReadByteFromMemory(State.AF);
+                case Register.BC: return ReadByteFromMemory(State.BC);
+                case Register.DE: return ReadByteFromMemory(State.DE);
+                case Register.HL: return ReadByteFromMemory(State.HL);
+                case Register.SP: return ReadByteFromMemory(State.SP);
+                case Register.PC: return ReadByteFromMemory(State.PC);
+                default:
+                    throw new Exception("Registrador desconhecido.");
+            }
+        }
+
+        protected ushort GetWordFromRegister(Register register)
+        {
+            switch (register)
+            {
+                case Register.AF: return State.AF;
+                case Register.BC: return State.BC;
+                case Register.DE: return State.DE;
+                case Register.HL: return State.HL;
+                case Register.SP: return State.SP;
+                case Register.PC: return State.PC;
+                default:
+                    throw new Exception("Registrador não permitido.");
+            }
+        }
 
         void SetByteToRegister(Register register, byte value)
         {
@@ -33,6 +120,11 @@ namespace bEmu.Core.CPUs.LR35902
             }
         }
 
+        protected bool CheckZero(byte value)
+        {
+            return value == 0;
+        }
+
         protected bool CheckHalfCarry(ushort a, ushort b, ushort result)
         {
             return (((a ^ b ^ result) & 0x10) == 0x10);
@@ -45,7 +137,7 @@ namespace bEmu.Core.CPUs.LR35902
 
         public void HandleInterrupts()
         {
-            if (State.GetType() == typeof(Systems.Gameboy.State))
+            if (State is Systems.Gameboy.State)
             {
                 var state = State as Systems.Gameboy.State;
 
@@ -56,9 +148,9 @@ namespace bEmu.Core.CPUs.LR35902
 
                     if ((state.IE & mask) == mask && ((state.IF & mask) == mask))
                     {
-                        State.Halted = false;
+                        state.Halted = false;
                         
-                        if (!State.EnableInterrupts)
+                        if (!state.EnableInterrupts)
                             return;
 
                         PushStack(state.PC);
@@ -351,6 +443,7 @@ namespace bEmu.Core.CPUs.LR35902
 
         public void Cb()
         {
+            IncreaseCycles(4);
             var cbOpcode = new Opcode(GetNextByte());
 
             switch (cbOpcode.Byte)

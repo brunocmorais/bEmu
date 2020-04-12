@@ -6,7 +6,7 @@ using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.LR35902
 {
-    public partial class LR35902<TState> : CPUs.Intel8080.Intel8080<TState> where TState : State
+    public partial class LR35902<TState> where TState : State
     {
         private void Bit(int bitNumber, Register register)
         {
@@ -50,6 +50,9 @@ namespace bEmu.Core.CPUs.LR35902
 
         private void Rlc(Register register)
         {
+            if (register == Register.HL)
+                IncreaseCycles(8);
+
             byte value = GetByteFromRegister(register);
             State.Flags.Carry = (value & 0x80) == 0x80;
             value <<= 1;
@@ -62,11 +65,14 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.HalfCarry = false;
             SetByteToRegister(register, value);
 
-            IncreaseCycles(4);
+            IncreaseCycles(8);
         }
 
         private void Rrc(Register register)
         {
+            if (register == Register.HL)
+                IncreaseCycles(8);
+
             byte value = GetByteFromRegister(register);
             State.Flags.Carry = (value & 1) == 1;
             value >>= 1;
@@ -79,11 +85,14 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.HalfCarry = false;
             SetByteToRegister(register, value);
 
-            IncreaseCycles(4);
+            IncreaseCycles(8);
         }
 
         private void Rl(Register register)
         {
+            if (register == Register.HL)
+                IncreaseCycles(8);
+
             bool previousCarry = State.Flags.Carry;
             State.Flags.Carry = ((GetByteFromRegister(register) & 0x80) >> 7) == 1;
             SetByteToRegister(register, (byte) (GetByteFromRegister(register) << 1));
@@ -95,11 +104,14 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.Subtract = false;
             State.Flags.HalfCarry = false;
 
-            IncreaseCycles(4);
+            IncreaseCycles(8);
         }
 
         private void Rr(Register register)
         {
+            if (register == Register.HL)
+                IncreaseCycles(8);
+
             bool previousCarry = State.Flags.Carry;
             State.Flags.Carry = ((GetByteFromRegister(register) & 0x1)) == 1;
             SetByteToRegister(register, (byte) (GetByteFromRegister(register) >> 1));
@@ -111,11 +123,14 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.Subtract = false;
             State.Flags.HalfCarry = false;
 
-            IncreaseCycles(4);
+            IncreaseCycles(8);
         }
 
         private void Sla(Register register)
         {
+            if (register == Register.HL)
+                IncreaseCycles(8);
+
             State.Flags.Carry = ((GetByteFromRegister(register) & 0x80) >> 7) == 1;
             SetByteToRegister(register, (byte) (GetByteFromRegister(register) << 1));
 
@@ -123,11 +138,14 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.Subtract = false;
             State.Flags.HalfCarry = false;
 
-            IncreaseCycles(4);
+            IncreaseCycles(8);
         }
 
         private void Sra(Register register)
         {
+            if (register == Register.HL)
+                IncreaseCycles(8);
+
             byte value = GetByteFromRegister(register);
             byte bit7 = (byte) (value >> 7); 
             State.Flags.Carry = (value & 0x1) == 1;
@@ -137,11 +155,14 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.Subtract = false;
             State.Flags.HalfCarry = false;
 
-            IncreaseCycles(4);
+            IncreaseCycles(8);
         }
 
         private void Swap(Register register)
         {
+            if (register == Register.HL)
+                IncreaseCycles(8);
+
             byte value = GetByteFromRegister(register);
 
             byte msb = (byte) ((value & 0xF0) >> 4);
@@ -160,6 +181,9 @@ namespace bEmu.Core.CPUs.LR35902
 
         private void Srl(Register register)
         {
+            if (register == Register.HL)
+                IncreaseCycles(8);
+
             byte value = GetByteFromRegister(register);
             State.Flags.Carry = (value & 0x1) == 1;
             SetByteToRegister(register, (byte) (value >> 1));
@@ -168,7 +192,7 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.Subtract = false;
             State.Flags.HalfCarry = false;
 
-            IncreaseCycles(4);
+            IncreaseCycles(8);
         }
 
         private void Jp(ushort addr)
@@ -241,7 +265,7 @@ namespace bEmu.Core.CPUs.LR35902
             State.A = (byte) result;
             State.Flags.Subtract = true;
             State.Flags.Zero = CheckZero(State.A);
-            IncreaseCycles(7);   
+            IncreaseCycles(8);   
         }
 
         private void Xor()
@@ -263,12 +287,13 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.Zero = CheckZero(result);
             State.Flags.Subtract = true;
             State.Flags.HalfCarry = CheckHalfCarry(State.A, value, result);
-            IncreaseCycles(7);
+            IncreaseCycles(8);
         }
 
         private void Ei()
         {
             State.EnableInterrupts = true;
+            IncreaseCycles(4);
         }
 
         private void RetZ()
@@ -290,7 +315,6 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.Zero = false;
             State.Flags.Subtract = false;
             State.Flags.Carry = (((sp ^ value ^ State.SP) & 0x100) == 0x100); 
-            //State.Flags.HalfCarry = (((sp ^ value ^ State.SP) & 0x10) == 0x10); 
             State.Flags.HalfCarry = CheckHalfCarry(sp, (ushort) value, State.SP);
             
             IncreaseCycles(16);
@@ -305,7 +329,6 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.Zero = false;
             State.Flags.Subtract = false;
             State.Flags.Carry = (((sp ^ value ^ State.HL) & 0x100) == 0x100); 
-            //State.Flags.HalfCarry = (((sp ^ value ^ State.HL) & 0x10) == 0x10); 
             State.Flags.HalfCarry = CheckHalfCarry(sp, (ushort) value, State.HL);
 
             IncreaseCycles(12);
@@ -326,7 +349,7 @@ namespace bEmu.Core.CPUs.LR35902
         private void Jp_HL()
         {
             Jp(State.HL);
-            IncreaseCycles(6);
+            IncreaseCycles(4);
         }
 
         private void Ld_SPHL()
@@ -685,7 +708,7 @@ namespace bEmu.Core.CPUs.LR35902
                 case Register.E: State.E = value; break;
                 case Register.H: State.H = value; break;
                 case Register.L: State.L = value; break;
-                case Register.HL: WriteByteToMemory(State.HL, value); IncreaseCycles(2); break;
+                case Register.HL: WriteByteToMemory(State.HL, value); break;
             }
 
             IncreaseCycles(4);
@@ -813,24 +836,28 @@ namespace bEmu.Core.CPUs.LR35902
 
         private void Daa()
         {
-            bool carry = State.Flags.Carry;
-            byte correction = 0;
+            if (!State.Flags.Subtract) 
+            {
+                if (State.Flags.Carry || State.A > 0x99) 
+                { 
+                    State.A += 0x60; 
+                    State.Flags.Carry = true; 
+                }
 
-            byte lsb = (byte) (State.A & 0x0F);
-            byte msb = (byte) (State.A >> 4);
+                if (State.Flags.HalfCarry || (State.A & 0x0F) > 0x09) 
+                    State.A += 0x6; 
+            } 
+            else 
+            {
+                if (State.Flags.Carry) 
+                    State.A -= 0x60; 
 
-            if (State.Flags.HalfCarry || lsb > 9) {
-                correction += 0x06;
+                if (State.Flags.HalfCarry) 
+                    State.A -= 0x6; 
             }
-            if (State.Flags.Carry || msb > 9 || (msb >= 9 && lsb > 9)) {
-                correction += 0x60;
-                carry = true;
-            }
 
-            State.A += correction;
             State.Flags.Zero = CheckZero(State.A);
             State.Flags.HalfCarry = false;
-            State.Flags.Carry = carry;
 
             IncreaseCycles(4);
         }
@@ -1085,13 +1112,11 @@ namespace bEmu.Core.CPUs.LR35902
         private void JrNC()
         {
             ConditionalJr(!State.Flags.Carry);
-            IncreaseCycles(8);
         }
 
         private void JrNZ()
         {
             ConditionalJr(!State.Flags.Zero);
-            IncreaseCycles(8);
         }
 
         private void ConditionalJmp(bool condition)
@@ -1099,9 +1124,10 @@ namespace bEmu.Core.CPUs.LR35902
             if (condition)
                 Jp();
             else
+            {
                 GetNextWord();
-
-            IncreaseCycles(4);
+                IncreaseCycles(12);
+            }            
         }
 
         private void Nop()
@@ -1112,6 +1138,7 @@ namespace bEmu.Core.CPUs.LR35902
         private void Stop()
         {
             GetNextByte();
+            IncreaseCycles(4);
             State.Halted = true;
         }
     }

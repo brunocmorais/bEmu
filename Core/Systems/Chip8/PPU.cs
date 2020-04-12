@@ -6,34 +6,13 @@ namespace bEmu.Core.Systems.Chip8
 {
     public class PPU : Core.PPU
     {
-        private readonly Pixel[,] gfx;
-
-        public PPU(System system, int width, int height) : base(system, width, height) 
-        { 
-            gfx = new Pixel[width, height];
-        }
+        public PPU(System system, int width, int height) : base(system, width, height) { }
 
         public State State => System.State as State;
 
         void DrawNextTime()
         {
             State.Draw = true;
-        }
-
-        bool IsPixelOn(Pixel pixel)
-        {
-            return (pixel.R + pixel.G + pixel.B == 765);
-        }
-
-        public override Pixel this[int x, int y]
-        {
-            get
-            {
-                if (x < 0 || y < 0 || x > Width || y > Height)
-                    throw new Exception("Tentativa de obter coordenada de vídeo fora do intervalo válido.");
-
-                return gfx[x, y];
-            }
         }
 
         public void ScrollRight()
@@ -43,9 +22,9 @@ namespace bEmu.Core.Systems.Chip8
                 for (int j = Height - 1; j >= 0; j--)
                 {
                     if ((i - 4) < 0)
-                        gfx[i, j] = Pixel.Black;
+                        SetPixel(i, j, 0x000000FF);
                     else
-                        gfx[i, j] = this[i - 4, j];
+                        SetPixel(i, j, GetPixel(i - 4, j));
                 }
             }
 
@@ -59,9 +38,9 @@ namespace bEmu.Core.Systems.Chip8
                 for (int j = 0; j < Height; j++)
                 {
                     if ((i + 4) > Width)
-                        gfx[i, j] = Pixel.Black;
+                        SetPixel(i, j, 0x000000FF);
                     else
-                        gfx[i, j] = this[i + 4, j];
+                        SetPixel(i, j, GetPixel(i + 4, j));
                 }   
             }
 
@@ -75,9 +54,9 @@ namespace bEmu.Core.Systems.Chip8
                 for (int j = Height - 1; j >= 0; j--)
                 {
                     if ((j - nibble) < 0)
-                        gfx[i, j] = Pixel.Black;
+                        SetPixel(i, j, 0x000000FF);
                     else
-                        gfx[i, j] = this[i, j - nibble];
+                        SetPixel(i, j, GetPixel(i, j - nibble));
                 }   
             }
 
@@ -91,9 +70,9 @@ namespace bEmu.Core.Systems.Chip8
                 for (int j = 0; j < Height; j++)
                 {
                     if ((j + nibble) > Width)
-                        gfx[i, j] = Pixel.Black;
+                        SetPixel(i, j, 0x000000FF);
                     else
-                        gfx[i, j] = this[i, j + nibble];
+                        SetPixel(i, j, GetPixel(i, j + nibble));
                 }   
             }
 
@@ -123,7 +102,7 @@ namespace bEmu.Core.Systems.Chip8
 
                 for (int j = 0; j < 8; j++)
                 {
-                    bool pixel = IsPixelOn(this[(coordX + j) % Width, coordY]);
+                    bool pixel = GetPixel((coordX + j) % Width, coordY) == 0xFFFFFFFF;
                     originalSprite |= (byte) ((pixel ? 1 : 0) << (7 - j));
                 }
                 
@@ -135,7 +114,7 @@ namespace bEmu.Core.Systems.Chip8
                 for (int j = 7; j >= 0; j--)
                 {
                     bool pixel = ((resultSprite & (0x1 << j)) >> j) == 1; 
-                    gfx[(byte) ((coordX + (7 - j)) % Width), coordY] = pixel ? Pixel.White : Pixel.Black;
+                    SetPixel((byte) ((coordX + (7 - j)) % Width), coordY, pixel ? 0xFFFFFFFF : 0x000000FF);
                 }
 
                 coordY++;
@@ -163,7 +142,7 @@ namespace bEmu.Core.Systems.Chip8
 
                 for (int j = 0; j < 16; j++)
                 {
-                    bool pixel = IsPixelOn(this[(coordX + j) % Width, coordY]);
+                    bool pixel = GetPixel((coordX + j) % Width, coordY) == 0xFFFFFFFF;
                     originalSprite |= (ushort) ((pixel ? 1 : 0) << (15 - j));
                 }
                 
@@ -175,7 +154,7 @@ namespace bEmu.Core.Systems.Chip8
                 for (int j = 15; j >= 0; j--)
                 {
                     bool pixel = ((resultSprite & (0x1 << j)) >> j) == 1; 
-                    gfx[(byte) ((coordX + (15 - j)) % Width), coordY] = pixel ? Pixel.White : Pixel.Black;
+                    SetPixel((byte) ((coordX + (15 - j)) % Width), coordY, pixel ? 0xFFFFFFFF : 0x000000FF);
                 }
 
                 coordY++;
@@ -190,7 +169,7 @@ namespace bEmu.Core.Systems.Chip8
         {
             for (int i = 0; i < Width; i++)
                 for (int j = 0; j < Height; j++)
-                    gfx[i, j] = Pixel.Black;
+                    SetPixel(i, j, 0x000000FF);
 
             State.Draw = true;
         }

@@ -51,7 +51,7 @@ namespace bEmu
 		{
             GraphicsDevice.Clear(Color.Black);
             spriteBatch.Begin ();
-            spriteBatch.Draw(backdrop, new Rectangle(0, 0, width, height), backdropColor);
+            spriteBatch.Draw(backdrop, new Rectangle(0, 0, width * tamanhoPixel, height * tamanhoPixel), backdropColor);
             spriteBatch.End ();
 
             base.Draw(gameTime);

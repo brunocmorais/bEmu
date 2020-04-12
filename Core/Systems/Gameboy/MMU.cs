@@ -1,38 +1,36 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace bEmu.Core.Systems.Gameboy
 {
     public class MMU : IMMU
     {
-        byte[] rom0 = InitializeRAMPart(16384);
-        byte[] romX = InitializeRAMPart(16384);
         byte[] vram = InitializeRAMPart(8192);
-        byte[] cartRam = InitializeRAMPart(8192);
         byte[] wram = InitializeRAMPart(8192);
         byte[] oam = InitializeRAMPart(160);
         byte[] io = InitializeRAMPart(128);
         byte[] zp = InitializeRAMPart(128);
         State state => (System.State as bEmu.Core.Systems.Gameboy.State);
+        IMBC mbc;
+        public BIOS Bios { get; }
 
         public int Length => 0x10000;
-        public char? Debug { get; private set; }
         public ISystem System { get; }
+        public CartridgeHeader CartridgeHeader { get; private set; }
 
         public MMU(ISystem system)
         {
             System = system;
+            Bios = new BIOS();
         }
 
         private static byte[] InitializeRAMPart(int size)
         {
             Random random = new Random();
             byte[] ramPart = new byte[size];
-
-            // for (int i = 0; i < ramPart.Length; i++)
-            //     ramPart[i] = (byte) random.Next(0x100);
 
             return ramPart;
         }
@@ -41,14 +39,14 @@ namespace bEmu.Core.Systems.Gameboy
         { 
             get
             {
-                if (addr >= 0x0000 && addr <= 0x3FFF)
-                    return rom0[addr - 0x0000];
-                if (addr >= 0x4000 && addr <= 0x7FFF)
-                    return romX[addr - 0x4000];
+                if (Bios.Running && addr < 0x100)
+                    return Bios[(byte) addr];
+                if (addr >= 0x0000 && addr <= 0x7FFF)
+                    return mbc.ReadROM((ushort) addr);
                 if (addr >= 0x8000 && addr <= 0x9FFF)
                     return vram[addr - 0x8000];
                 if (addr >= 0xA000 && addr <= 0xBFFF)
-                    return cartRam[addr - 0xA000];
+                    return mbc.ReadCartRAM((ushort) (addr - 0xA000));
                 if (addr >= 0xC000 && addr <= 0xDFFF)
                     return wram[addr - 0xC000];
                 if (addr >= 0xE000 && addr <= 0xFDFF)
@@ -69,12 +67,12 @@ namespace bEmu.Core.Systems.Gameboy
             }
             set
             {
-                Debug = null;
-
+                if (addr >= 0x0000 && addr <= 0x7FFF)
+                    mbc.SetMode((ushort) addr, value);
                 if (addr >= 0x8000 && addr <= 0x9FFF)
                     vram[addr - 0x8000] = value;
                 if (addr >= 0xA000 && addr <= 0xBFFF)
-                    cartRam[addr - 0xA000] = value;
+                    mbc.WriteCartRAM((ushort) (addr - 0xA000), value);
                 if (addr >= 0xC000 && addr <= 0xDFFF)
                     wram[addr - 0xC000] = value;
                 if (addr >= 0xE000 && addr <= 0xFDFF)
@@ -85,27 +83,32 @@ namespace bEmu.Core.Systems.Gameboy
                 {
                     if (addr == 0xFF00) // joypad
                         state.Joypad.SetJoypadColumn(value);
-
-                    if (addr == 0xFF02 && value == 0x0081)
-                        Debug = (char) this[0xFF01];
-
-                    if (addr == 0xFF04) // DIV timer
+                    else if (addr == 0xFF04) // DIV timer
                         io[addr - 0xFF00] = 0;
-
-                    if (addr == 0xFF46) // OAM DMA
+                    else if (addr == 0xFF46) // OAM DMA
                     {
                         ushort oamStartAddress = (ushort) (value << 8);
 
                         for (int i = 0; i < 0x9F; i++)
                             oam[i] = this[oamStartAddress + i];
                     }
-
-                    io[addr - 0xFF00] = value;
+                    else
+                        io[addr - 0xFF00] = value;
                 }
                 if (addr >= 0xFF80 && addr <= 0xFFFF)
                     zp[addr - 0xFF80] = value;
             }
         }
+
+        public void InitTimer()
+        {
+            io[4] = 171;
+        }
+
+        // public void UpdateLY(int value)
+        // {
+        //     io[0x44] = (byte) value;
+        // }
 
         public void LoadProgram(string fileName, int startAddress = 0)
         {
@@ -115,31 +118,9 @@ namespace bEmu.Core.Systems.Gameboy
 
         public void LoadProgram(byte[] bytes, int startAddress = 0)
         {
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                if (i < 16384)
-                    rom0[i] = bytes[i];
-                else
-                    romX[i - 16384] = bytes[i];
-            }
-        }
-
-        public string Title
-        {
-            get
-            {
-                var sb = new StringBuilder();
-                
-                for (int i = 0x134; i < 0x143; i++)
-                {
-                    if (this[i] == 0)
-                        break;
-
-                    sb.Append((char) this[i]);
-                }
-
-                return sb.ToString();
-            }
+            CartridgeHeader = new CartridgeHeader(bytes);
+            mbc = MBCFactory.GetMBC(CartridgeHeader.CartridgeType);
+            mbc.LoadProgram(bytes);
         }
     }
 }

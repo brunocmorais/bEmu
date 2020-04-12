@@ -35,5 +35,22 @@ namespace Tests
                 opcode = system.Runner.StepCycle();
             }
         }
+
+        [TestMethod]
+        public void Daa()
+        {
+            var system = new bEmu.Core.Systems.Gameboy.System();
+            var state = (system.State as bEmu.Core.Systems.Gameboy.State);
+            var fakeRom = new byte[32768];
+            fakeRom[0x100] = 0x27;
+
+            system.MMU.LoadProgram(fakeRom);
+            state.F = 0b01010000;
+            state.A = 0x00;
+            
+            system.Runner.StepCycle();
+
+            Assert.AreEqual(state.A, 0xA0);
+        }
     }
 }

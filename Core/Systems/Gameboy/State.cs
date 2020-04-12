@@ -15,7 +15,7 @@ namespace bEmu.Core.Systems.Gameboy
             System = system;
             LCD = new LCD(System.MMU as MMU);
             Joypad = new Joypad();
-            Timer = new Timer(System.MMU as MMU);
+            Timer = new Timer(System);
         }
 
         public Joypad Joypad { get; set; }
