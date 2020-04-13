@@ -31,12 +31,13 @@ namespace bEmu
         {
             Keys.D0, Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6, Keys.D7, Keys.D8, Keys.D9
         };
-        private int lastRenderedFrame;
+        int lastRenderedFrame;
         Thread thread;
-        private bool debug;
+        bool debug;
         SpriteFont font;
         Texture2D backBuffer;
-        Rectangle destinationRectangle = new Rectangle(0, 0, width * tamanhoPixel, height * tamanhoPixel);
+        Rectangle destinationRectangle;
+        bool showFPS = false;
 
         public GameboyGame(string rom)
         {
@@ -67,6 +68,7 @@ namespace bEmu
             spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("Common/Font");
             backBuffer = new Texture2D(GraphicsDevice, 160, 144);
+            destinationRectangle = new Rectangle(0, 0, width * tamanhoPixel, height * tamanhoPixel);
 
             running = true;
 
@@ -74,15 +76,6 @@ namespace bEmu
             {
                 while (running)
                 {
-                    // if (State.PC == 0xC000)
-                    //     Debugger.Break();
-
-                    // if (debug)
-                    //     Debug.WriteLine(State);
-
-                    // if (State.PC == 0xC304)
-                    //     Debugger.Break();
-
                     UpdateGame();
                     Gpu.StepCycle();
                 }
@@ -104,6 +97,9 @@ namespace bEmu
                 Initialize();
             }
 
+            if (keyboardState.IsKeyDown(Keys.F2))
+                showFPS = !showFPS;
+
             if (frameskipKeys.Any(x => keyboardState.IsKeyDown(x)))
                 Gpu.Frameskip = (int) frameskipKeys.First(x => keyboardState.IsKeyDown(x)) - 48;
 
@@ -114,15 +110,19 @@ namespace bEmu
         {
             GraphicsDevice.Clear(Color.White);
 
-            // if (Gpu.Frame > lastRenderedFrame)
+            if (Gpu.Frame > lastRenderedFrame)
                 backBuffer.SetData(Gpu.FrameBuffer);
 
             lastRenderedFrame = Gpu.Frame;
             spriteBatch.Begin();
             spriteBatch.Draw(backBuffer, destinationRectangle, Color.White);
-            double fps = Math.Round(Gpu.Frame / gameTime.TotalGameTime.TotalSeconds, 1);
-            spriteBatch.DrawString(font, $"{Gpu.Frame}@{fps} fps\ninst={State.Instructions}", new Vector2(0, 0), Color.Red);
 
+            if (showFPS)
+            {
+                double fps = Math.Round(Gpu.Frame / gameTime.TotalGameTime.TotalSeconds, 1);
+                spriteBatch.DrawString(font, $"{Gpu.Frame}@{fps} fps\ninst={State.Instructions}", new Vector2(0, 0), Color.Red);
+            }
+            
             spriteBatch.End();
         }
 

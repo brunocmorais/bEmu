@@ -4,12 +4,12 @@ namespace bEmu.Core.Systems.Gameboy
 {
     public class OAM
     {
-        public ISystem System { get; }
+        public MMU MMU { get; }
         public Sprite[] Sprites = new Sprite[40];
 
-        public OAM(ISystem system)
+        public OAM(MMU mmu)
         {
-            System = system;
+            MMU = mmu;
         }
 
         public void UpdateSprites()
@@ -51,10 +51,10 @@ namespace bEmu.Core.Systems.Gameboy
             index *= 4;
 
             return new Sprite(
-                System.MMU[0xFE00 + index + 1] - 8,
-                System.MMU[0xFE00 + index + 0] - 16,
-                System.MMU[0xFE00 + index + 2],
-                System.MMU[0xFE00 + index + 3]);
+                MMU.OAM[index + 1] - 8,
+                MMU.OAM[index + 0] - 16,
+                MMU.OAM[index + 2],
+                MMU.OAM[index + 3]);
         }
     }
 

@@ -13,48 +13,48 @@ namespace bEmu.Core.Systems.Gameboy
 
         public byte LCDC
         {
-            get { return mmu[0xFF40]; }
-            set { mmu[0xFF40] = value; }
+            get { return mmu.IO[0x40]; }
+            set { mmu.IO[0x40] = value; }
         }
 
         public byte STAT
         {
-            get { return mmu[0xFF41]; }
-            set { mmu[0xFF41] = value; }
+            get { return mmu.IO[0x41]; }
+            set { mmu.IO[0x41] = value; }
         }
 
         public byte SCY
         {
-            get { return mmu[0xFF42]; }
-            set { mmu[0xFF42] = value; }
+            get { return mmu.IO[0x42]; }
+            set { mmu.IO[0x42] = value; }
         }
 
         public byte SCX
         {
-            get { return mmu[0xFF43]; }
-            set { mmu[0xFF43] = value; }
+            get { return mmu.IO[0x43]; }
+            set { mmu.IO[0x43] = value; }
         }
 
         public byte LY
         {
-            get { return mmu[0xFF44]; }
-            set { mmu[0xFF44] = value; }
+            get { return mmu.IO[0x44]; }
+            set { mmu.IO[0x44] = value; }
         }
 
         public byte LYC
         {
-            get { return mmu[0xFF45]; }
-            set { mmu[0xFF45] = value; }
+            get { return mmu.IO[0x45]; }
+            set { mmu.IO[0x45] = value; }
         }
 
-        public byte BGP => mmu[0xFF47];
-        public byte OBP0 => mmu[0xFF48];
-        public byte OBP1 => mmu[0xFF49];
+        public byte BGP => mmu.IO[0x47];
+        public byte OBP0 => mmu.IO[0x48];
+        public byte OBP1 => mmu.IO[0x49];
 
         public bool GetLCDCFlag(LCDC option)
         {
-            int option1 = (int)option;
-            return ((LCDC & (0x1 << option1)) >> option1) == 1;
+            int op = (0x1 << (int) option);
+            return (LCDC & op) == op;
         }
 
         public int GetSTATFlag(STAT option)
@@ -62,9 +62,9 @@ namespace bEmu.Core.Systems.Gameboy
             int op = (int) option;
 
             if (op < 1)
-                return STAT & 0x4;
+                return STAT & 0x3;
 
-            return ((STAT & (0x1 << (int)option)) >> (int) option);
+            return (STAT & (0x1 << op)) >> op;
         }
 
         public void SetSTATFlag(STAT option, bool value)
@@ -101,28 +101,5 @@ namespace bEmu.Core.Systems.Gameboy
             else
                 LCDC |= mask;
         }
-    }
-
-    public enum STAT
-    {
-        ModeFlag = 0,
-        CoincidenceFlag = 2,
-        Mode0HBlankInterrupt = 3,
-        Mode1VBlankInterrupt = 4,
-        Mode2OAMInterrupt = 5,
-        LYCoincidenceInterrupt = 6
-
-    }
-
-    public enum LCDC
-    {
-        BGDisplay = 0,
-        SpriteDisplayEnable = 1,
-        SpriteSize = 2,
-        BGTileMapDisplaySelect = 3,
-        BGWindowTileDataSelect = 4,
-        WindowDisplayEnable = 5,
-        WindowTileMapDisplaySelect = 6,
-        LCDDisplayEnable = 7
     }
 }

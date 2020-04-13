@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using bEmu.Core;
@@ -171,9 +172,10 @@ namespace bEmu.Core.CPUs.LR35902
                 IncreaseCycles(4);
                 return default(Opcode);
             }
+            else
+                HandleInterrupts();
 
             var opcode = new Opcode(GetNextByte());
-
             State.Instructions++;
 
             switch (opcode.Byte)
@@ -435,8 +437,6 @@ namespace bEmu.Core.CPUs.LR35902
                 case 0xEF: Rst(0x28); break;
                 case 0xFF: Rst(0x38); break;
             }
-
-            HandleInterrupts();
 
             return opcode;
         }

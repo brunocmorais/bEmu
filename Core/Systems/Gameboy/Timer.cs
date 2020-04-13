@@ -7,35 +7,36 @@ namespace bEmu.Core.Systems.Gameboy
         private readonly ISystem system;
         int cycles = 0;
         int cyclesDivider = 0;
+        bEmu.Core.Systems.Gameboy.MMU Mmu => (system.MMU as bEmu.Core.Systems.Gameboy.MMU);
+        State State => (system.State as bEmu.Core.Systems.Gameboy.State);
 
         public Timer(ISystem system)
         {
             this.system = system;
-            (system.MMU as bEmu.Core.Systems.Gameboy.MMU).InitTimer();
         }
 
         public byte DIV 
         {
-            get { return system.MMU[0xFF04];}
-            set { system.MMU[0xFF04] = value; }
+            get { return Mmu.IO[0x04];}
+            set { Mmu.IO[0x04] = value; }
         }
 
         public byte TIMA
         {
-            get { return system.MMU[0xFF05]; }
-            set { system.MMU[0xFF05] = value; }
+            get { return Mmu.IO[0x05]; }
+            set { Mmu.IO[0x05] = value; }
         }
 
         public byte TMA
         {
-            get { return system.MMU[0xFF06]; }
-            set { system.MMU[0xFF06] = value; }
+            get { return Mmu.IO[0x06]; }
+            set { Mmu.IO[0x06] = value; }
         }
 
         public byte TAC
         {
-            get { return system.MMU[0xFF07]; }
-            set { system.MMU[0xFF07] = value; }
+            get { return Mmu.IO[0x07]; }
+            set { Mmu.IO[0x07] = value; }
         }
 
         public bool Enabled => (TAC & 0x4) == 0x4;
@@ -50,7 +51,7 @@ namespace bEmu.Core.Systems.Gameboy
                     case 1:  return 16;
                     case 2:  return 64;
                     case 3:  return 256;
-                    default: return 0x00;
+                    default: return 0;
                 }
             }
         }
@@ -73,7 +74,7 @@ namespace bEmu.Core.Systems.Gameboy
                 {
                     if (TIMA == 0xFF)
                     {
-                        (system.State as bEmu.Core.Systems.Gameboy.State).RequestInterrupt(InterruptType.Timer);
+                        State.RequestInterrupt(InterruptType.Timer);
                         TIMA = TMA;
                     }
                     else

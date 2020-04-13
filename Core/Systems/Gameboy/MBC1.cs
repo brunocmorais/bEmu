@@ -27,7 +27,7 @@ namespace bEmu.Core.Systems
                 RAMBanks.Add(new byte[8192]);
         }
 
-        public void SetMode(ushort addr, byte value)
+        public void SetMode(int addr, byte value)
         {
             if (addr >= 0x0000 && addr <= 0x1FFF)
                 RAMG = value;
@@ -44,7 +44,7 @@ namespace bEmu.Core.Systems
                 Mode = value & 0x1;
         }
 
-        public byte ReadROM(ushort addr)
+        public byte ReadROM(int addr)
         {
             if (addr >= 0x0000 && addr <= 0x3FFF)
             {
@@ -82,13 +82,13 @@ namespace bEmu.Core.Systems
             }
         }
 
-        public void WriteCartRAM(ushort addr, byte value)
+        public void WriteCartRAM(int addr, byte value)
         {
             if ((RAMG & 0x0F) == 0x0A)
                 cartRAM[addr] = value;
         }
 
-        public byte ReadCartRAM(ushort addr)
+        public byte ReadCartRAM(int addr)
         {
             if ((RAMG & 0x0F) == 0x0A)
                 return cartRAM[addr];

@@ -28,6 +28,6 @@ namespace bEmu.Core.Systems.Gameboy
             Running = true;
         }
 
-        public byte this[byte index] => bios[index];
+        public byte this[int index] => bios[index];
     }
 }
