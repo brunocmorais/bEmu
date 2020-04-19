@@ -47,6 +47,18 @@ namespace bEmu.Core.Systems.Gameboy
             set { mmu.IO[0x45] = value; }
         }
 
+        public byte WY
+        {
+            get { return mmu.IO[0x4A]; }
+            set { mmu.IO[0x4A] = value; }
+        }
+
+        public byte WX
+        {
+            get { return mmu.IO[0x4B]; }
+            set { mmu.IO[0x4B] = value; }
+        }
+
         public byte BGP => mmu.IO[0x47];
         public byte OBP0 => mmu.IO[0x48];
         public byte OBP1 => mmu.IO[0x49];
@@ -85,8 +97,7 @@ namespace bEmu.Core.Systems.Gameboy
 
         public void SetSTATMode(int number)
         {
-            byte value = (byte) (number | 0xFC);
-            STAT &= value;
+            STAT = (byte) ((STAT & 0xFC) | number);
         }
 
         public void SetLCDCFlag(LCDC option, bool value)

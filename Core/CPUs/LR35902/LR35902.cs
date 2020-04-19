@@ -150,8 +150,8 @@ namespace bEmu.Core.CPUs.LR35902
                     if ((state.IE & mask) == mask && ((state.IF & mask) == mask))
                     {
                         state.Halted = false;
-                        
-                        if (!state.EnableInterrupts)
+
+                        if (!State.EnableInterrupts)
                             return;
 
                         PushStack(state.PC);
@@ -443,10 +443,7 @@ namespace bEmu.Core.CPUs.LR35902
 
         public void Cb()
         {
-            IncreaseCycles(4);
-            var cbOpcode = new Opcode(GetNextByte());
-
-            switch (cbOpcode.Byte)
+            switch (GetNextByte())
             {
                 case 0x00: Rlc(Register.B); break;
                 case 0x01: Rlc(Register.C); break;

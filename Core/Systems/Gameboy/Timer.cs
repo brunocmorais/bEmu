@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using bEmu.Core.CPUs.LR35902;
 
 namespace bEmu.Core.Systems.Gameboy
@@ -51,7 +53,7 @@ namespace bEmu.Core.Systems.Gameboy
                     case 1:  return 16;
                     case 2:  return 64;
                     case 3:  return 256;
-                    default: return 0;
+                    default: throw new Exception();
                 }
             }
         }
@@ -63,14 +65,14 @@ namespace bEmu.Core.Systems.Gameboy
             if (cyclesDivider >= 256)
             {
                 DIV++;
-                cyclesDivider = 0;
+                cyclesDivider -= 256;
             }
 
             if (Enabled)
             {
                 cycles += lastCycleCount;
 
-                if (cycles >= Step)
+                while (cycles >= Step)
                 {
                     if (TIMA == 0xFF)
                     {
@@ -78,10 +80,9 @@ namespace bEmu.Core.Systems.Gameboy
                         TIMA = TMA;
                     }
                     else
-                    {
                         TIMA++;
-                        cycles = 0;
-                    }
+
+                    cycles -= Step;
                 }
             }
         }

@@ -41,14 +41,15 @@
             //04-op r,imm.gb = Passed
             //05-op rp.gb = Passed
             //06-ld r,r.gb = Passed
-            //07-jr,jp,call,ret,rst.gb
+            //07-jr,jp,call,ret,rst.gb = Passed
             //08-misc instrs.gb = Passed
             //09-op r,r.gb = Passed
             //10-bit ops.gb = Passed
             //11-op a,(hl).gb = Passed
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bEmu/bin/Debug/netcoreapp3.0/bEmu.dll",
-            "args": ["Gameboy", "${workspaceFolder}/Tests/test_roms/gb/bgbtest.gb"],
+            //"args": ["Gameboy", "${workspaceFolder}/Tests/test_roms/gb/emulator-only/mbc5/rom_64Mb.gb"],
+            "args": ["Gameboy", "${workspaceFolder}/Tests/test_roms/gb/tetrisdx.gbc"],
             "cwd": "${workspaceFolder}/bEmu",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "integratedTerminal",

@@ -7,5 +7,6 @@ namespace bEmu.Core.Systems
         byte ReadROM(int addr);
         void SetMode(int addr, byte value);
         void WriteCartRAM(int addr, byte value);
+        void Tick(int lastCycleCount);
     }
 }

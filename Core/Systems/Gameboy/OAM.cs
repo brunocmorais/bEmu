@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace bEmu.Core.Systems.Gameboy
 {
@@ -22,7 +23,7 @@ namespace bEmu.Core.Systems.Gameboy
         {
             int counter = 0;
 
-            foreach (var sprite in Sprites)
+            foreach (var sprite in Sprites.OrderByDescending(sprite => sprite.X))
             {
                 if (counter == 10) // limite de 10 sprites por linha
                     yield break;

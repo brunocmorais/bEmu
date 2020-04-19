@@ -69,6 +69,7 @@ namespace bEmu
             font = Content.Load<SpriteFont>("Common/Font");
             backBuffer = new Texture2D(GraphicsDevice, 160, 144);
             destinationRectangle = new Rectangle(0, 0, width * tamanhoPixel, height * tamanhoPixel);
+            Gpu.Frameskip = 2;
 
             running = true;
 
@@ -101,15 +102,13 @@ namespace bEmu
                 showFPS = !showFPS;
 
             if (frameskipKeys.Any(x => keyboardState.IsKeyDown(x)))
-                Gpu.Frameskip = (int) frameskipKeys.First(x => keyboardState.IsKeyDown(x)) - 48;
+                Gpu.Frameskip = (int) (frameskipKeys.First(x => keyboardState.IsKeyDown(x))) - 48;
 
             UpdateKeys(keyboardState);
         }
 
         protected override void Draw (GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.White);
-
             if (Gpu.Frame > lastRenderedFrame)
                 backBuffer.SetData(Gpu.FrameBuffer);
 
@@ -138,6 +137,7 @@ namespace bEmu
             int lastCycleCount = (afterCycles - prevCycles);
             Gpu.Cycles += lastCycleCount;
             State.Timer.UpdateTimers(lastCycleCount);
+            Mmu.MBC.Tick(lastCycleCount);
         }
 
         public void UpdateKeys(KeyboardState keyboardState)

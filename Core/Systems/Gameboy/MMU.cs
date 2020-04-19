@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using bEmu.Core.Systems.Gameboy.MBCs;
 
 namespace bEmu.Core.Systems.Gameboy
 {
@@ -14,7 +15,7 @@ namespace bEmu.Core.Systems.Gameboy
         public byte[] OAM { get; } = InitializeRAMPart(160);
         byte[] zp = InitializeRAMPart(128);
         State state => (System.State as bEmu.Core.Systems.Gameboy.State);
-        IMBC mbc;
+        public IMBC MBC { get; private set; }
         public BIOS Bios { get; }
         public int Length => 0x10000;
         public ISystem System { get; }
@@ -38,11 +39,11 @@ namespace bEmu.Core.Systems.Gameboy
                 if (Bios.Running && addr < 0x100)
                     return Bios[addr];
                 else if (addr >= 0x0000 && addr <= 0x7FFF)
-                    return mbc.ReadROM(addr);
+                    return MBC.ReadROM(addr);
                 else if (addr >= 0x8000 && addr <= 0x9FFF)
                     return VRAM[addr - 0x8000];
                 else if (addr >= 0xA000 && addr <= 0xBFFF)
-                    return mbc.ReadCartRAM((addr - 0xA000));
+                    return MBC.ReadCartRAM((addr - 0xA000));
                 else if (addr >= 0xC000 && addr <= 0xDFFF)
                     return wram[addr - 0xC000];
                 else if (addr >= 0xE000 && addr <= 0xFDFF)
@@ -64,11 +65,11 @@ namespace bEmu.Core.Systems.Gameboy
             set
             {
                 if (addr >= 0x0000 && addr <= 0x7FFF)
-                    mbc.SetMode(addr, value);
+                    MBC.SetMode(addr, value);
                 else if (addr >= 0x8000 && addr <= 0x9FFF)
                     VRAM[addr - 0x8000] = value;
                 else if (addr >= 0xA000 && addr <= 0xBFFF)
-                    mbc.WriteCartRAM((addr - 0xA000), value);
+                    MBC.WriteCartRAM((addr - 0xA000), value);
                 else if (addr >= 0xC000 && addr <= 0xDFFF)
                     wram[addr - 0xC000] = value;
                 else if (addr >= 0xE000 && addr <= 0xFDFF)
@@ -107,8 +108,8 @@ namespace bEmu.Core.Systems.Gameboy
         public void LoadProgram(byte[] bytes, int startAddress = 0)
         {
             CartridgeHeader = new CartridgeHeader(bytes);
-            mbc = MBCFactory.GetMBC(CartridgeHeader.CartridgeType);
-            mbc.LoadProgram(bytes);
+            MBC = MBCFactory.GetMBC(CartridgeHeader.CartridgeType);
+            MBC.LoadProgram(bytes);
         }
     }
 }

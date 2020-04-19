@@ -2,7 +2,7 @@ namespace bEmu.Core.Systems.Gameboy
 {
     public enum LCDC
     {
-        BGDisplay = 0,
+        BGDisplayEnable = 0,
         SpriteDisplayEnable = 1,
         SpriteSize = 2,
         BGTileMapDisplaySelect = 3,

@@ -459,7 +459,7 @@ namespace bEmu.Core.CPUs.LR35902
 
         private void JpNC()
         {
-            ConditionalJr(!State.Flags.Carry);
+            ConditionalJmp(!State.Flags.Carry);
         }
 
         private void Ld_C_A()
@@ -520,15 +520,13 @@ namespace bEmu.Core.CPUs.LR35902
 
         private void Ldh_A_a8()
         {
-            byte value = GetNextByte();
-            State.A = MMU[0xFF00 + value];
+            State.A = MMU[0xFF00 | GetNextByte()];
             IncreaseCycles(12);
         }
 
         private void Ldh_a8_A()
         {
-            byte value = GetNextByte();
-            MMU[0xFF00 + value] = State.A;
+            MMU[0xFF00 | GetNextByte()] = State.A;
             IncreaseCycles(12);
         }
 
@@ -1137,9 +1135,12 @@ namespace bEmu.Core.CPUs.LR35902
 
         private void Stop()
         {
-            GetNextByte();
+            byte value = GetNextByte();
+
+            if (value != 0)
+                State.Halted = true;
+
             IncreaseCycles(4);
-            State.Halted = true;
         }
     }
 }

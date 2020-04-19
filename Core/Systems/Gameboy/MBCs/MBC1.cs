@@ -1,64 +1,64 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace bEmu.Core.Systems
+namespace bEmu.Core.Systems.MBCs
 {
 
     public class MBC1 : IMBC
     {
-        int Mode { get; set; }
-        int Bank1 { get; set; }
-        int Bank2 { get; set; }
-        IList<byte[]> ROMBanks { get; set; }
-        IList<byte[]> RAMBanks { get; set; }
-        byte[] ROM0 => ROMBanks[0];
-        byte[] cartRAM => Mode == 0 ? RAMBanks[0] : RAMBanks[Bank2];
-        byte RAMG { get; set; }
+        int mode;
+        int bank1;
+        int bank2;
+        IList<byte[]> romBanks;
+        IList<byte[]> ramBanks;
+        byte[] rom0 => romBanks[0];
+        byte[] cartRAM => mode == 0 ? ramBanks[0] : ramBanks[bank2];
+        byte ramg;
 
         public MBC1()
         {
-            ROMBanks = new List<byte[]>();
-            RAMBanks = new List<byte[]>();
-            Bank1 = 1;
-            Bank2 = 0;
-            Mode = 0;
+            romBanks = new List<byte[]>();
+            ramBanks = new List<byte[]>();
+            bank1 = 1;
+            bank2 = 0;
+            mode = 0;
 
             for (int i = 0; i < 4; i++)
-                RAMBanks.Add(new byte[8192]);
+                ramBanks.Add(new byte[8192]);
         }
 
         public void SetMode(int addr, byte value)
         {
             if (addr >= 0x0000 && addr <= 0x1FFF)
-                RAMG = value;
+                ramg = value;
             if (addr >= 0x2000 && addr <= 0x3FFF)
             {
                 if ((value & 0x1F) == 0x00)
-                    Bank1 = 0x01;
+                    bank1 = 0x01;
                 else
-                    Bank1 = value & 0x1F;
+                    bank1 = value & 0x1F;
             }
             if (addr >= 0x4000 && addr <= 0x5FFF)
-                Bank2 = value & 0x3;
+                bank2 = value & 0x3;
             if (addr >= 0x6000 && addr <= 0x7FFF)
-                Mode = value & 0x1;
+                mode = value & 0x1;
         }
 
         public byte ReadROM(int addr)
         {
             if (addr >= 0x0000 && addr <= 0x3FFF)
             {
-                if (Mode == 0)
-                    return ROM0[addr];
+                if (mode == 0)
+                    return rom0[addr];
                 else
-                    return ROMBanks[(Bank2 << 5) % ROMBanks.Count][addr];
+                    return romBanks[(bank2 << 5) % romBanks.Count][addr];
             }
             else if (addr >= 0x4000 && addr <= 0x7FFF)
             {
-                if (ROMBanks.Count >= 16)
-                    return ROMBanks[((Bank2 << 5) | Bank1) % ROMBanks.Count][addr - 0x4000];
+                if (romBanks.Count >= 16)
+                    return romBanks[((bank2 << 5) | bank1) % romBanks.Count][addr - 0x4000];
 
-                return ROMBanks[Bank1 % ROMBanks.Count][addr - 0x4000];
+                return romBanks[bank1 % romBanks.Count][addr - 0x4000];
             }
 
             return 0xFF;
@@ -73,27 +73,29 @@ namespace bEmu.Core.Systems
             {
                 if (counter % 16384 == 0)
                 {
-                    ROMBanks.Add(new byte[16384]);
+                    romBanks.Add(new byte[16384]);
                     bank++;
                 }
 
-                ROMBanks[bank][counter % 16384] = bytes[counter];
+                romBanks[bank][counter % 16384] = bytes[counter];
                 counter++;
             }
         }
 
         public void WriteCartRAM(int addr, byte value)
         {
-            if ((RAMG & 0x0F) == 0x0A)
+            if ((ramg & 0x0F) == 0x0A)
                 cartRAM[addr] = value;
         }
 
         public byte ReadCartRAM(int addr)
         {
-            if ((RAMG & 0x0F) == 0x0A)
+            if ((ramg & 0x0F) == 0x0A)
                 return cartRAM[addr];
 
             return 0xFF;
         }
+
+        public void Tick(int lastCycleCount) { }
     }
 }
