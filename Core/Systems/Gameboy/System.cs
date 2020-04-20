@@ -14,7 +14,7 @@ namespace bEmu.Core.Systems.Gameboy
             state.Cycles = 0;
             state.Halted = false;
             state.Instructions = 0;
-            state.PC = 0x100;
+            state.PC = 0x00;
 
             return state;
         }

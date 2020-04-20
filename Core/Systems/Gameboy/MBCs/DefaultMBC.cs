@@ -10,6 +10,8 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
         protected byte[][] ramBanks;
         protected byte[] rom0 => romBanks[0];
         protected abstract byte[] cartRAM { get; }
+        protected abstract int ramBankCount { get; }
+        protected abstract int externalRAMSize { get; }
         private readonly string fileName;
         private readonly bool battery;
 
@@ -23,16 +25,27 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
             }
         }
 
-        public DefaultMBC(string fileName, bool battery)
+        public DefaultMBC(string fileName, bool battery, bool ram)
         {
             this.fileName = fileName;
             this.battery = battery;
-            if (battery)
-            {
-                byte[] ram = GetOrCreateSaveFile();
+            InitializeMBC(ram);
+        }
 
-                for (int i = 0; i < ram.Length; i++)
-                    WriteCartRAM(i, ram[i]);
+        private void InitializeMBC(bool ram)
+        {
+            if (ram)
+            {
+                InitializeRAMBanks();
+
+                if (battery)
+                {
+                    byte[] ramBytes = GetOrCreateSaveFile();
+
+                    for (int i = 0; i < ramBankCount; i++)
+                        for (int j = 0; j < externalRAMSize; j++)
+                            ramBanks[i][j] = ramBytes[j + (i * externalRAMSize)];
+                }
             }
         }
 
@@ -41,8 +54,9 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
             if (File.Exists(SaveName))
                 return File.ReadAllBytes(SaveName);
             
-            File.Create(SaveName);
-            return new byte[0];
+            var bytes = new byte[externalRAMSize * ramBankCount];
+            File.WriteAllBytes(SaveName, bytes);
+            return bytes;
         }
 
         public void LoadProgram(byte[] bytes)
@@ -56,18 +70,26 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
                 romBanks[i / ROMBankSize][i % ROMBankSize] = bytes[i];
         }
 
-        protected void InitializeRAMBanks(int banks, int bankSize)
+        protected void InitializeRAMBanks()
         {
-            ramBanks = new byte[banks][];
+            ramBanks = new byte[ramBankCount][];
 
-            for (int i = 0; i < banks; i++)
-                ramBanks[i] = new byte[bankSize];
+            for (int i = 0; i < ramBankCount; i++)
+                ramBanks[i] = new byte[externalRAMSize];
         }
 
         public void Shutdown()
         {
             if (battery)
-                File.WriteAllBytes(SaveName, cartRAM);
+            {
+                byte[] externalRAM = new byte[externalRAMSize * ramBankCount];
+
+                for (int i = 0; i < ramBankCount; i++)
+                    for (int j = 0; j < externalRAMSize; j++)
+                        externalRAM[j + (i * externalRAMSize)] = ramBanks[i][j];
+
+                File.WriteAllBytes(SaveName, externalRAM);
+            }
         }
 
         public abstract byte ReadCartRAM(int addr);

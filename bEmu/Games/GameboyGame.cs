@@ -81,10 +81,13 @@ namespace bEmu
                 {
                     int lastCycleCount = UpdateGame();
 
-                    if (/*Mmu.Bios.Running || */Gpu.Frame <= drawCounter)
+                    lock (this)
                     {
-                        Gpu.Cycles += lastCycleCount;
-                        Gpu.StepCycle();
+                        if (Gpu.Frame <= drawCounter)
+                        {
+                            Gpu.Cycles += lastCycleCount;
+                            Gpu.StepCycle();
+                        }
                     }
                 }
             });

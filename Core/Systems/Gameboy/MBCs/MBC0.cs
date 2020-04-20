@@ -4,11 +4,11 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
     {
         protected override byte[] cartRAM => ramBanks != null ? ramBanks[0] : null;
 
-        public MBC0(string fileName, bool ram, bool battery) : base(fileName, battery)
-        {
-            if (ram)
-                InitializeRAMBanks(1, 8192);
-        }
+        protected override int externalRAMSize => 8192;
+
+        protected override int ramBankCount => 1;
+
+        public MBC0(string fileName, bool ram, bool battery) : base(fileName, battery, ram) { }
 
         public override byte ReadCartRAM(int addr)
         {

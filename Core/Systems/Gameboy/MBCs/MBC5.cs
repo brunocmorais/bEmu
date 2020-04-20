@@ -6,19 +6,20 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
     public class MBC5 : DefaultMBC
     {
         protected override byte[] cartRAM => ramBanks != null ? ramBanks[ramb] : null;
+        protected override int externalRAMSize => 8192;
+
+        protected override int ramBankCount => 16;
+
         byte romb0;
         byte romb1;
         byte ramb;
         byte ramg;
 
-        public MBC5(string fileName, bool ram, bool battery) : base(fileName, battery)
+        public MBC5(string fileName, bool ram, bool battery) : base(fileName, battery, ram)
         {
             romb0 = 1;
             romb1 = 0;
             ramb = 0;
-
-            if (ram)
-                InitializeRAMBanks(16, 8192);
         }
 
         public override void SetMode(int addr, byte value)

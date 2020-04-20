@@ -7,21 +7,23 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
     public class MBC3 : DefaultMBC, IHasRTC
     {
         protected override byte[] cartRAM => ramBanks != null ? ramBanks[bank2] : null;
+
+        protected override int externalRAMSize => 8192;
+
+        protected override int ramBankCount => 4;
+
         int bank1;
         int bank2;
         byte ramg;
         RTC rtc;
 
-        public MBC3(string fileName, bool ram, bool timer, bool battery) : base(fileName, battery)
+        public MBC3(string fileName, bool ram, bool timer, bool battery) : base(fileName, battery, ram)
         {
             bank1 = 1;
             bank2 = 0;
 
             if (timer)
                 rtc = new RTC();
-
-            if (ram)
-                InitializeRAMBanks(4, 8192);
         }
 
         public override void SetMode(int addr, byte value)

@@ -22,16 +22,17 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
                     return ramBanks[bank2];
             }   
         }
+
+        protected override int externalRAMSize => 8192;
+        protected override int ramBankCount => 4;
+
         byte ramg;
 
-        public MBC1(string fileName, bool ram, bool battery) : base(fileName, battery)
+        public MBC1(string fileName, bool ram, bool battery) : base(fileName, battery, ram)
         {
             bank1 = 1;
             bank2 = 0;
             mode = 0;
-
-            if (ram)
-                InitializeRAMBanks(4, 8192);
         }
 
         public override void SetMode(int addr, byte value)
