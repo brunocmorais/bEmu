@@ -23,7 +23,7 @@ namespace bEmu.Core.Systems.Gameboy
         {
             int counter = 0;
 
-            foreach (var sprite in Sprites.OrderByDescending(sprite => sprite.X))
+            foreach (var sprite in Sprites.Where(x => x != null).OrderByDescending(sprite => sprite.X))
             {
                 if (counter == 10) // limite de 10 sprites por linha
                     yield break;

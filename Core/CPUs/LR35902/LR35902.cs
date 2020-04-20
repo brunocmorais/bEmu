@@ -8,7 +8,7 @@ using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.LR35902
 {
-    public partial class LR35902<TState> : CPU<TState> where TState : State
+    public partial class LR35902<TState> : CPU<TState> where TState : bEmu.Core.Systems.Gameboy.State
     {
         public LR35902(ISystem system) : base(system) { }
 
@@ -138,28 +138,24 @@ namespace bEmu.Core.CPUs.LR35902
 
         public void HandleInterrupts()
         {
-            if (State is Systems.Gameboy.State)
+            if (State.IE == 0 || State.IF == 0)
+                return;
+
+            for (int i = 0; i < 5; i++)
             {
-                var state = State as Systems.Gameboy.State;
+                int mask = (0x1 << i);
 
-                for (int i = 0; i < 5; i++)
+                if ((State.IE & State.IF & mask) == mask)
                 {
-                    var interruptType = (InterruptType) i;
-                    int mask = (0x1 << i);
+                    State.Halted = false;
 
-                    if ((state.IE & mask) == mask && ((state.IF & mask) == mask))
-                    {
-                        state.Halted = false;
+                    if (!State.EnableInterrupts)
+                        return;
 
-                        if (!State.EnableInterrupts)
-                            return;
-
-                        PushStack(state.PC);
-                        state.EnableInterrupts = false;
-                        state.PC = (ushort)(0x40 + (0x8 * i));
-                        state.IF &= (byte) ~mask;
-                        break;
-                    }
+                    State.EnableInterrupts = false;
+                    Rst((ushort) (0x40 + (0x8 * i)));
+                    State.IF &= (byte) ~mask;
+                    break;
                 }
             }
         }
@@ -169,11 +165,9 @@ namespace bEmu.Core.CPUs.LR35902
             if (State.Halted)
             {
                 HandleInterrupts();
-                IncreaseCycles(4);
+                IncreaseCycles(16);
                 return default(Opcode);
             }
-            else
-                HandleInterrupts();
 
             var opcode = new Opcode(GetNextByte());
             State.Instructions++;
@@ -437,6 +431,8 @@ namespace bEmu.Core.CPUs.LR35902
                 case 0xEF: Rst(0x28); break;
                 case 0xFF: Rst(0x38); break;
             }
+
+            HandleInterrupts();
 
             return opcode;
         }
@@ -702,6 +698,8 @@ namespace bEmu.Core.CPUs.LR35902
                 case 0xFE: Set(7, Register.HL); break;
                 case 0xFF: Set(7, Register.A);  break;
             }
+
+            HandleInterrupts();
         }
     }
 }

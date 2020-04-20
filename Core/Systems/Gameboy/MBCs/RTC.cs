@@ -1,6 +1,6 @@
 using System;
 
-namespace bEmu.Core.Systems.MBCs
+namespace bEmu.Core.Systems.Gameboy.MBCs
 {
     public class RTC
     {

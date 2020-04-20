@@ -1,24 +1,22 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace bEmu.Core.Systems.MBCs
+namespace bEmu.Core.Systems.Gameboy.MBCs
 {
 
-    public class MBC2 : IMBC
+    public class MBC2 : DefaultMBC
     {
         int romb;
-        IList<byte[]> romBanks;
-        byte[] rom0 => romBanks[0];
-        byte[] cartRAM = new byte[512];
         byte ramg;
+        protected override byte[] cartRAM => ramBanks[0];
 
-        public MBC2()
+        public MBC2(string fileName, bool battery) : base(fileName, battery)
         {
-            romBanks = new List<byte[]>();
             romb = 1;
+            InitializeRAMBanks(1, 512);
         }
 
-        public void SetMode(int addr, byte value)
+        public override void SetMode(int addr, byte value)
         {
             if (addr >= 0x0000 && addr <= 0x3FFF)
             {
@@ -30,54 +28,32 @@ namespace bEmu.Core.Systems.MBCs
                         romb++;
                 }
                 else
-                {
                     ramg = value;
-                }
             }
         }
 
-        public byte ReadROM(int addr)
+        public override byte ReadROM(int addr)
         {
             if (addr >= 0x0000 && addr <= 0x3FFF)
                 return rom0[addr];
             else if (addr >= 0x4000 && addr <= 0x7FFF)
-                return romBanks[romb % romBanks.Count][addr - 0x4000];
+                return romBanks[romb % romBanks.Length][addr - 0x4000];
 
             return 0xFF;
         }
 
-        public void LoadProgram(byte[] bytes)
-        {
-            int bank = -1;
-            int counter = 0;
-
-            while (counter < bytes.Length)
-            {
-                if (counter % 16384 == 0)
-                {
-                    romBanks.Add(new byte[16384]);
-                    bank++;
-                }
-
-                romBanks[bank][counter % 16384] = bytes[counter];
-                counter++;
-            }
-        }
-
-        public void WriteCartRAM(int addr, byte value)
+        public override void WriteCartRAM(int addr, byte value)
         {
             if ((ramg & 0x0F) == 0x0A)
                 cartRAM[addr] = (byte) (value & 0xF);
         }
 
-        public byte ReadCartRAM(int addr)
+        public override byte ReadCartRAM(int addr)
         {
             if ((ramg & 0x0F) == 0x0A)
                 return (byte) (cartRAM[addr % cartRAM.Length] | 0xF0);
 
             return 0xFF;
         }
-
-        public void Tick(int lastCycleCount) { }
     }
 }

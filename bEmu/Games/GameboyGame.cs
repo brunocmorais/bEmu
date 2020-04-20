@@ -12,6 +12,7 @@ using bEmu.Core.CPUs.LR35902;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Threading;
+using bEmu.Core.Systems.Gameboy.MBCs;
 
 namespace bEmu
 {
@@ -38,6 +39,7 @@ namespace bEmu
         Texture2D backBuffer;
         Rectangle destinationRectangle;
         bool showFPS = false;
+        int drawCounter = 0;
 
         public GameboyGame(string rom)
         {
@@ -69,7 +71,7 @@ namespace bEmu
             font = Content.Load<SpriteFont>("Common/Font");
             backBuffer = new Texture2D(GraphicsDevice, 160, 144);
             destinationRectangle = new Rectangle(0, 0, width * tamanhoPixel, height * tamanhoPixel);
-            Gpu.Frameskip = 2;
+            Gpu.Frameskip = 1;
 
             running = true;
 
@@ -77,8 +79,13 @@ namespace bEmu
             {
                 while (running)
                 {
-                    UpdateGame();
-                    Gpu.StepCycle();
+                    int lastCycleCount = UpdateGame();
+
+                    if (/*Mmu.Bios.Running || */Gpu.Frame <= drawCounter)
+                    {
+                        Gpu.Cycles += lastCycleCount;
+                        Gpu.StepCycle();
+                    }
                 }
             });
 
@@ -90,7 +97,10 @@ namespace bEmu
             KeyboardState keyboardState = Keyboard.GetState();
 
             if (keyboardState.IsKeyDown(Keys.Escape))
+            {
                 Exit();
+                Mmu.MBC.Shutdown();
+            }
 
             if (keyboardState.IsKeyDown(Keys.F1))
             {
@@ -109,6 +119,8 @@ namespace bEmu
 
         protected override void Draw (GameTime gameTime)
         {
+            GraphicsDevice.Clear(Color.Black);
+
             if (Gpu.Frame > lastRenderedFrame)
                 backBuffer.SetData(Gpu.FrameBuffer);
 
@@ -123,9 +135,10 @@ namespace bEmu
             }
             
             spriteBatch.End();
+            drawCounter++;
         }
 
-        private void UpdateGame()
+        private int UpdateGame()
         {
             if (Mmu.Bios.Running && State.PC >= 0x100)
                 Mmu.Bios.Running = false;
@@ -135,9 +148,12 @@ namespace bEmu
             int afterCycles = State.Cycles;
 
             int lastCycleCount = (afterCycles - prevCycles);
-            Gpu.Cycles += lastCycleCount;
             State.Timer.UpdateTimers(lastCycleCount);
-            Mmu.MBC.Tick(lastCycleCount);
+
+            if (Mmu.MBC is IHasRTC)
+                (Mmu.MBC as IHasRTC).Tick(lastCycleCount);
+
+            return lastCycleCount;
         }
 
         public void UpdateKeys(KeyboardState keyboardState)

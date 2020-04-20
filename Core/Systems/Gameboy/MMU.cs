@@ -102,14 +102,14 @@ namespace bEmu.Core.Systems.Gameboy
         public void LoadProgram(string fileName, int startAddress = 0)
         {
             byte[] bytes = File.ReadAllBytes(fileName);
-            LoadProgram(bytes, startAddress);
+            CartridgeHeader = new CartridgeHeader(bytes);
+            MBC = MBCFactory.GetMBC(fileName, CartridgeHeader.CartridgeType);
+            MBC.LoadProgram(bytes);
         }
 
         public void LoadProgram(byte[] bytes, int startAddress = 0)
         {
-            CartridgeHeader = new CartridgeHeader(bytes);
-            MBC = MBCFactory.GetMBC(CartridgeHeader.CartridgeType);
-            MBC.LoadProgram(bytes);
+            throw new NotImplementedException();
         }
     }
 }
