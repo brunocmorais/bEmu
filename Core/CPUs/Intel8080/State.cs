@@ -14,6 +14,8 @@ namespace bEmu.Core.CPUs.Intel8080
         public Flags Flags;
         public bool EnableInterrupts { get; set; }
         
+        public State(ISystem system) : base(system) { }
+        
         public ushort BC
         {
             get { return BitUtils.GetWordFrom2Bytes(C, B); }
@@ -72,15 +74,7 @@ namespace bEmu.Core.CPUs.Intel8080
                    "de = " + DE.ToString("x") + "\n" +
                    "hl = " + HL.ToString("x") + "\n" +
                    "pc = " + PC.ToString("x") + "\n" +
-                   "sp = " + SP.ToString("x") + "\n" +
-                   "cycles = " + Cycles       + "\n" +
-                   "inst = "   + Instructions + "\n" +
-                   "flags = " + 
-                    (Flags.Zero ? "Z" : ".") +
-                    (Flags.Sign ? "S" : ".") +
-                    (Flags.Parity ? "P" : ".") +
-                    (Flags.AuxiliaryCarry ? "A" : ".") +
-                    (Flags.Carry ? "C" : ".");
+                   "sp = " + SP.ToString("x") + "\n";
         }
     }
 }

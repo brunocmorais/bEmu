@@ -14,17 +14,17 @@ namespace bEmu
 {
     public class SpaceInvadersGame : Generic8080Game
     {
-        Texture2D backdrop;
-        SoundEffect shot;
-        SoundEffect invaderDie;
-        SoundEffect explosion;
-        SoundEffect ufoLowPitch;
-        SoundEffectInstance ufoHighPitch;
-        SoundEffect fastInvader1;
-        SoundEffect fastInvader2;
-        SoundEffect fastInvader3;
-        SoundEffect fastInvader4;
-        Color backdropColor = Color.FromNonPremultiplied(255, 255, 255, 160);
+        private Texture2D backdrop;
+        private SoundEffect shot;
+        private SoundEffect invaderDie;
+        private SoundEffect explosion;
+        private SoundEffect ufoLowPitch;
+        private SoundEffectInstance ufoHighPitch;
+        private SoundEffect fastInvader1;
+        private SoundEffect fastInvader2;
+        private SoundEffect fastInvader3;
+        private SoundEffect fastInvader4;
+        private Color backdropColor = Color.FromNonPremultiplied(255, 255, 255, 160);
 
         public SpaceInvadersGame(string zipName, string[] fileNames, string[] memoryPositions) : 
             base(zipName, fileNames, memoryPositions) { }
@@ -42,7 +42,7 @@ namespace bEmu
             fastInvader4 = Content.Load<SoundEffect>("SpaceInvaders/fastinvader4");
             ufoHighPitch = Content.Load<SoundEffect>("SpaceInvaders/ufo_highpitch").CreateInstance();
             ufoHighPitch.IsLooped = false;
-            alpha = 160;
+            Alpha = 160;
 
             base.LoadContent();
         }
@@ -51,7 +51,7 @@ namespace bEmu
 		{
             GraphicsDevice.Clear(Color.Black);
             spriteBatch.Begin ();
-            spriteBatch.Draw(backdrop, new Rectangle(0, 0, width * tamanhoPixel, height * tamanhoPixel), backdropColor);
+            spriteBatch.Draw(backdrop, new Rectangle(0, 0, Width * TamanhoPixel, Height * TamanhoPixel), backdropColor);
             spriteBatch.End ();
 
             base.Draw(gameTime);

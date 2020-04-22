@@ -2,7 +2,7 @@ namespace bEmu.Core
 {
     public abstract class System : ISystem
     {
-        public IExecutor Runner { get; protected set; }
+        public IRunner Runner { get; protected set; }
         public IState State { get; protected set; }
         public IMMU MMU { get; protected set; }
         public IPPU PPU { get; protected set; }

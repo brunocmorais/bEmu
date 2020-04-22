@@ -4,6 +4,6 @@ namespace bEmu.Core.Systems
     {
         Generic8080 = 0,
         Chip8 = 1,
-        Gameboy = 2
+        GameBoy = 2
     }
 }

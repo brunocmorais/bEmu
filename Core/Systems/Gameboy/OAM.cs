@@ -6,11 +6,12 @@ namespace bEmu.Core.Systems.Gameboy
     public class OAM
     {
         public MMU MMU { get; }
-        public Sprite[] Sprites = new Sprite[40];
+        public Sprite[] Sprites { get; }
 
         public OAM(MMU mmu)
         {
             MMU = mmu;
+            Sprites = new Sprite[40];
         }
 
         public void UpdateSprites()
@@ -19,7 +20,7 @@ namespace bEmu.Core.Systems.Gameboy
                 Sprites[i] = GetSprite(i);
         }
 
-        public IEnumerable<Sprite> GetSpritesOnLine(int ly, int spriteSize)
+        public IEnumerable<Sprite> GetSpritesForScanline(int ly, int spriteSize)
         {
             int counter = 0;
 
@@ -57,27 +58,5 @@ namespace bEmu.Core.Systems.Gameboy
                 MMU.OAM[index + 2],
                 MMU.OAM[index + 3]);
         }
-    }
-
-    public class Sprite
-    {
-        public Sprite(int x, int y, byte address, byte attr)
-        {
-            X = x;
-            Y = y;
-            Address = address;
-            Attr = attr;
-        }
-
-        public int X { get; }
-        public int Y { get; }        
-        public byte Address { get; }
-        public byte Attr { get; }
-        public int LineOffset { get; set; }
-        public int Size { get; set; }
-        public PaletteType PaletteType => (Attr & 0x10) == 0x10 ? PaletteType.OPB1 : PaletteType.OBP0;
-        public bool Priority => (Attr & 0x80) == 0x80;
-        public bool XFlip => (Attr & 0x20) == 0x20;
-        public bool YFlip => (Attr & 0x40) == 0x40;
     }
 }

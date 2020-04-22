@@ -6,7 +6,12 @@ namespace bEmu.Core.VMs.Chip8
 {
     public partial class Chip8 : VM<bEmu.Core.Systems.Chip8.State, bEmu.Core.Systems.Chip8.PPU>
     {
-        public Chip8(ISystem system) : base(system) { }
+        private Random random;
+        
+        public Chip8(ISystem system) : base(system) 
+        { 
+            random = new Random();
+        }
 
         public override IOpcode StepCycle()
         {

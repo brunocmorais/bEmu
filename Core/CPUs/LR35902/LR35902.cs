@@ -1,17 +1,13 @@
 using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using bEmu.Core;
-using bEmu.Core.CPUs.Intel8080;
 using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.LR35902
 {
-    public partial class LR35902<TState> : CPU<TState> where TState : bEmu.Core.Systems.Gameboy.State
+    public partial class LR35902<TState, TMMU> : CPU<TState, TMMU> 
+        where TState : State
+        where TMMU : Core.Systems.Gameboy.MMU
     {
         public LR35902(ISystem system) : base(system) { }
-
 
         protected ushort GetNextWord()
         {
@@ -138,23 +134,28 @@ namespace bEmu.Core.CPUs.LR35902
 
         public void HandleInterrupts()
         {
-            if (State.IE == 0 || State.IF == 0)
+            if (!(State is bEmu.Core.Systems.Gameboy.State))
+                return;
+
+            var state = State as bEmu.Core.Systems.Gameboy.State;
+
+            if (state.IE == 0 || state.IF == 0)
                 return;
 
             for (int i = 0; i < 5; i++)
             {
                 int mask = (0x1 << i);
 
-                if ((State.IE & State.IF & mask) == mask)
+                if ((state.IE & state.IF & mask) == mask)
                 {
-                    State.Halted = false;
+                    state.Halted = false;
 
-                    if (!State.EnableInterrupts)
+                    if (!state.EnableInterrupts)
                         return;
 
-                    State.EnableInterrupts = false;
+                    state.EnableInterrupts = false;
                     Rst((ushort) (0x40 + (0x8 * i)));
-                    State.IF &= (byte) ~mask;
+                    state.IF &= (byte) ~mask;
                     break;
                 }
             }

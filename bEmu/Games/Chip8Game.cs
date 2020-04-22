@@ -9,30 +9,30 @@ namespace bEmu
 {
     public class Chip8Game : Game
     {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
-        SoundEffect tone;
-        SoundEffectInstance soundEffectInstance;
-        Texture2D backBuffer;
-        Core.Systems.Chip8.System system;
-        const int tamanhoPixel = 10;
-        const int width = 64;
-        const int height = 32;
-        private const int CycleCount = 10;
-        string rom;
-        Rectangle destinationRectangle = new Rectangle(0, 0, width * tamanhoPixel, height * tamanhoPixel);
+        private const int TamanhoPixel = 10;
+        private const int Width = 64;
+        private const int Height = 32;
+        private const int CycleCount = 15;
+        private GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
+        private SoundEffect tone;
+        private SoundEffectInstance soundEffectInstance;
+        private Texture2D backBuffer;
+        private Core.Systems.Chip8.System system;
+        private string rom;
+        private Rectangle destinationRectangle;
+        private State State => system.State as State;
         
         public Chip8Game(string rom)
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = width * tamanhoPixel;
-            graphics.PreferredBackBufferHeight = height * tamanhoPixel;
+            graphics.PreferredBackBufferWidth = Width * TamanhoPixel;
+            graphics.PreferredBackBufferHeight = Height * TamanhoPixel;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             this.rom = rom;
+            destinationRectangle = new Rectangle(0, 0, Width * TamanhoPixel, Height * TamanhoPixel);
         }
-
-        State State => system.State as State;
 
         protected override void Initialize()
         {
@@ -47,7 +47,7 @@ namespace bEmu
             spriteBatch = new SpriteBatch(GraphicsDevice);
             tone = Content.Load<SoundEffect>("Chip8/tone");
             soundEffectInstance = tone.CreateInstance();
-            backBuffer = new Texture2D(GraphicsDevice, width, height);
+            backBuffer = new Texture2D(GraphicsDevice, Width, Height);
         }
 
         protected override void Update(GameTime gameTime)
@@ -58,8 +58,8 @@ namespace bEmu
             if (Keyboard.GetState().IsKeyDown(Keys.F1))
                 Initialize();
 
-            if (State.SuperChipMode && backBuffer.Width == width)
-                backBuffer = new Texture2D(GraphicsDevice, width * 2, height * 2);
+            if (State.SuperChipMode && backBuffer.Width == Width)
+                backBuffer = new Texture2D(GraphicsDevice, Width * 2, Height * 2);
 
             int cycle = CycleCount;
 
@@ -120,16 +120,6 @@ namespace bEmu
 
 			GraphicsDevice.Clear (Color.Black);
             spriteBatch.Begin ();
-
-            // var texture = State.SuperChipMode ? whiteRectHiRes : whiteRect;
-            // int pixelSize = State.SuperChipMode ? tamanhoPixelHiRes : tamanhoPixel;
-            
-			// for (int i = 0; i < system.PPU.Width; i++) 
-			// 	for (int j = 0; j < system.PPU.Height; j++)
-            //     {
-            //         Pixel pixel = system.PPU[i, j];
-            //         spriteBatch.Draw(texture, new Vector2(i * pixelSize, j * pixelSize), Color.FromNonPremultiplied(pixel.R, pixel.G, pixel.B, 255));
-            //     }
 
             backBuffer.SetData(system.PPU.FrameBuffer);
             spriteBatch.Draw(backBuffer, destinationRectangle, Color.White);

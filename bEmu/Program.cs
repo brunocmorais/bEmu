@@ -9,10 +9,10 @@ using Newtonsoft.Json;
 
 namespace bEmu
 {
-    class Program
+    public class Program
     {
         [STAThread]
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace bEmu
                     case SupportedSystems.Chip8:
                         LaunchChip8(args);
                         break;
-                    case SupportedSystems.Gameboy:
+                    case SupportedSystems.GameBoy:
                         LaunchGameboy(args);
                         break;
                     default:
@@ -49,26 +49,6 @@ namespace bEmu
         {
             using (GameboyGame game = new GameboyGame(args[1]))
                 game.Run();
-
-            /*var system = new bEmu.Core.Systems.Gameboy.System();
-            string fileName = "/home/bruno/Projetos/NET/bEmu/Tests/test_roms/gb/10-bit ops.gb";
-
-            system.MMU.LoadProgram(fileName);
-            int counter = 0;
-
-            Console.WriteLine();
-            IOpcode opcode = default;
-
-            while (!system.State.Halted)
-            {
-                char? debug = (system.MMU as bEmu.Core.Systems.Gameboy.MMU).Debug;
-
-                if (debug.HasValue)
-                    Console.Write(debug);
-
-                counter++;
-                opcode = system.Runner.StepCycle();
-            }*/
         }
 
         private static void LaunchChip8(string[] args)
@@ -81,7 +61,7 @@ namespace bEmu
         {
             string gameToRun = Path.GetFileNameWithoutExtension(args[1]);
 
-            var gameInfos = JsonConvert.DeserializeObject<IList<GameInfo>>(File.ReadAllText("games.json"));
+            var gameInfos = JsonConvert.DeserializeObject<IList<GameInfo>>(File.ReadAllText("gamesIntel8080.json"));
             var gameInfo = gameInfos.FirstOrDefault(x => x.ZipName == gameToRun);
 
             if (gameInfo == null)

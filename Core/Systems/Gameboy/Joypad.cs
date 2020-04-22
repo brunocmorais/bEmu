@@ -2,9 +2,15 @@ namespace bEmu.Core.Systems.Gameboy
 {
     public class Joypad
     {
-        public byte Column1 { get; set; } = 0xF;
-        public byte Column2 { get; set; } = 0xF;
-        byte activeColumn;
+        private byte activeColumn;
+        public byte Column1 { get; set; }
+        public byte Column2 { get; set; }
+
+        public Joypad()
+        {
+            Column1 = 0xF;
+            Column2 = 0xF;
+        }
 
         public void SetJoypadColumn(byte column)
         {

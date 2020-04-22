@@ -6,16 +6,24 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
 
     public class MBC3 : DefaultMBC, IHasRTC
     {
-        protected override byte[] cartRAM => ramBanks != null ? ramBanks[bank2] : null;
+        private int bank1;
+        private int bank2;
+        private byte ramg;
+        private RTC rtc;
+        protected override byte[] CartRam => RamBanks != null ? RamBanks[bank2] : null;
 
-        protected override int externalRAMSize => 8192;
+        protected override int ExternalRamSize => 8192;
 
-        protected override int ramBankCount => 4;
-
-        int bank1;
-        int bank2;
-        byte ramg;
-        RTC rtc;
+        protected override int RamBankCount => 4;
+        protected string SaveRTCName
+        {
+            get
+            {
+                string directory = Path.GetDirectoryName(FileName);
+                string name = Path.GetFileNameWithoutExtension(FileName) + ".rtc";
+                return Path.Combine(directory, name);
+            }
+        }
 
         public MBC3(string fileName, bool ram, bool timer, bool battery) : base(fileName, battery, ram)
         {
@@ -45,15 +53,15 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
                     rtc.SetMode(value);
             }
             else if (addr >= 0x6000 && addr <= 0x7FFF && rtc != null)
-                rtc.Latched = (value & 0x1) == 0x1 && !rtc.Latched;
+                rtc.Latch((byte) (value & 0x1));
         }
 
         public override byte ReadROM(int addr)
         {
             if (addr >= 0x0000 && addr <= 0x3FFF)
-                return rom0[addr];
+                return Rom0[addr];
             else if (addr >= 0x4000 && addr <= 0x7FFF)
-                return romBanks[bank1 % romBanks.Length][addr - 0x4000];
+                return RomBanks[bank1 % RomBanks.Length][addr - 0x4000];
 
             return 0xFF;
         }
@@ -62,8 +70,8 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
         {
             if ((ramg & 0x0F) == 0x0A)
             {
-                if ((rtc == null || rtc.Mode == 0x0) && cartRAM != null)
-                    cartRAM[addr] = value;
+                if ((rtc == null || rtc.Mode == 0x0) && CartRam != null)
+                    CartRam[addr] = value;
                 else if (rtc != null)
                     rtc.Write(value);
             }
@@ -73,8 +81,8 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
         {
             if ((ramg & 0x0F) == 0x0A)
             {
-                if ((rtc == null || rtc.Mode == 0x0) && cartRAM != null)
-                    return cartRAM[addr];
+                if ((rtc == null || rtc.Mode == 0x0) && CartRam != null)
+                    return CartRam[addr];
                 else if (rtc != null)
                     return rtc.Read();
             }
@@ -86,6 +94,14 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
         {
             if (rtc != null)
                 rtc.Tick(lastCycleCount);
+        }
+
+        public override void Shutdown()
+        {
+            base.Shutdown();
+
+            if (rtc != null)
+                File.WriteAllBytes(SaveRTCName, rtc.Export());
         }
     }
 }

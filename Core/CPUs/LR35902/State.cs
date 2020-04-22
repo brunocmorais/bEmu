@@ -6,11 +6,65 @@ using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.LR35902
 {
-    public class State : CPUs.Intel8080.State
+    public class State : Core.State
     {
-        public new Flags Flags;
+        public byte A { get; set; }
+        public byte B { get; set; }
+        public byte C { get; set; }
+        public byte D { get; set; }
+        public byte E { get; set; }
+        public byte H { get; set; }
+        public byte L { get; set; }
+        public Flags Flags;
+        public bool EnableInterrupts { get; set; }
 
-        public new byte F
+        public State(ISystem system) : base(system) { }
+        
+        public ushort BC
+        {
+            get { return BitUtils.GetWordFrom2Bytes(C, B); }
+            set
+            {
+                BitUtils.Get2BytesFromWord(value, out byte b, out byte c);
+                B = b;
+                C = c;
+            }
+        }
+
+        public ushort DE
+        {
+            get { return BitUtils.GetWordFrom2Bytes(E, D); }
+            set
+            {
+                BitUtils.Get2BytesFromWord(value, out byte d, out byte e);
+                D = d;
+                E = e;
+            }
+        }
+
+        public ushort HL
+        {
+            get { return BitUtils.GetWordFrom2Bytes(L, H); }
+            set
+            {
+                BitUtils.Get2BytesFromWord(value, out byte h, out byte l);
+                H = h;
+                L = l;
+            }
+        }
+
+        public ushort AF
+        {
+            get { return BitUtils.GetWordFrom2Bytes(F, A); }
+            set
+            {
+                BitUtils.Get2BytesFromWord(value, out byte a, out byte f);
+                A = a;
+                F = f;
+            }
+        }
+
+        public byte F
         {
             get 
             {
@@ -28,17 +82,6 @@ namespace bEmu.Core.CPUs.LR35902
             }
         }
 
-        public new ushort AF
-        {
-            get { return BitUtils.GetWordFrom2Bytes(F, A); }
-            set
-            {
-                BitUtils.Get2BytesFromWord(value, out byte a, out byte f);
-                A = a;
-                F = f;
-            }
-        }
-
         public override string ToString()
         {
             return " AF = " + AF.ToString("x").PadLeft(4, '0').ToUpper() +
@@ -46,9 +89,7 @@ namespace bEmu.Core.CPUs.LR35902
                    " DE = " + DE.ToString("x").PadLeft(4, '0').ToUpper() +
                    " HL = " + HL.ToString("x").PadLeft(4, '0').ToUpper() +
                    " SP = " + SP.ToString("x").PadLeft(4, '0').ToUpper() +
-                   " PC = " + PC.ToString("x").PadLeft(4, '0').ToUpper(); //+
-                //    " cycles = " + Cycles.ToString().PadLeft(6, '0') +
-                //    " inst = "   + Instructions.ToString().PadLeft(6, '0');
+                   " PC = " + PC.ToString("x").PadLeft(4, '0').ToUpper();
         }
     }
 }

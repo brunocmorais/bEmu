@@ -9,25 +9,30 @@ namespace bEmu.Core.Systems.Gameboy
 {
     public class MMU : IMMU
     {
-        public byte[] VRAM { get; } = InitializeRAMPart(8192);
-        public byte[] IO { get; } = InitializeRAMPart(128);
-        byte[] wram = InitializeRAMPart(8192);
-        public byte[] OAM { get; } = InitializeRAMPart(160);
-        byte[] zp = InitializeRAMPart(128);
-        State state => (System.State as bEmu.Core.Systems.Gameboy.State);
+        private readonly State state;
+        public byte[] VRAM { get; }
+        public byte[] IO { get; }
+        public byte[] WRAM { get; }
+        public byte[] OAM { get; }
+        public byte[] ZeroPage { get; }
         public IMBC MBC { get; private set; }
         public BIOS Bios { get; }
         public int Length => 0x10000;
-        public ISystem System { get; }
         public CartridgeHeader CartridgeHeader { get; private set; }
 
-        public MMU(ISystem system)
+        public MMU(State state)
         {
-            System = system;
+            this.state = state;
             Bios = new BIOS();
+
+            VRAM = InitializeRAMPart(8192);
+            IO = InitializeRAMPart(128);
+            WRAM = InitializeRAMPart(8192);
+            OAM = InitializeRAMPart(160);
+            ZeroPage = InitializeRAMPart(128);
         }
 
-        private static byte[] InitializeRAMPart(int size)
+        private byte[] InitializeRAMPart(int size)
         {
             return new byte[size];
         }
@@ -45,9 +50,9 @@ namespace bEmu.Core.Systems.Gameboy
                 else if (addr >= 0xA000 && addr <= 0xBFFF)
                     return MBC.ReadCartRAM((addr - 0xA000));
                 else if (addr >= 0xC000 && addr <= 0xDFFF)
-                    return wram[addr - 0xC000];
+                    return WRAM[addr - 0xC000];
                 else if (addr >= 0xE000 && addr <= 0xFDFF)
-                    return wram[addr - 0xE000];
+                    return WRAM[addr - 0xE000];
                 else if (addr >= 0xFE00 && addr <= 0xFE9F)
                     return OAM[addr - 0xFE00];
                 else if (addr >= 0xFF00 && addr <= 0xFF7F)
@@ -58,9 +63,9 @@ namespace bEmu.Core.Systems.Gameboy
                     return IO[addr - 0xFF00];
                 }
                 else if (addr >= 0xFF80 && addr <= 0xFFFF)
-                    return zp[addr - 0xFF80];
+                    return ZeroPage[addr - 0xFF80];
                 
-                return 0;
+                return 0xFF;
             }
             set
             {
@@ -71,9 +76,9 @@ namespace bEmu.Core.Systems.Gameboy
                 else if (addr >= 0xA000 && addr <= 0xBFFF)
                     MBC.WriteCartRAM((addr - 0xA000), value);
                 else if (addr >= 0xC000 && addr <= 0xDFFF)
-                    wram[addr - 0xC000] = value;
+                    WRAM[addr - 0xC000] = value;
                 else if (addr >= 0xE000 && addr <= 0xFDFF)
-                    wram[addr - 0xE000] = value;
+                    WRAM[addr - 0xE000] = value;
                 else if (addr >= 0xFE00 && addr <= 0xFE9F)
                     OAM[addr - 0xFE00] = value;
                 else if (addr >= 0xFF00 && addr <= 0xFF7F)
@@ -95,7 +100,7 @@ namespace bEmu.Core.Systems.Gameboy
                         IO[addr - 0xFF00] = value;
                 }
                 else if (addr >= 0xFF80 && addr <= 0xFFFF)
-                    zp[addr - 0xFF80] = value;
+                    ZeroPage[addr - 0xFF80] = value;
             }
         }
 

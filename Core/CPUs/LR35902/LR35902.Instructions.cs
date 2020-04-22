@@ -6,7 +6,9 @@ using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.LR35902
 {
-    public partial class LR35902<TState> : CPU<TState> where TState : bEmu.Core.Systems.Gameboy.State
+    public partial class LR35902<TState, TMMU> : CPU<TState, TMMU> 
+        where TState : State
+        where TMMU : Core.Systems.Gameboy.MMU
     {
         private void Bit(int bitNumber, Register register)
         {

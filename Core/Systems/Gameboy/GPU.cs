@@ -9,28 +9,39 @@ namespace bEmu.Core.Systems.Gameboy
 {
     public class GPU : Core.PPU
     {
-        public int Cycles { get; set; } = 0;
-        public int Frame { get; private set; } = 0;
-        public int Frameskip { get; set; } = 0;
-        GPUMode Mode = GPUMode.HBlank;
-        State State => System.State as bEmu.Core.Systems.Gameboy.State;
-        MMU MMU => System.MMU as bEmu.Core.Systems.Gameboy.MMU;
-        IEnumerable<Sprite> spritesCurrentLine = Enumerable.Empty<Sprite>();
-        OAM oam;
-        int spriteSize = 8;
-        bool lcdEnabled = true;
-        bool bgDisplay;
-        bool windowDisplay;
-        bool spriteDisplay;
-        int tileStartAddress;
-        int windowMapSelect;
-        int bgMapSelect;
-        bool skipFrame => (Frameskip > 1 && Frame % Frameskip != 0) || (Frameskip == 1 && Frame % 2 == 0);
-        readonly uint[] palette = new uint[8];
+        private readonly uint[] palette;
+        private readonly State state;
+        private readonly MMU mmu;
+        private GPUMode Mode;
+        private OAM oam;
+        private int spriteSize;
+        private bool lcdEnabled;
+        private bool bgDisplay;
+        private bool windowDisplay;
+        private bool spriteDisplay;
+        private int tileStartAddress;
+        private int windowMapSelect;
+        private int bgMapSelect;
+        private IEnumerable<Sprite> spritesCurrentLine;
+        public int Cycles { get; set; }
+        public int Frame { get; private set; }
+        public int Frameskip { get; set; }
+        private bool SkipFrame => (Frameskip >= 1 && Frame % (Frameskip + 1) != 0);
 
-        public GPU(ISystem system, int width, int height) : base(system, width, height) 
-        { 
-            oam = new OAM(system.MMU as MMU);
+        public GPU(System system) : base(system, 160, 144) 
+        {
+            Mode = GPUMode.HBlank;
+            Cycles = 0;
+            Frame = 0;
+            Frameskip = 0;
+            state = System.State as State;
+            state.LCD = new LCD(System.MMU as MMU);
+            mmu = System.MMU as MMU;
+            spriteSize = 8;
+            lcdEnabled = true;
+            palette = new uint[8];
+            spritesCurrentLine = Enumerable.Empty<Sprite>();
+            oam = new OAM(mmu);
             oam.UpdateSprites();
         }
 
@@ -40,9 +51,9 @@ namespace bEmu.Core.Systems.Gameboy
 
             switch (type)
             {
-                case PaletteType.BGP: val = State.LCD.BGP; break;
-                case PaletteType.OBP0: val = State.LCD.OBP0; break;
-                case PaletteType.OPB1: val = State.LCD.OBP1; break;
+                case PaletteType.BGP: val = state.LCD.BGP; break;
+                case PaletteType.OBP0: val = state.LCD.OBP0; break;
+                case PaletteType.OPB1: val = state.LCD.OBP1; break;
             }
 
             int bitOffset = (colorNumber * 2);
@@ -51,7 +62,7 @@ namespace bEmu.Core.Systems.Gameboy
             return (uint)((color << 24) | (color << 16) | (color << 8) | 0xFF);
         }
 
-        private static byte GetColor(int shadeNumber)
+        private byte GetColor(int shadeNumber)
         {
             switch (shadeNumber)
             {
@@ -85,17 +96,17 @@ namespace bEmu.Core.Systems.Gameboy
 
         public void SetLCYRegisterCoincidence(int ly)
         {
-            bool lycCoincidence = ly == State.LCD.LYC;
-            State.LCD.SetSTATFlag(STAT.CoincidenceFlag, lycCoincidence);
+            bool lycCoincidence = ly == state.LCD.LYC;
+            state.LCD.SetSTATFlag(STAT.CoincidenceFlag, lycCoincidence);
 
-            if (lycCoincidence && State.LCD.GetSTATFlag(STAT.LYCoincidenceInterrupt) == 1)
-                State.RequestInterrupt(InterruptType.LcdStat);
+            if (lycCoincidence && state.LCD.GetSTATFlag(STAT.LYCoincidenceInterrupt) == 1)
+                state.RequestInterrupt(InterruptType.LcdStat);
         }
 
         public void TurnOffLCD()
         {
             Mode = GPUMode.HBlank;
-            State.LCD.SetSTATMode(0);
+            state.LCD.SetSTATMode(0);
             Cycles = 0;
         }
 
@@ -103,7 +114,7 @@ namespace bEmu.Core.Systems.Gameboy
         {
             if (!lcdEnabled)
             {
-                lcdEnabled = State.LCD.GetLCDCFlag(LCDC.LCDDisplayEnable);
+                lcdEnabled = state.LCD.GetLCDCFlag(LCDC.LCDDisplayEnable);
 
                 if (!lcdEnabled)
                     return;
@@ -114,29 +125,29 @@ namespace bEmu.Core.Systems.Gameboy
                 case GPUMode.HBlank:
                     if (Cycles >= 204)
                     {
-                        if (State.LCD.GetSTATFlag(STAT.Mode0HBlankInterrupt) == 1)
-                            State.RequestInterrupt(InterruptType.LcdStat);
+                        if (state.LCD.GetSTATFlag(STAT.Mode0HBlankInterrupt) == 1)
+                            state.RequestInterrupt(InterruptType.LcdStat);
 
-                        if (!skipFrame && lcdEnabled)
+                        if (!SkipFrame && lcdEnabled)
                         {
-                            windowDisplay = State.LCD.GetLCDCFlag(LCDC.WindowDisplayEnable);
-                            spriteDisplay = State.LCD.GetLCDCFlag(LCDC.SpriteDisplayEnable);
-                            spriteSize = State.LCD.GetLCDCFlag(LCDC.SpriteSize) ? 16 : 8;
-                            bgDisplay = State.LCD.GetLCDCFlag(LCDC.BGDisplayEnable);
+                            windowDisplay = state.LCD.GetLCDCFlag(LCDC.WindowDisplayEnable);
+                            spriteDisplay = state.LCD.GetLCDCFlag(LCDC.SpriteDisplayEnable);
+                            spriteSize = state.LCD.GetLCDCFlag(LCDC.SpriteSize) ? 16 : 8;
+                            bgDisplay = state.LCD.GetLCDCFlag(LCDC.BGDisplayEnable);
 
                             Renderscan();
                         }
 
-                        SetLCYRegisterCoincidence(++State.LCD.LY);
+                        SetLCYRegisterCoincidence(++state.LCD.LY);
 
                         Cycles -= 204;
 
-                        if (State.LCD.LY == 144)
+                        if (state.LCD.LY == 144)
                             Mode = GPUMode.VBlank;
                         else
                             Mode = GPUMode.ScanlineOAM;
 
-                        State.LCD.SetSTATMode((int) Mode);
+                        state.LCD.SetSTATMode((int) Mode);
                     }
 
                     break;
@@ -144,31 +155,31 @@ namespace bEmu.Core.Systems.Gameboy
 
                     if (Cycles >= 456)
                     {
-                        if (State.LCD.LY == 144)
-                            State.RequestInterrupt(InterruptType.VBlank);
+                        if (state.LCD.LY == 144)
+                            state.RequestInterrupt(InterruptType.VBlank);
                         
-                        if (State.LCD.GetSTATFlag(STAT.Mode1VBlankInterrupt) == 1)
-                            State.RequestInterrupt(InterruptType.LcdStat);
+                        if (state.LCD.GetSTATFlag(STAT.Mode1VBlankInterrupt) == 1)
+                            state.RequestInterrupt(InterruptType.LcdStat);
 
                         Cycles -= 456;
-                        SetLCYRegisterCoincidence(++State.LCD.LY);
+                        SetLCYRegisterCoincidence(++state.LCD.LY);
 
-                        if (State.LCD.LY > 153)
+                        if (state.LCD.LY > 153)
                         {
-                            State.LCD.LY = 0;
+                            state.LCD.LY = 0;
                             SetLCYRegisterCoincidence(0);
                             Mode = GPUMode.ScanlineOAM;
-                            State.LCD.SetSTATMode((int) Mode);
+                            state.LCD.SetSTATMode((int) Mode);
 
-                            lcdEnabled = State.LCD.GetLCDCFlag(LCDC.LCDDisplayEnable);
+                            lcdEnabled = state.LCD.GetLCDCFlag(LCDC.LCDDisplayEnable);
 
                             if (!lcdEnabled)
                                 TurnOffLCD();
-                            else if (!skipFrame)
+                            else if (!SkipFrame)
                             {
-                                tileStartAddress = State.LCD.GetLCDCFlag(LCDC.BGWindowTileDataSelect) ? 0x0000 : 0x0800;
-                                bgMapSelect = State.LCD.GetLCDCFlag(LCDC.BGTileMapDisplaySelect) ? 0x1C00 : 0x1800;
-                                windowMapSelect = State.LCD.GetLCDCFlag(LCDC.WindowTileMapDisplaySelect) ? 0x1C00 : 0x1800;
+                                tileStartAddress = state.LCD.GetLCDCFlag(LCDC.BGWindowTileDataSelect) ? 0x0000 : 0x0800;
+                                bgMapSelect = state.LCD.GetLCDCFlag(LCDC.BGTileMapDisplaySelect) ? 0x1C00 : 0x1800;
+                                windowMapSelect = state.LCD.GetLCDCFlag(LCDC.WindowTileMapDisplaySelect) ? 0x1C00 : 0x1800;
 
                                 if (spriteDisplay)
                                     oam.UpdateSprites();
@@ -182,13 +193,13 @@ namespace bEmu.Core.Systems.Gameboy
                     if (Cycles >= 80)
                     {
                         Mode = GPUMode.ScanlineVRAM;
-                        State.LCD.SetSTATMode((int) Mode);
+                        state.LCD.SetSTATMode((int) Mode);
 
-                        if (State.LCD.GetSTATFlag(STAT.Mode2OAMInterrupt) == 1)
-                            State.RequestInterrupt(InterruptType.LcdStat);
+                        if (state.LCD.GetSTATFlag(STAT.Mode2OAMInterrupt) == 1)
+                            state.RequestInterrupt(InterruptType.LcdStat);
 
-                        if (!skipFrame && lcdEnabled && spriteDisplay)
-                            spritesCurrentLine = oam.GetSpritesOnLine(State.LCD.LY, spriteSize);
+                        if (!SkipFrame && lcdEnabled && spriteDisplay)
+                            spritesCurrentLine = oam.GetSpritesForScanline(state.LCD.LY, spriteSize);
 
                         Cycles -= 80;
                     }
@@ -197,7 +208,7 @@ namespace bEmu.Core.Systems.Gameboy
                     if (Cycles >= 172)
                     {
                         Mode = GPUMode.HBlank;
-                        State.LCD.SetSTATMode((int) Mode);
+                        state.LCD.SetSTATMode((int) Mode);
                         Cycles -= 172;
                     }
 
@@ -221,21 +232,21 @@ namespace bEmu.Core.Systems.Gameboy
 
         private void RenderWindowScanline()
         {
-            if (State.LCD.LY < State.LCD.WY)
+            if (state.LCD.LY < state.LCD.WY)
                 return;
 
-            int line = State.LCD.LY - State.LCD.WY;
+            int line = state.LCD.LY - state.LCD.WY;
 
             for (int i = 0; i <= 20; i++)
             {
-                var wx = State.LCD.WX - 7;
+                var wx = state.LCD.WX - 7;
 
                 if (i < wx)
                     continue;
 
                 int addr = windowMapSelect + ((i + (wx / 8)) % 32) + (line / 8 * 32);
                 
-                byte tileNumber = MMU.VRAM[addr];
+                byte tileNumber = mmu.VRAM[addr];
                 int paletteAddr;
 
                 if (tileStartAddress == 0)
@@ -243,40 +254,40 @@ namespace bEmu.Core.Systems.Gameboy
                 else
                     paletteAddr = ((tileNumber & 0x80) == 0x80 ? 0x800 : 0x1000) + ((tileNumber & 0x7F) << 4) + (2 * (line % 8));
 
-                GetPaletteFromBytes(PaletteType.BGP, MMU.VRAM[paletteAddr], MMU.VRAM[paletteAddr + 1]);
+                GetPaletteFromBytes(PaletteType.BGP, mmu.VRAM[paletteAddr], mmu.VRAM[paletteAddr + 1]);
 
                 for (int j = 0; j < palette.Length; j++)
                 {
                     int x = (j + (i * 8)) - (wx % 8);
 
                     if (x >= 0 && x < 160)
-                        SetPixel(x, State.LCD.LY, palette[j]);
+                        SetPixel(x, state.LCD.LY, palette[j]);
                 }
             }
         }
 
         private void RenderBackgroundScanline()
         {
-            byte line = (byte)((State.LCD.LY + State.LCD.SCY));
+            byte line = (byte)((state.LCD.LY + state.LCD.SCY));
             int paletteAddr;
 
             for (int i = 0; i <= 20; i++)
             {
-                int addr = bgMapSelect + ((i + (State.LCD.SCX / 8)) % 32) + (line / 8 * 32);
+                int addr = bgMapSelect + ((i + (state.LCD.SCX / 8)) % 32) + (line / 8 * 32);
 
                 if (tileStartAddress == 0)
-                    paletteAddr = tileStartAddress + (MMU.VRAM[addr] << 4) + (2 * (line % 8));
+                    paletteAddr = tileStartAddress + (mmu.VRAM[addr] << 4) + (2 * (line % 8));
                 else
-                    paletteAddr = ((MMU.VRAM[addr] & 0x80) == 0x80 ? 0x800 : 0x1000) + ((MMU.VRAM[addr] & 0x7F) << 4) + (2 * (line % 8));
+                    paletteAddr = ((mmu.VRAM[addr] & 0x80) == 0x80 ? 0x800 : 0x1000) + ((mmu.VRAM[addr] & 0x7F) << 4) + (2 * (line % 8));
 
-                GetPaletteFromBytes(PaletteType.BGP, MMU.VRAM[paletteAddr], MMU.VRAM[paletteAddr + 1]);
+                GetPaletteFromBytes(PaletteType.BGP, mmu.VRAM[paletteAddr], mmu.VRAM[paletteAddr + 1]);
 
                 for (int j = 0; j < palette.Length; j++)
                 {
-                    int x = (j + (i * 8)) - (State.LCD.SCX % 8);
+                    int x = (j + (i * 8)) - (state.LCD.SCX % 8);
 
                     if (x >= 0 && x < 160)
-                        SetPixel(x, State.LCD.LY, palette[j]);
+                        SetPixel(x, state.LCD.LY, palette[j]);
                 }
             }
         }
@@ -286,11 +297,11 @@ namespace bEmu.Core.Systems.Gameboy
             foreach (var sprite in spritesCurrentLine)
             {
                 int paletteAddr = (sprite.Address << 4) + (2 * ((sprite.LineOffset) % sprite.Size));
-                GetPaletteFromBytes(sprite.PaletteType, MMU.VRAM[paletteAddr], MMU.VRAM[paletteAddr + 1]);
+                GetPaletteFromBytes(sprite.PaletteType, mmu.VRAM[paletteAddr], mmu.VRAM[paletteAddr + 1]);
 
                 for (int j = 0; j < palette.Length; j++)
                 {
-                    if (palette[j] == 0) // transparente
+                    if (palette[j] == 0)
                         continue;
 
                     int coordX;
@@ -302,8 +313,8 @@ namespace bEmu.Core.Systems.Gameboy
 
                     if (coordX >= 0 && coordX < 160)
                     
-                        if (!sprite.Priority || GetPixel(coordX, State.LCD.LY) == GetColorFrom(PaletteType.BGP, 0))
-                            SetPixel(coordX, State.LCD.LY, palette[j]);
+                        if (!sprite.Priority || GetPixel(coordX, state.LCD.LY) == GetColorFrom(PaletteType.BGP, 0))
+                            SetPixel(coordX, state.LCD.LY, palette[j]);
                 }
             }
         }

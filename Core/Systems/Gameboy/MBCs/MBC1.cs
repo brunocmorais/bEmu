@@ -6,27 +6,27 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
 
     public class MBC1 : DefaultMBC
     {
-        int mode;
-        int bank1;
-        int bank2;
-        protected override byte[] cartRAM 
+        private int mode;
+        private int bank1;
+        private int bank2;
+        private byte ramg;
+        protected override byte[] CartRam 
         {
             get
             {
-                if (ramBanks == null)
+                if (RamBanks == null)
                     return null;
 
                 if (mode == 0)
-                    return ramBanks[0];
+                    return RamBanks[0];
                 else
-                    return ramBanks[bank2];
+                    return RamBanks[bank2];
             }   
         }
 
-        protected override int externalRAMSize => 8192;
-        protected override int ramBankCount => 4;
+        protected override int ExternalRamSize => 8192;
+        protected override int RamBankCount => 4;
 
-        byte ramg;
 
         public MBC1(string fileName, bool ram, bool battery) : base(fileName, battery, ram)
         {
@@ -57,16 +57,16 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
             if (addr >= 0x0000 && addr <= 0x3FFF)
             {
                 if (mode == 0)
-                    return rom0[addr];
+                    return Rom0[addr];
                 else
-                    return romBanks[(bank2 << 5) % romBanks.Length][addr];
+                    return RomBanks[(bank2 << 5) % RomBanks.Length][addr];
             }
             else if (addr >= 0x4000 && addr <= 0x7FFF)
             {
-                if (romBanks.Length >= 16)
-                    return romBanks[((bank2 << 5) | bank1) % romBanks.Length][addr - 0x4000];
+                if (RomBanks.Length >= 16)
+                    return RomBanks[((bank2 << 5) | bank1) % RomBanks.Length][addr - 0x4000];
 
-                return romBanks[bank1 % romBanks.Length][addr - 0x4000];
+                return RomBanks[bank1 % RomBanks.Length][addr - 0x4000];
             }
 
             return 0xFF;
@@ -74,14 +74,14 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
 
         public override void WriteCartRAM(int addr, byte value)
         {
-            if (cartRAM != null && (ramg & 0x0F) == 0x0A)
-                cartRAM[addr] = value;
+            if (CartRam != null && (ramg & 0x0F) == 0x0A)
+                CartRam[addr] = value;
         }
 
         public override byte ReadCartRAM(int addr)
         {
-            if (cartRAM != null && (ramg & 0x0F) == 0x0A)
-                return cartRAM[addr];
+            if (CartRam != null && (ramg & 0x0F) == 0x0A)
+                return CartRam[addr];
 
             return 0xFF;
         }

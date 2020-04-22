@@ -15,40 +15,43 @@ namespace bEmu
 {
     public class Generic8080Game : Game
     {
+        protected const int Width = 224;
+        protected const int Height = 256;
+        protected const int Delay = 8;
+        protected const int CycleCount = 3000;
+        protected int Alpha = 255;
+        protected const int TamanhoPixel = 2;
         protected GraphicsDeviceManager graphics;
         protected SpriteBatch spriteBatch;
         protected Texture2D whiteRect;
         protected Texture2D backBuffer;
         protected Core.Systems.Generic8080.System system;
-        protected TimeSpan lastInterruptTime = TimeSpan.Zero;
-        protected int lastInterrupt = 1;
-        protected const int tamanhoPixel = 2;
+        protected TimeSpan lastInterruptTime;
+        protected int lastInterrupt;
         protected byte lastWrite3;
         protected byte lastWrite5;
         protected string[] fileNames;
         protected string[] memoryPositions;
         protected string zipName;
-        protected const int width = 224;
-        protected const int height = 256;
-        protected const int delay = 8;
-        protected const int CycleCount = 3000;
-        protected int alpha = 255;
-        protected Rectangle destinationRectangle = new Rectangle(0, 0, width * tamanhoPixel, height * tamanhoPixel);
+        protected Rectangle destinationRectangle;
         protected State State => system.State as State;
         protected Core.Systems.Generic8080.PPU PPU => system.PPU as Core.Systems.Generic8080.PPU;
-        protected Intel8080<State> CPU => system.Runner as Intel8080<State>;
+        protected Intel8080<State, MMU> CPU => system.Runner as Intel8080<State, MMU>;
 
         public Generic8080Game(string zipName, string[] fileNames, string[] memoryPositions)
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = width * tamanhoPixel;
-            graphics.PreferredBackBufferHeight = height * tamanhoPixel;
+            graphics.PreferredBackBufferWidth = Width * TamanhoPixel;
+            graphics.PreferredBackBufferHeight = Height * TamanhoPixel;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, delay);
+            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, Delay);
             this.fileNames = fileNames;
             this.memoryPositions = memoryPositions; 
             this.zipName = zipName;
+            lastInterruptTime = TimeSpan.Zero;
+            lastInterrupt = 1;
+            destinationRectangle = new Rectangle(0, 0, Width * TamanhoPixel, Height * TamanhoPixel);
         }
 
         protected override void Initialize()
@@ -80,10 +83,10 @@ namespace bEmu
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            whiteRect = new Texture2D(GraphicsDevice, tamanhoPixel, tamanhoPixel);
-            backBuffer = new Texture2D(GraphicsDevice, width, height);
+            whiteRect = new Texture2D(GraphicsDevice, TamanhoPixel, TamanhoPixel);
+            backBuffer = new Texture2D(GraphicsDevice, Width, Height);
 
-            Color[] whiteColor = new Color[tamanhoPixel * tamanhoPixel];
+            Color[] whiteColor = new Color[TamanhoPixel * TamanhoPixel];
             
             for(int i = 0; i < whiteColor.Length; i++) 
                 whiteColor[i] = Color.White;
@@ -114,7 +117,7 @@ namespace bEmu
 
             }
 
-            if (totalMilliseconds >= delay)
+            if (totalMilliseconds >= Delay)
             {
                 if (State.EnableInterrupts)
                 {
@@ -158,7 +161,7 @@ namespace bEmu
                 GraphicsDevice.Clear (Color.Black);
 
             spriteBatch.Begin ();
-            PPU.UpdateFramebuffer();
+            PPU.UpdateFrameBuffer();
             backBuffer.SetData(PPU.FrameBuffer);
             spriteBatch.Draw(backBuffer, destinationRectangle, Color.White);
 			spriteBatch.End ();

@@ -5,32 +5,36 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
 {
     public abstract class DefaultMBC : IMBC
     {
-        const int ROMBankSize = 16384;
-        protected byte[][] romBanks;
-        protected byte[][] ramBanks;
-        protected byte[] rom0 => romBanks[0];
-        protected abstract byte[] cartRAM { get; }
-        protected abstract int ramBankCount { get; }
-        protected abstract int externalRAMSize { get; }
-        private readonly string fileName;
-        private readonly bool battery;
-
-        private string SaveName
+        private const int RomBankSize = 16384;
+        protected byte[][] RomBanks;
+        protected byte[][] RamBanks;
+        protected byte[] Rom0 => RomBanks[0];
+        protected abstract byte[] CartRam { get; }
+        protected abstract int RamBankCount { get; }
+        protected abstract int ExternalRamSize { get; }
+        protected readonly string FileName;
+        protected readonly bool Battery;
+        protected string SaveName
         {
             get
             {
-                string directory = Path.GetDirectoryName(fileName);
-                string name = Path.GetFileNameWithoutExtension(fileName) + ".sav";
+                string directory = Path.GetDirectoryName(FileName);
+                string name = Path.GetFileNameWithoutExtension(FileName) + ".sav";
                 return Path.Combine(directory, name);
             }
         }
 
         public DefaultMBC(string fileName, bool battery, bool ram)
         {
-            this.fileName = fileName;
-            this.battery = battery;
+            FileName = fileName;
+            Battery = battery;
             InitializeMBC(ram);
         }
+
+        public abstract byte ReadCartRAM(int addr);
+        public abstract byte ReadROM(int addr);
+        public abstract void SetMode(int addr, byte value);
+        public abstract void WriteCartRAM(int addr, byte value);
 
         private void InitializeMBC(bool ram)
         {
@@ -38,13 +42,13 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
             {
                 InitializeRAMBanks();
 
-                if (battery)
+                if (Battery)
                 {
                     byte[] ramBytes = GetOrCreateSaveFile();
 
-                    for (int i = 0; i < ramBankCount; i++)
-                        for (int j = 0; j < externalRAMSize; j++)
-                            ramBanks[i][j] = ramBytes[j + (i * externalRAMSize)];
+                    for (int i = 0; i < RamBankCount; i++)
+                        for (int j = 0; j < ExternalRamSize; j++)
+                            RamBanks[i][j] = ramBytes[j + (i * ExternalRamSize)];
                 }
             }
         }
@@ -54,47 +58,42 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
             if (File.Exists(SaveName))
                 return File.ReadAllBytes(SaveName);
             
-            var bytes = new byte[externalRAMSize * ramBankCount];
+            var bytes = new byte[ExternalRamSize * RamBankCount];
             File.WriteAllBytes(SaveName, bytes);
             return bytes;
         }
 
-        public void LoadProgram(byte[] bytes)
+        public virtual void LoadProgram(byte[] bytes)
         {
-            romBanks = new byte[bytes.Length / ROMBankSize][];
+            RomBanks = new byte[bytes.Length / RomBankSize][];
 
-            for (int i = 0; i < romBanks.Length; i++)
-                romBanks[i] = new byte[ROMBankSize];
+            for (int i = 0; i < RomBanks.Length; i++)
+                RomBanks[i] = new byte[RomBankSize];
 
             for (int i = 0; i < bytes.Length; i++)
-                romBanks[i / ROMBankSize][i % ROMBankSize] = bytes[i];
+                RomBanks[i / RomBankSize][i % RomBankSize] = bytes[i];
         }
 
-        protected void InitializeRAMBanks()
+        private void InitializeRAMBanks()
         {
-            ramBanks = new byte[ramBankCount][];
+            RamBanks = new byte[RamBankCount][];
 
-            for (int i = 0; i < ramBankCount; i++)
-                ramBanks[i] = new byte[externalRAMSize];
+            for (int i = 0; i < RamBankCount; i++)
+                RamBanks[i] = new byte[ExternalRamSize];
         }
 
-        public void Shutdown()
+        public virtual void Shutdown()
         {
-            if (battery)
+            if (Battery)
             {
-                byte[] externalRAM = new byte[externalRAMSize * ramBankCount];
+                byte[] externalRAM = new byte[ExternalRamSize * RamBankCount];
 
-                for (int i = 0; i < ramBankCount; i++)
-                    for (int j = 0; j < externalRAMSize; j++)
-                        externalRAM[j + (i * externalRAMSize)] = ramBanks[i][j];
+                for (int i = 0; i < RamBankCount; i++)
+                    for (int j = 0; j < ExternalRamSize; j++)
+                        externalRAM[j + (i * ExternalRamSize)] = RamBanks[i][j];
 
                 File.WriteAllBytes(SaveName, externalRAM);
             }
         }
-
-        public abstract byte ReadCartRAM(int addr);
-        public abstract byte ReadROM(int addr);
-        public abstract void SetMode(int addr, byte value);
-        public abstract void WriteCartRAM(int addr, byte value);
     }
 }

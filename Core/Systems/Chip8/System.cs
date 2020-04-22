@@ -8,19 +8,20 @@ namespace bEmu.Core.Systems.Chip8
         {
             State state = (State as State);
             state.SuperChipMode = true;
-            PPU = new PPU(this, 128, 64);
+            PPU = new PPU(state, 128, 64);
             state.R = new byte[8];
         }
 
         public void SetChip8Mode()
         {
-            (State as State).SuperChipMode = false;
-            PPU = new PPU(this, 64, 32);
+            State state = (State as State);
+            state.SuperChipMode = false;
+            PPU = new PPU(state, 64, 32);
         }
 
         public override IState GetInitialState()
         {
-            var state = new State();
+            var state = new State(this);
             state.PC = 0x200;
             state.V = new byte[16];
             state.Stack = new ushort[16];
@@ -31,8 +32,8 @@ namespace bEmu.Core.Systems.Chip8
 
         public override void Initialize()
         {
-            base.Initialize();
             MMU = new MMU(0x1000);
+            base.Initialize();
             SetChip8Mode();
             Runner = new VMs.Chip8.Chip8(this);
 

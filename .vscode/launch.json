@@ -48,8 +48,8 @@
             //11-op a,(hl).gb = Passed
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bEmu/bin/Debug/netcoreapp3.0/bEmu.dll",
-            //"args": ["Gameboy", "${workspaceFolder}/Tests/test_roms/gb/emulator-only/mbc5/rom_64Mb.gb"],
-            "args": ["Gameboy", "${workspaceFolder}/Tests/test_roms/gb/pokemon.gb"],
+            //"args": ["GameBoy", "${workspaceFolder}/Tests/test_roms/gb/emulator-only/mbc5/rom_64Mb.gb"],
+            "args": ["GameBoy", "${workspaceFolder}/Tests/test_roms/gb/mario.gb"],
             "cwd": "${workspaceFolder}/bEmu",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "integratedTerminal",

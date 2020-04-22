@@ -10,6 +10,8 @@ namespace bEmu.Core.Systems.Generic8080
     {
         public Ports Ports;
 
+        public State(ISystem system) : base(system) { }
+
         public void UpdatePorts(int number, byte value)
         {
             switch (number)

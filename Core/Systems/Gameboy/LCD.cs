@@ -5,6 +5,9 @@ namespace bEmu.Core.Systems.Gameboy
     public class LCD
     {
         private readonly MMU mmu;
+        public byte BGP => mmu.IO[0x47];
+        public byte OBP0 => mmu.IO[0x48];
+        public byte OBP1 => mmu.IO[0x49];
 
         public LCD(MMU mmu)
         {
@@ -59,10 +62,6 @@ namespace bEmu.Core.Systems.Gameboy
             set { mmu.IO[0x4B] = value; }
         }
 
-        public byte BGP => mmu.IO[0x47];
-        public byte OBP0 => mmu.IO[0x48];
-        public byte OBP1 => mmu.IO[0x49];
-
         public bool GetLCDCFlag(LCDC option)
         {
             int op = (0x1 << (int) option);
@@ -81,9 +80,6 @@ namespace bEmu.Core.Systems.Gameboy
 
         public void SetSTATFlag(STAT option, bool value)
         {
-            if ((int) option < 3)
-                return; 
-
             byte mask = (byte) (0x1 << (int) option);
 
             if (value)
@@ -98,19 +94,6 @@ namespace bEmu.Core.Systems.Gameboy
         public void SetSTATMode(int number)
         {
             STAT = (byte) ((STAT & 0xFC) | number);
-        }
-
-        public void SetLCDCFlag(LCDC option, bool value)
-        {
-            byte mask = (byte) (0x1 << (int) option);
-
-            if (value)
-            {
-                mask = (byte) ~mask;
-                LCDC &= mask;
-            }
-            else
-                LCDC |= mask;
         }
     }
 }

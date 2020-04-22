@@ -8,20 +8,18 @@ namespace bEmu.Core.VMs.Chip8
 {
     public partial class Chip8 : VM<bEmu.Core.Systems.Chip8.State, bEmu.Core.Systems.Chip8.PPU>
     {
-        Random random = new Random();
-
-        public void Ret()
+        private void Ret()
         {
             State.SP--;
             State.PC = State.Stack[State.SP];
         }
 
-        public void Jp(ushort addr)
+        private void Jp(ushort addr)
         {
             State.PC = addr;
         }
 
-        public void Call(ushort addr)
+        private void Call(ushort addr)
         {
             State.Stack[State.SP] = State.PC;
             State.SP++;

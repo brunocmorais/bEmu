@@ -16,7 +16,6 @@ namespace bEmu.Core
             FrameBuffer = new byte[width * height * 4];
         }
 
-        //public abstract Pixel this[int x, int y] { get; }
         public virtual void SetPixel(int x, int y, uint color)
         {
             int start = (y * Width * 4) + (x * 4);

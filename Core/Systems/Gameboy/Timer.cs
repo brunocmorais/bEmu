@@ -6,16 +6,12 @@ namespace bEmu.Core.Systems.Gameboy
 {
     public class Timer
     {
-        private readonly ISystem system;
-        int cycles = 0;
-        int cyclesDivider = 0;
-        bEmu.Core.Systems.Gameboy.MMU Mmu => (system.MMU as bEmu.Core.Systems.Gameboy.MMU);
-        State State => (system.State as bEmu.Core.Systems.Gameboy.State);
-
-        public Timer(ISystem system)
-        {
-            this.system = system;
-        }
+        private readonly System system;
+        private int cycles;
+        private int cyclesDivider;
+        private bEmu.Core.Systems.Gameboy.MMU Mmu => (system.MMU as bEmu.Core.Systems.Gameboy.MMU);
+        private State State => (system.State as bEmu.Core.Systems.Gameboy.State);
+        public bool Enabled => (TAC & 0x4) == 0x4;
 
         public byte DIV 
         {
@@ -41,8 +37,6 @@ namespace bEmu.Core.Systems.Gameboy
             set { Mmu.IO[0x07] = value; }
         }
 
-        public bool Enabled => (TAC & 0x4) == 0x4;
-
         public int Step
         {
             get 
@@ -56,6 +50,13 @@ namespace bEmu.Core.Systems.Gameboy
                     default: throw new Exception();
                 }
             }
+        }
+
+        public Timer(System system)
+        {
+            this.system = system;
+            cycles = 0;
+            cyclesDivider = 0;
         }
 
         public void UpdateTimers(int lastCycleCount)

@@ -4,11 +4,33 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
 {
     public class RTC
     {
-        int cycles;
-        int counter;
+        private int cycles;
+        private int counter;
+        private bool halt;
+        private RTC latchedData;
+        private byte latchRegister;
         public byte Mode { get; private set; }
-        bool halt;
-        public bool Latched { get; set; }
+        private TimeSpan ts => new TimeSpan(counter * TimeSpan.TicksPerSecond);
+        private byte Seconds
+        {
+            get => latchedData != null ? latchedData.Seconds : (byte) ts.Seconds;
+            set => counter = (int) new TimeSpan(Days, Hours, Minutes, value).TotalSeconds;
+        }
+        private byte Minutes
+        {
+            get => latchedData != null ? latchedData.Minutes : (byte) ts.Minutes;
+            set => counter = (int) new TimeSpan(Days, Hours, value, Seconds).TotalSeconds;
+        } 
+        private byte Hours
+        {
+            get => latchedData != null ? latchedData.Hours : (byte) ts.Hours;
+            set => counter = (int) new TimeSpan(Days, value, Minutes, Seconds).TotalSeconds;
+        }
+        private int Days
+        {
+            get => latchedData != null ? latchedData.Days : ts.Days;
+            set => counter = (int) new TimeSpan(value, Hours, Minutes, Seconds).TotalSeconds;
+        }
 
         public RTC()
         {
@@ -16,29 +38,15 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
             counter = 0;
             Mode = 0;
             halt = true;
-            Latched = false;
+            latchRegister = 0;
         }
 
-        TimeSpan ts => new TimeSpan(counter * TimeSpan.TicksPerSecond);
-        byte Seconds
+        RTC(int days, int hours, int minutes, int seconds)
         {
-            get => (byte) ts.Seconds;
-            set => counter = (int) new TimeSpan(Days, Hours, Minutes, value).TotalSeconds;
-        }
-        byte Minutes
-        {
-            get => (byte) ts.Minutes;
-            set => counter = (int) new TimeSpan(Days, Hours, value, Seconds).TotalSeconds;
-        } 
-        byte Hours
-        {
-            get => (byte) ts.Hours;
-            set => counter = (int) new TimeSpan(Days, value, Minutes, Seconds).TotalSeconds;
-        }
-        int Days
-        {
-            get => ts.Days;
-            set => counter = (int) new TimeSpan(value, Hours, Minutes, Seconds).TotalSeconds;
+            Days = days;
+            Hours = (byte) hours;
+            Minutes = (byte) minutes;
+            Seconds = (byte) seconds;
         }
 
         public void SetMode(byte mode)
@@ -47,6 +55,11 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
         }
 
         public byte Read()
+        {
+            return GetValue(Mode);
+        }
+
+        private byte GetValue(byte mode)
         {
             switch (Mode)
             {
@@ -77,7 +90,7 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
 
         public void Tick(int lastCycleCount)
         {
-            if (!halt && !Latched)
+            if (!halt)
             {
                 cycles += lastCycleCount;
 
@@ -87,6 +100,32 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
                     cycles -= 128;
                 }
             }
+        }
+
+        public void Latch(byte value)
+        {
+            if (value == 1 && latchRegister == 0)
+                latchedData = new RTC(Days, Hours, Minutes, Seconds);
+            else
+                latchedData = null;
+
+            latchRegister = value;
+        }
+
+        public byte[] Export()
+        {
+            byte[] bytes = new byte[10];
+            Latch(0);
+
+            for (int i = 0x08; i < 0x0C; i++)
+                bytes[i - 0x08] = GetValue((byte) i);
+
+            Latch(1);
+
+            for (int i = 0x08; i < 0x0C; i++)
+                bytes[i - 0x03] = latchedData.GetValue((byte) i);
+
+            return bytes;
         }
     }
 }

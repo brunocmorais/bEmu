@@ -8,14 +8,12 @@ namespace bEmu.Core.Systems.Gameboy
 {
     public class State : CPUs.LR35902.State
     {
-        public LCD LCD { get; }
+        public LCD LCD { get; set; }
 
-        public State(ISystem system)
+        public State(System system) : base(system)
         {
-            System = system;
-            LCD = new LCD(System.MMU as MMU);
             Joypad = new Joypad();
-            Timer = new Timer(System);
+            Timer = new Timer(system);
         }
 
         public Joypad Joypad { get; set; }

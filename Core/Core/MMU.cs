@@ -5,14 +5,7 @@ namespace bEmu.Core
 {
     public class MMU : IMMU
     {
-        public ISystem System { get; }
-        byte[] ram;
-
-        public MMU(ISystem system)
-        {
-            System = system;
-        }
-
+        private byte[] ram;
         public int Length => ram.Length;
 
         public MMU(int size)

@@ -8,6 +8,6 @@ namespace bEmu.Core
         void LoadProgram(string fileName, int startAddress = 0);
         void LoadProgram(byte[] bytes, int startAddress = 0);
         int Length { get; }
-        ISystem System { get; }
+        //ISystem System { get; }
     }
 }

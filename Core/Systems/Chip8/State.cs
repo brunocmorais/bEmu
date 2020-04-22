@@ -4,6 +4,7 @@ namespace bEmu.Core.Systems.Chip8
 {
     public class State : Core.State
     {
+        public State(ISystem system) : base(system) { }
         public byte[] V { get; set; }
         public bool[] Keys { get; set; }
         public ushort I { get; set; }

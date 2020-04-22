@@ -6,7 +6,6 @@ using bEmu.Core;
 using System.Diagnostics;
 using System;
 using bEmu.Core.Systems.Gameboy;
-using State = bEmu.Core.Systems.Gameboy.State;
 using bEmu.Core.Util;
 using bEmu.Core.CPUs.LR35902;
 using System.Threading.Tasks;
@@ -18,50 +17,52 @@ namespace bEmu
 {
     public class GameboyGame : Game
     {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
-        Core.Systems.Gameboy.System system;
-        const int tamanhoPixel = 2;
-        const int width = 160;
-        const int height = 144;
-        const int CycleCount = 70224;
-        string rom;
-        bEmu.Core.CPUs.LR35902.Disassembler disassembler;
-        bool running = false;
-        Keys[] frameskipKeys = new Keys[]
-        {
-            Keys.D0, Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6, Keys.D7, Keys.D8, Keys.D9
-        };
-        int lastRenderedFrame;
-        Thread thread;
-        bool debug;
-        SpriteFont font;
-        Texture2D backBuffer;
-        Rectangle destinationRectangle;
-        bool showFPS = false;
-        int drawCounter = 0;
+        private const int TamanhoPixel = 2;
+        private const int Width = 160;
+        private const int Height = 144;
+        private const int CycleCount = 70224;
+        private readonly Core.Systems.Gameboy.System system;
+        private readonly Core.Systems.Gameboy.State state;
+        private readonly Core.Systems.Gameboy.MMU mmu;
+        private readonly GPU gpu;
+        private GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
+        private string rom;
+        private bool running;
+        private Keys[] frameskipKeys;
+        private int lastRenderedFrame;
+        private Thread thread;
+        private SpriteFont font;
+        private Texture2D backBuffer;
+        private Rectangle destinationRectangle;
+        private bool showFPS;
+        private int drawCounter;
 
         public GameboyGame(string rom)
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = width * tamanhoPixel;
-            graphics.PreferredBackBufferHeight = height * tamanhoPixel;
+            graphics.PreferredBackBufferWidth = Width * TamanhoPixel;
+            graphics.PreferredBackBufferHeight = Height * TamanhoPixel;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             this.rom = rom;
+            running = false;
+            frameskipKeys = new Keys[]
+            {
+                Keys.D0, Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6, Keys.D7, Keys.D8, Keys.D9
+            };
+            showFPS = false;
+            drawCounter = 0;
+            system = new Core.Systems.Gameboy.System();
+            state = system.State as bEmu.Core.Systems.Gameboy.State;
+            mmu = system.MMU as bEmu.Core.Systems.Gameboy.MMU;
+            gpu = system.PPU as GPU;
         }
-
-        bEmu.Core.Systems.Gameboy.State State => system.State as bEmu.Core.Systems.Gameboy.State;
-        bEmu.Core.Systems.Gameboy.MMU Mmu => (system.MMU as bEmu.Core.Systems.Gameboy.MMU);
-        GPU Gpu => system.PPU as GPU;
 
         protected override void Initialize()
         {
-            system = new Core.Systems.Gameboy.System();
-            Mmu.LoadProgram(rom);
-            disassembler = new Core.CPUs.LR35902.Disassembler(system);
-            this.Window.Title = $"bEmu - {Mmu.CartridgeHeader.Title}";
-
+            mmu.LoadProgram(rom);
+            Window.Title = $"bEmu - {mmu.CartridgeHeader.Title}";
             base.Initialize();
         }
 
@@ -70,8 +71,8 @@ namespace bEmu
             spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("Common/Font");
             backBuffer = new Texture2D(GraphicsDevice, 160, 144);
-            destinationRectangle = new Rectangle(0, 0, width * tamanhoPixel, height * tamanhoPixel);
-            Gpu.Frameskip = 1;
+            destinationRectangle = new Rectangle(0, 0, Width * TamanhoPixel, Height * TamanhoPixel);
+            gpu.Frameskip = 1;
 
             running = true;
 
@@ -83,10 +84,10 @@ namespace bEmu
 
                     lock (this)
                     {
-                        if (Gpu.Frame <= drawCounter)
+                        if (gpu.Frame <= drawCounter)
                         {
-                            Gpu.Cycles += lastCycleCount;
-                            Gpu.StepCycle();
+                            gpu.Cycles += lastCycleCount;
+                            gpu.StepCycle();
                         }
                     }
                 }
@@ -102,7 +103,7 @@ namespace bEmu
             if (keyboardState.IsKeyDown(Keys.Escape))
             {
                 Exit();
-                Mmu.MBC.Shutdown();
+                mmu.MBC.Shutdown();
             }
 
             if (keyboardState.IsKeyDown(Keys.F1))
@@ -115,7 +116,7 @@ namespace bEmu
                 showFPS = !showFPS;
 
             if (frameskipKeys.Any(x => keyboardState.IsKeyDown(x)))
-                Gpu.Frameskip = (int) (frameskipKeys.First(x => keyboardState.IsKeyDown(x))) - 48;
+                gpu.Frameskip = (int) (frameskipKeys.First(x => keyboardState.IsKeyDown(x))) - 48;
 
             UpdateKeys(keyboardState);
         }
@@ -124,17 +125,17 @@ namespace bEmu
         {
             GraphicsDevice.Clear(Color.Black);
 
-            if (Gpu.Frame > lastRenderedFrame)
-                backBuffer.SetData(Gpu.FrameBuffer);
+            if (gpu.Frame > lastRenderedFrame)
+                backBuffer.SetData(gpu.FrameBuffer);
 
-            lastRenderedFrame = Gpu.Frame;
+            lastRenderedFrame = gpu.Frame;
             spriteBatch.Begin();
             spriteBatch.Draw(backBuffer, destinationRectangle, Color.White);
 
             if (showFPS)
             {
-                double fps = Math.Round(Gpu.Frame / gameTime.TotalGameTime.TotalSeconds, 1);
-                spriteBatch.DrawString(font, $"{Gpu.Frame}@{fps} fps\ninst={State.Instructions}", new Vector2(0, 0), Color.Red);
+                double fps = Math.Round(gpu.Frame / gameTime.TotalGameTime.TotalSeconds, 1);
+                spriteBatch.DrawString(font, $"{gpu.Frame}@{fps} fps\ninst={state.Instructions}", new Vector2(0, 0), Color.Red);
             }
             
             spriteBatch.End();
@@ -143,18 +144,18 @@ namespace bEmu
 
         private int UpdateGame()
         {
-            if (Mmu.Bios.Running && State.PC >= 0x100)
-                Mmu.Bios.Running = false;
+            if (mmu.Bios.Running && state.PC >= 0x100)
+                mmu.Bios.Running = false;
 
-            int prevCycles = State.Cycles;
+            int prevCycles = state.Cycles;
             var opcode = system.Runner.StepCycle();
-            int afterCycles = State.Cycles;
+            int afterCycles = state.Cycles;
 
             int lastCycleCount = (afterCycles - prevCycles);
-            State.Timer.UpdateTimers(lastCycleCount);
+            state.Timer.UpdateTimers(lastCycleCount);
 
-            if (Mmu.MBC is IHasRTC)
-                (Mmu.MBC as IHasRTC).Tick(lastCycleCount);
+            if (mmu.MBC is IHasRTC)
+                (mmu.MBC as IHasRTC).Tick(lastCycleCount);
 
             return lastCycleCount;
         }
@@ -162,41 +163,41 @@ namespace bEmu
         public void UpdateKeys(KeyboardState keyboardState)
         {
             if (keyboardState.IsKeyDown(Keys.Z))
-                State.Joypad.Column1 &= 0xE;
+                state.Joypad.Column1 &= 0xE;
             if (keyboardState.IsKeyDown(Keys.X))
-                State.Joypad.Column1 &= 0xD;
+                state.Joypad.Column1 &= 0xD;
             if (keyboardState.IsKeyDown(Keys.RightShift))
-                State.Joypad.Column1 &= 0xB;
+                state.Joypad.Column1 &= 0xB;
             if (keyboardState.IsKeyDown(Keys.Enter))
-                State.Joypad.Column1 &= 0x7;
+                state.Joypad.Column1 &= 0x7;
             if (keyboardState.IsKeyDown(Keys.Right))
-                State.Joypad.Column2 &= 0xE;
+                state.Joypad.Column2 &= 0xE;
             if (keyboardState.IsKeyDown(Keys.Left))
-                State.Joypad.Column2 &= 0xD;
+                state.Joypad.Column2 &= 0xD;
             if (keyboardState.IsKeyDown(Keys.Up))
-                State.Joypad.Column2 &= 0xB;
+                state.Joypad.Column2 &= 0xB;
             if (keyboardState.IsKeyDown(Keys.Down))
-                State.Joypad.Column2 &= 0x7;
+                state.Joypad.Column2 &= 0x7;
 
             if (keyboardState.IsKeyUp(Keys.Z))
-                State.Joypad.Column1 |= 0x1;
+                state.Joypad.Column1 |= 0x1;
             if (keyboardState.IsKeyUp(Keys.X))
-                State.Joypad.Column1 |= 0x2;
+                state.Joypad.Column1 |= 0x2;
             if (keyboardState.IsKeyUp(Keys.RightShift))
-                State.Joypad.Column1 |= 0x4;
+                state.Joypad.Column1 |= 0x4;
             if (keyboardState.IsKeyUp(Keys.Enter))
-                State.Joypad.Column1 |= 0x8;
+                state.Joypad.Column1 |= 0x8;
             if (keyboardState.IsKeyUp(Keys.Right))
-                State.Joypad.Column2 |= 0x1;
+                state.Joypad.Column2 |= 0x1;
             if (keyboardState.IsKeyUp(Keys.Left))
-                State.Joypad.Column2 |= 0x2;
+                state.Joypad.Column2 |= 0x2;
             if (keyboardState.IsKeyUp(Keys.Up))
-                State.Joypad.Column2 |= 0x4;
+                state.Joypad.Column2 |= 0x4;
             if (keyboardState.IsKeyUp(Keys.Down))
-                State.Joypad.Column2 |= 0x8;
+                state.Joypad.Column2 |= 0x8;
 
-            if (State.Joypad.Column1 != 0xF || State.Joypad.Column2 != 0xF)
-                State.RequestInterrupt(InterruptType.Joypad);
+            if (state.Joypad.Column1 != 0xF || state.Joypad.Column2 != 0xF)
+                state.RequestInterrupt(InterruptType.Joypad);
         }
 
         protected override void UnloadContent()

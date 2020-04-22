@@ -5,10 +5,9 @@ namespace bEmu.Core.Systems.Generic8080
 {
     public class System : Core.System
     {
-
         public override IState GetInitialState()
         {
-            var state = new State();
+            var state = new State(this);
 
             state.A = 0;
             state.B = 0;
@@ -33,7 +32,7 @@ namespace bEmu.Core.Systems.Generic8080
             base.Initialize();
             MMU = new MMU(0x10000);
             PPU = new PPU(this, 224, 256);
-            Runner = new Intel8080<State>(this);
+            Runner = new Intel8080<State, MMU>(this);
         }
 
         public void SetStartPoint(ushort pc)

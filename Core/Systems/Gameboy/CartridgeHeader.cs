@@ -37,7 +37,7 @@ namespace bEmu.Core.Systems.Gameboy
             GlobalChecksum = (ushort) (rom[0x014E] << 8 | rom[0x014F]);
         }
 
-        byte[] GetArray(byte[] rom, ushort start, ushort end)
+        private byte[] GetArray(byte[] rom, ushort start, ushort end)
         {
             byte[] array = new byte[end - start + 1];
 
@@ -47,7 +47,7 @@ namespace bEmu.Core.Systems.Gameboy
             return array;
         }
 
-        string GetString(byte[] header, ushort start, ushort end)
+        private string GetString(byte[] header, ushort start, ushort end)
         {
             var sb = new StringBuilder();
             
@@ -62,7 +62,7 @@ namespace bEmu.Core.Systems.Gameboy
             return sb.ToString();
         }
 
-        int GetRAMSize(byte value)
+        private int GetRAMSize(byte value)
         {
             switch (value)
             {

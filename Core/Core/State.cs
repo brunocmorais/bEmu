@@ -5,7 +5,12 @@ namespace bEmu.Core
 {
     public abstract class State : IState
     {
-        public ISystem System { get; set; }
+        public State(ISystem system)
+        {
+            System = system;
+        }
+
+        public ISystem System { get; }
         public ushort PC { get; set; }
         public ushort SP { get; set; }
         public int Cycles { get; set; }

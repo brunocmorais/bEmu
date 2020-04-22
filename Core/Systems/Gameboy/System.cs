@@ -14,17 +14,17 @@ namespace bEmu.Core.Systems.Gameboy
             state.Cycles = 0;
             state.Halted = false;
             state.Instructions = 0;
-            state.PC = 0x00;
+            state.PC = 0x0000;
 
             return state;
         }
 
         public override void Initialize()
         {
-            MMU = new MMU(this);
-            PPU = new GPU(this, 160, 144);
-            Runner = new LR35902<State>(this);
             base.Initialize();
+            MMU = new MMU(State as State);
+            PPU = new GPU(this);
+            Runner = new LR35902<State, MMU>(this);
         }
     }
 }

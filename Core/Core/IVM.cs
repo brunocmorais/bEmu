@@ -1,6 +1,6 @@
 namespace bEmu.Core
 {
-    public interface IVM<TState, TPPU> : IExecutor
+    public interface IVM<TState, TPPU> : IRunner
     { 
         TState State { get; }
         MMU MMU { get; }

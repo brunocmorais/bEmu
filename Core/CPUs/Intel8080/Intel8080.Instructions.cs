@@ -5,7 +5,9 @@ using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.Intel8080
 {
-    public partial class Intel8080<TState> : CPU<TState> where TState : State
+    public partial class Intel8080<TState, TMMU> : CPU<TState, TMMU> 
+        where TState : State
+        where TMMU : MMU
     {
         private void Nop()
         {

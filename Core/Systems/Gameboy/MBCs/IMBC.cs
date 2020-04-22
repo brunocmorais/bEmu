@@ -1,4 +1,4 @@
-namespace bEmu.Core.Systems
+namespace bEmu.Core.Systems.Gameboy.MBCs
 {
     public interface IMBC
     {

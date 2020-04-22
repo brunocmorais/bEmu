@@ -6,13 +6,15 @@ namespace bEmu.Core.Systems.Chip8
 {
     public class PPU : Core.PPU
     {
-        public PPU(System system, int width, int height) : base(system, width, height) { }
+        private State state;
+        public PPU(State state, int width, int height) : base(state.System, width, height) 
+        { 
+            this.state = state;
+        }
 
-        public State State => System.State as State;
-
-        void DrawNextTime()
+        private void DrawNextTime()
         {
-            State.Draw = true;
+            state.Draw = true;
         }
 
         public void ScrollRight()
@@ -90,10 +92,10 @@ namespace bEmu.Core.Systems.Chip8
             byte[] sprite = new byte[n];
 
             for (int i = 0; i < n; i++)
-                sprite[i] = System.MMU[State.I + i];
+                sprite[i] = System.MMU[state.I + i];
 
-            byte coordX = State.V[x];
-            byte coordY = State.V[y];
+            byte coordX = state.V[x];
+            byte coordY = state.V[y];
             bool collision = false;
 
             for (int i = 0; i < n; i++)
@@ -121,7 +123,7 @@ namespace bEmu.Core.Systems.Chip8
                 coordY %= (byte) Height;
             }
 
-            State.V[0xF] = (byte) (collision ? 1 : 0);
+            state.V[0xF] = (byte) (collision ? 1 : 0);
             DrawNextTime();
         }
 
@@ -130,10 +132,10 @@ namespace bEmu.Core.Systems.Chip8
             ushort[] sprite = new ushort[16];
 
             for (int i = 0; i < 16; i++)
-                sprite[i] = BitUtils.GetWordFrom2Bytes(System.MMU[State.I + (2 * i) + 1], System.MMU[State.I + (2 * i)]);
+                sprite[i] = BitUtils.GetWordFrom2Bytes(System.MMU[state.I + (2 * i) + 1], System.MMU[state.I + (2 * i)]);
 
-            byte coordX = State.V[x];
-            byte coordY = State.V[y];
+            byte coordX = state.V[x];
+            byte coordY = state.V[y];
             bool collision = false;
 
             for (int i = 0; i < 16; i++)
@@ -161,7 +163,7 @@ namespace bEmu.Core.Systems.Chip8
                 coordY %= (byte) Height;
             }
 
-            State.V[0xF] = (byte) (collision ? 1 : 0);
+            state.V[0xF] = (byte) (collision ? 1 : 0);
             DrawNextTime();
         }
 
@@ -171,7 +173,7 @@ namespace bEmu.Core.Systems.Chip8
                 for (int j = 0; j < Height; j++)
                     SetPixel(i, j, 0x000000FF);
 
-            State.Draw = true;
+            DrawNextTime();
         }
     }
 }
