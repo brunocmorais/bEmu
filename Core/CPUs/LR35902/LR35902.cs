@@ -163,15 +163,16 @@ namespace bEmu.Core.CPUs.LR35902
 
         public override IOpcode StepCycle()
         {
+            State.Instructions++;
+
             if (State.Halted)
             {
                 HandleInterrupts();
-                IncreaseCycles(16);
+                IncreaseCycles(8);
                 return default(Opcode);
             }
 
             var opcode = new Opcode(GetNextByte());
-            State.Instructions++;
 
             switch (opcode.Byte)
             {

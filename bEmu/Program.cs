@@ -14,6 +14,10 @@ namespace bEmu
         [STAThread]
         private static void Main(string[] args)
         {
+            // using (var game = new SoundTest())
+            //     game.Run();
+
+            // return;
             try
             {
                 string supportedSystems = string.Join("\n", Enum.GetNames(typeof(SupportedSystems)));

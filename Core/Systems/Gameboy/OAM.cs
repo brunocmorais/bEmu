@@ -29,9 +29,8 @@ namespace bEmu.Core.Systems.Gameboy
                 if (counter == 10) // limite de 10 sprites por linha
                     yield break;
 
-                if (sprite == null || sprite.X == 0 || sprite.X >= 168 || 
-                    sprite.Y == 0 || sprite.Y >= 160 || (sprite.Y <= 8 && spriteSize == 8))
-                    continue;
+                // if (sprite.X <= -8 || sprite.X >= 168 || sprite.Y <= -8 || sprite.Y >= 144)
+                //     continue;
                     
                 int lineOffset = ly - sprite.Y;
 

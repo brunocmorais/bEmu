@@ -20,7 +20,7 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
 
         public override byte ReadROM(int addr)
         {
-            if (addr >= 0x0000 && addr <= 0x4000)
+            if (addr >= 0x0000 && addr <= 0x3FFF)
                 return Rom0[addr];
             else
                 return RomBanks[1][addr - 0x4000];

@@ -17,7 +17,7 @@ namespace bEmu
 {
     public class GameboyGame : Game
     {
-        private const int TamanhoPixel = 2;
+        private const int TamanhoPixel = 3;
         private const int Width = 160;
         private const int Height = 144;
         private const int CycleCount = 70224;
@@ -87,7 +87,9 @@ namespace bEmu
                         if (gpu.Frame <= drawCounter)
                         {
                             gpu.Cycles += lastCycleCount;
-                            gpu.StepCycle();
+
+                            if (state.Instructions % 2 == 0)
+                                gpu.StepCycle();
                         }
                     }
                 }

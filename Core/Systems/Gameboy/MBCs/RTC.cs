@@ -68,7 +68,7 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
                 case 0x0A: return Hours;
                 case 0x0B: return (byte) (Days & 0xFF);
                 case 0x0C: return (byte) ((halt ? 0 : 1) << 6 | ((Days & 0x100) >> 9));
-                default: throw new Exception();
+                default: return 0;
             }
         }
 
