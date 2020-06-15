@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Threading;
 using bEmu.Core.Systems.Gameboy.MBCs;
+using bEmu.Core.Systems.Gameboy.GPU;
+using bEmu.Core.Systems.Gameboy.Sound;
 
 namespace bEmu
 {
@@ -25,6 +27,7 @@ namespace bEmu
         private readonly Core.Systems.Gameboy.State state;
         private readonly Core.Systems.Gameboy.MMU mmu;
         private readonly GPU gpu;
+        private readonly APU apu;
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         private string rom;
@@ -37,6 +40,8 @@ namespace bEmu
         private Rectangle destinationRectangle;
         private bool showFPS;
         private int drawCounter;
+        private DynamicSoundEffectInstance instance;
+        private byte[] instanceBuffer;
 
         public GameboyGame(string rom)
         {
@@ -57,6 +62,9 @@ namespace bEmu
             state = system.State as bEmu.Core.Systems.Gameboy.State;
             mmu = system.MMU as bEmu.Core.Systems.Gameboy.MMU;
             gpu = system.PPU as GPU;
+            apu = system.APU as APU;
+            instance = new DynamicSoundEffectInstance(APU.AudioSampleRate, AudioChannels.Stereo);
+            instanceBuffer = new byte[2 * APU.AudioBufferFrames * APU.BytesPerSample];
         }
 
         protected override void Initialize()
@@ -73,6 +81,7 @@ namespace bEmu
             backBuffer = new Texture2D(GraphicsDevice, 160, 144);
             destinationRectangle = new Rectangle(0, 0, Width * TamanhoPixel, Height * TamanhoPixel);
             gpu.Frameskip = 1;
+            instance.Play();
 
             running = true;
 
@@ -81,6 +90,10 @@ namespace bEmu
                 while (running)
                 {
                     int lastCycleCount = UpdateGame();
+                    // apu.Cycle(lastCycleCount);
+
+                    // if (/*apu.Enabled && */instance.PendingBufferCount <= 128)
+                    //     SubmitBuffer();
 
                     lock (this)
                     {
@@ -98,6 +111,13 @@ namespace bEmu
             thread.Start();
         }
 
+        private void SubmitBuffer()
+        {
+            //apu.FillWorkingBuffer();
+            //ConvertBuffer(apu.WorkingBuffer, instanceBuffer);
+            //instance.SubmitBuffer(apu.WorkingBuffer);
+        }
+
         protected override void Update(GameTime gameTime)
         {
             KeyboardState keyboardState = Keyboard.GetState();
@@ -111,6 +131,7 @@ namespace bEmu
             if (keyboardState.IsKeyDown(Keys.F1))
             {
                 running = false;
+                state.PC = 0x00;
                 Initialize();
             }
 
@@ -205,6 +226,33 @@ namespace bEmu
         protected override void UnloadContent()
         {
             running = false;
+        }
+
+        private void ConvertBuffer(float[,] from, byte[] to)
+        {
+            int bufferSize = from.GetLength(1);
+
+            for (int i = 0; i < bufferSize; i++)
+            {
+                for (int c = 0; c < 2; c++)
+                {
+                    float floatSample = MathHelper.Clamp(from[c, i], -1.0f, 1.0f);	
+                    short shortSample = (short) (floatSample >= 0.0f ? floatSample * short.MaxValue : floatSample * short.MinValue * -1);
+                    int index = i * 2 * APU.BytesPerSample + c * APU.BytesPerSample;
+                    to[index] = (byte)shortSample;
+
+                    if (!BitConverter.IsLittleEndian)
+                    {
+                        to[index] = (byte)(shortSample >> 8);
+                        to[index + 1] = (byte)shortSample;
+                    }
+                    else
+                    {
+                        to[index] = (byte)shortSample;
+                        to[index + 1] = (byte)(shortSample >> 8);
+                    }
+                }
+            }
         }
     }
 }

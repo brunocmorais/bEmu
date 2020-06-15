@@ -1,5 +1,6 @@
 using bEmu.Core.CPUs.LR35902;
 using bEmu.Core;
+using bEmu.Core.Systems.Gameboy.Sound;
 
 namespace bEmu.Core.Systems.Gameboy
 {
@@ -23,7 +24,8 @@ namespace bEmu.Core.Systems.Gameboy
         {
             base.Initialize();
             MMU = new MMU(State as State);
-            PPU = new GPU(this);
+            PPU = new GPU.GPU(this);
+            APU = new APU(this);
             Runner = new LR35902<State, MMU>(this);
         }
     }

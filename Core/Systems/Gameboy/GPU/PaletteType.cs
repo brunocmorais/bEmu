@@ -1,4 +1,4 @@
-namespace bEmu.Core.Systems.Gameboy
+namespace bEmu.Core.Systems.Gameboy.GPU
 {
     public enum PaletteType
     {

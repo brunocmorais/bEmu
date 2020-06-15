@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace bEmu.Core.Systems.Gameboy
+namespace bEmu.Core.Systems.Gameboy.GPU
 {
     public class OAM
     {

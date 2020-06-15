@@ -6,6 +6,7 @@ namespace bEmu.Core
         public IState State { get; protected set; }
         public IMMU MMU { get; protected set; }
         public IPPU PPU { get; protected set; }
+        public IAPU APU { get; protected set; }
 
         public System()
         {

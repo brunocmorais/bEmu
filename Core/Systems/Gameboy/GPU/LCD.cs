@@ -1,6 +1,6 @@
 using bEmu.Core.CPUs.LR35902;
 
-namespace bEmu.Core.Systems.Gameboy
+namespace bEmu.Core.Systems.Gameboy.GPU
 {
     public class LCD
     {

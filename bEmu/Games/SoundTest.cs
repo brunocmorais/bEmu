@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Input;
@@ -10,14 +11,16 @@ namespace bEmu
         private GraphicsDeviceManager graphics;
         private Oscillator leftOscillator;
         private Oscillator rightOscillator;
+        private Thread thread;
         private DynamicSoundEffectInstance instance;
-        private int sampleRate = 48000;
+        private int sampleRate = 22050;
         private byte[] xnaBuffer;
         private float[,] workingBuffer;
-        private int channels = 2;
-        private int samplesPerBuffer = 1024;
-        private int bytesPerSample = 2;
+        const int channels = 2;
+        const int samplesPerBuffer = 16;
+        const int bytesPerSample = 2;
         private double time = 0;
+        private bool running = true;
 
         public SoundTest()
         {
@@ -36,32 +39,61 @@ namespace bEmu
 
             leftOscillator = new Oscillator();
             rightOscillator = new Oscillator();
+
+            thread = new Thread(() => 
+            {
+                while (running) 
+                {
+                    lock (instance)
+                    {
+                        if (instance.PendingBufferCount <= 128)
+                            SubmitBuffer();
+                    }
+                }
+            });
+
+            thread.Start();
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+            {
+                running = false;
                 Exit();
+            }
 
             HandleInputs();
-
-            while (instance.PendingBufferCount < 3)
-                SubmitBuffer();
         }
 
         private void HandleInputs()
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Right))
-                leftOscillator.Frequency++;
+            {
+                leftOscillator.Frequency += 2;
+                rightOscillator.Frequency += 2;
+            }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Left))
-                leftOscillator.Frequency--;
+            {
+                leftOscillator.Frequency -= 2;
+                rightOscillator.Frequency -= 2;
+            }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Up))
+            {
                 leftOscillator.Amplitude += 0.1;
+                rightOscillator.Amplitude += 0.1;
+            }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Down))
-                leftOscillator.Amplitude -= 0.1;
+            {
+                //if (leftOscillator.Amplitude > 0 && rightOscillator.Amplitude > 0)
+                {
+                    leftOscillator.Amplitude = 0;
+                    rightOscillator.Amplitude = 0;
+                }
+            }
         }
 
         private void SubmitBuffer()
@@ -116,15 +148,13 @@ namespace bEmu
 
     public class Oscillator
     {
-        public double Frequency = 110;
-        public double Amplitude = 1;
+        public double Frequency = 440;
+        public double Amplitude = 0.5;
         private Random random = new Random();
 
         public double GenerateSquareWave(double time)
         {
             return Math.Sin(Frequency * time * 2 * Math.PI) >= 0 ? Amplitude : -Amplitude;
-            //return (random.NextDouble() - random.NextDouble()) * Amplitude;
-            //return Math.Sin(Frequency * time * 2 * Math.PI) * Amplitude;
         }
     }
 }

@@ -6,6 +6,7 @@ namespace bEmu.Core
         IState State { get; }
         IMMU MMU { get; }
         IPPU PPU { get; }
+        IAPU APU { get; }
         void Initialize();
         IState GetInitialState();
     }
