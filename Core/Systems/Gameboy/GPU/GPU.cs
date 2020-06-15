@@ -180,9 +180,6 @@ namespace bEmu.Core.Systems.Gameboy.GPU
                                 tileStartAddress = state.LCD.GetLCDCFlag(LCDC.BGWindowTileDataSelect) ? 0x0000 : 0x0800;
                                 bgMapSelect = state.LCD.GetLCDCFlag(LCDC.BGTileMapDisplaySelect) ? 0x1C00 : 0x1800;
                                 windowMapSelect = state.LCD.GetLCDCFlag(LCDC.WindowTileMapDisplaySelect) ? 0x1C00 : 0x1800;
-
-                                if (spriteDisplay)
-                                    oam.UpdateSprites();
                             }
 
                             Frame++;
@@ -199,8 +196,11 @@ namespace bEmu.Core.Systems.Gameboy.GPU
                             state.RequestInterrupt(InterruptType.LcdStat);
 
                         if (!SkipFrame && lcdEnabled && spriteDisplay)
+                        {
                             spritesCurrentLine = oam.GetSpritesForScanline(state.LCD.LY, spriteSize);
-
+                            oam.UpdateSprites();
+                        }
+                        
                         Cycles -= 80;
                     }
                     break;

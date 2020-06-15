@@ -19,7 +19,7 @@ namespace bEmu
 {
     public class GameboyGame : Game
     {
-        private const int TamanhoPixel = 3;
+        private const int TamanhoPixel = 2;
         private const int Width = 160;
         private const int Height = 144;
         private const int CycleCount = 70224;
