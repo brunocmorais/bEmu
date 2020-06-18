@@ -8,6 +8,11 @@ namespace bEmu.Core.Systems.Generic8080
 
         public PPU(System system, int width, int height) : base(system, width, height) { }
 
+        public override void StepCycle()
+        {
+            
+        }
+
         public void UpdateFrameBuffer()
         {
             for (int x = 0; x < Height; x++)

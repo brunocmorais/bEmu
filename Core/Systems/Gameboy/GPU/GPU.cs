@@ -23,9 +23,6 @@ namespace bEmu.Core.Systems.Gameboy.GPU
         private int windowMapSelect;
         private int bgMapSelect;
         private IEnumerable<Sprite> spritesCurrentLine;
-        public int Cycles { get; set; }
-        public int Frame { get; private set; }
-        public int Frameskip { get; set; }
         private bool SkipFrame => (Frameskip >= 1 && Frame % (Frameskip + 1) != 0);
 
         public GPU(System system) : base(system, 160, 144) 
@@ -110,7 +107,7 @@ namespace bEmu.Core.Systems.Gameboy.GPU
             Cycles = 0;
         }
 
-        public void StepCycle()
+        public override void StepCycle()
         {
             if (!lcdEnabled)
             {

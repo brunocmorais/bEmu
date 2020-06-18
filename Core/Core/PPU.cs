@@ -7,6 +7,9 @@ namespace bEmu.Core
         public int Width { get; }
         public int Height { get; }
         public byte[] FrameBuffer { get; set; }
+        public int Frameskip { get; set; }
+        public int Frame { get; set; }
+        public int Cycles { get; set; }
 
         public PPU(ISystem system, int width, int height)
         {
@@ -30,5 +33,7 @@ namespace bEmu.Core
             int start = (y * Width * 4) + (x * 4);
             return (uint) ((FrameBuffer[start] << 24) | (FrameBuffer[start + 1] << 16) | (FrameBuffer[start + 2] << 8) | (FrameBuffer[start + 3])); 
         }
+
+        public abstract void StepCycle();
     }
 }

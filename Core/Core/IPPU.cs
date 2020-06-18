@@ -8,5 +8,10 @@ namespace bEmu.Core
         byte[] FrameBuffer { get; }
         uint GetPixel(int x, int y);
         void SetPixel(int x, int y, uint color);
+        int Frameskip { get; set; }
+        int Frame { get; set; }
+        int Cycles { get; set; }
+
+        void StepCycle();
     }
 }
