@@ -60,7 +60,7 @@ namespace bEmu.Core.Systems.Gameboy.Sound
         //         // return ret;
         //     }
         // }
-        private double time = 0;
+        public double time = 0;
         private int cycleCountLength = 0;
         private int cycleCountEnvelope = 0;
         private int cycleCount = 0;

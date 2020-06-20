@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework.Input;
 
-namespace bEmu
+namespace bEmu.Extensions
 {
     public static class KeyboardStateExtensions
     {

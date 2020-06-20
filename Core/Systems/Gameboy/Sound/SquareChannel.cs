@@ -13,7 +13,7 @@ namespace bEmu.Core.Systems.Gameboy.Sound
         private int cycles;
         private int sampleIndex;
         private int cycleSampleUpdate;
-        private int soundLengthCounter;
+        //private int soundLengthCounter;
         private LengthCounter lengthCounter;
         private Envelope envelope;
         private ushort currentFrequency;

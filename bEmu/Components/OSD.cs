@@ -4,7 +4,7 @@ using bEmu.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace bEmu
+namespace bEmu.Components
 {
     public class OSD
     {

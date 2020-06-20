@@ -1,8 +1,9 @@
+using System;
 using Microsoft.Xna.Framework.Input;
 
 namespace bEmu
 {
-    public interface IBaseGame
+    public interface IBaseGame : IDisposable
     {
         void StopGame();
         void UpdateGame();

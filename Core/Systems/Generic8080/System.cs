@@ -32,7 +32,7 @@ namespace bEmu.Core.Systems.Generic8080
             base.Initialize();
             MMU = new MMU(0x10000);
             PPU = new PPU(this, 224, 256);
-            Runner = new Intel8080<State, MMU>(this);
+            Runner = new CPU(this);
         }
 
         public void SetStartPoint(ushort pc)

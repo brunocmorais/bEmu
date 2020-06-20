@@ -6,11 +6,11 @@ using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.LR35902
 {
-    public partial class LR35902<TState, TMMU> : CPU<TState, TMMU> 
+    public abstract partial class LR35902<TState, TMMU> : CPU<TState, TMMU> 
         where TState : State
         where TMMU : Core.Systems.Gameboy.MMU
     {
-        private void Bit(int bitNumber, Register register)
+        protected void Bit(int bitNumber, Register register)
         {
             if (register == Register.HL)
                 IncreaseCycles(8);
@@ -25,7 +25,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Set(int bitNumber, Register register)
+        protected void Set(int bitNumber, Register register)
         {
             byte value = GetByteFromRegister(register);
             value |= (byte) (0x1 << bitNumber);
@@ -38,7 +38,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Res(int bitNumber, Register register)
+        protected void Res(int bitNumber, Register register)
         {
             byte value = GetByteFromRegister(register);
             value &= (byte) ~(0x1 << bitNumber);
@@ -50,7 +50,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Rlc(Register register)
+        protected void Rlc(Register register)
         {
             if (register == Register.HL)
                 IncreaseCycles(8);
@@ -70,7 +70,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Rrc(Register register)
+        protected void Rrc(Register register)
         {
             if (register == Register.HL)
                 IncreaseCycles(8);
@@ -90,7 +90,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Rl(Register register)
+        protected void Rl(Register register)
         {
             if (register == Register.HL)
                 IncreaseCycles(8);
@@ -109,7 +109,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Rr(Register register)
+        protected void Rr(Register register)
         {
             if (register == Register.HL)
                 IncreaseCycles(8);
@@ -128,7 +128,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Sla(Register register)
+        protected void Sla(Register register)
         {
             if (register == Register.HL)
                 IncreaseCycles(8);
@@ -143,7 +143,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Sra(Register register)
+        protected void Sra(Register register)
         {
             if (register == Register.HL)
                 IncreaseCycles(8);
@@ -160,7 +160,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Swap(Register register)
+        protected void Swap(Register register)
         {
             if (register == Register.HL)
                 IncreaseCycles(8);
@@ -181,7 +181,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Srl(Register register)
+        protected void Srl(Register register)
         {
             if (register == Register.HL)
                 IncreaseCycles(8);
@@ -197,13 +197,13 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Jp(ushort addr)
+        protected void Jp(ushort addr)
         {
             State.PC = addr;
             IncreaseCycles(10);
         }
 
-        private void ConditionalCall(bool condition)
+        protected void ConditionalCall(bool condition)
         {
             if (condition)
                 Call();
@@ -214,13 +214,13 @@ namespace bEmu.Core.CPUs.LR35902
             }
         }
 
-        private void Call(ushort addr)
+        protected void Call(ushort addr)
         {
             PushStack(State.PC);
             Jp(addr);
         }
 
-        private void Call()
+        protected void Call()
         {
             ushort addr = GetNextWord();
             PushStack(State.PC);
@@ -228,17 +228,17 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(14);
         }
 
-        private void CallC()
+        protected void CallC()
         {
             ConditionalCall(State.Flags.Carry);
         }
 
-        private void CallZ()
+        protected void CallZ()
         {
             ConditionalCall(State.Flags.Zero);
         }
 
-        private void Adc()
+        protected void Adc()
         {
             byte value = GetNextByte();
             int result = State.A + value;
@@ -254,7 +254,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Sbc()
+        protected void Sbc()
         {
             byte value = GetNextByte();
             int result = State.A - value;
@@ -270,7 +270,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);   
         }
 
-        private void Xor()
+        protected void Xor()
         {
             byte value = GetNextByte();
             State.Flags.Carry = false;
@@ -281,7 +281,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Cp()
+        protected void Cp()
         {
             byte value = GetNextByte();                
             byte result = (byte) (State.A - value);
@@ -292,23 +292,23 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Ei()
+        protected void Ei()
         {
             State.EnableInterrupts = true;
             IncreaseCycles(4);
         }
 
-        private void RetZ()
+        protected void RetZ()
         {
             ConditionalRet(State.Flags.Zero);
         }
 
-        private void RetC()
+        protected void RetC()
         {
             ConditionalRet(State.Flags.Carry);
         }
 
-        private void AddSP()
+        protected void AddSP()
         {
             sbyte value = (sbyte) GetNextByte();
             ushort sp = State.SP;
@@ -322,7 +322,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(16);
         }
 
-        private void Ld_HL_SPr8()
+        protected void Ld_HL_SPr8()
         {
             sbyte value = (sbyte) GetNextByte();
             ushort sp = State.SP;
@@ -336,48 +336,48 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(12);
         }
 
-        private void Ret()
+        protected void Ret()
         {
             State.PC = PopStack();
             IncreaseCycles(16);
         }
 
-        private void Reti()
+        protected void Reti()
         {
             Ret();
             State.EnableInterrupts = true;
         }
 
-        private void Jp_HL()
+        protected void Jp_HL()
         {
             Jp(State.HL);
             IncreaseCycles(4);
         }
 
-        private void Ld_SPHL()
+        protected void Ld_SPHL()
         {
             State.SP = State.HL;
             IncreaseCycles(8);
         }
 
-        private void JpZ()
+        protected void JpZ()
         {
             ConditionalJmp(State.Flags.Zero);
         }
 
-        private void Ld_a16_A()
+        protected void Ld_a16_A()
         {
             MMU[GetNextWord()] = State.A;
             IncreaseCycles(16);
         }
 
-        private void Ld_A_a16()
+        protected void Ld_A_a16()
         {
             State.A = MMU[GetNextWord()];
             IncreaseCycles(16);
         }
 
-        private void Add_A_d8()
+        protected void Add_A_d8()
         {
             byte value = GetNextByte();
             int result = State.A + value;
@@ -391,7 +391,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Sub_d8()
+        protected void Sub_d8()
         {
             byte value = GetNextByte();
             int result = State.A - value;
@@ -403,7 +403,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(7);   
         }
 
-        private void And_d8()
+        protected void And_d8()
         {
             byte value = GetNextByte();
             State.Flags.Carry = false;
@@ -414,7 +414,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Or_d8()
+        protected void Or_d8()
         {
             byte value = GetNextByte();
             State.Flags.Carry = false;
@@ -425,13 +425,13 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Rst(ushort addr)
+        protected void Rst(ushort addr)
         {
             Call(addr);
             IncreaseCycles(6);
         }
 
-        private void Push(Register register)
+        protected void Push(Register register)
         {
             switch (register)
             {
@@ -444,57 +444,57 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(16);
         }
 
-        private void CallNC()
+        protected void CallNC()
         {
             ConditionalCall(!State.Flags.Carry);
         }
 
-        private void CallNZ()
+        protected void CallNZ()
         {
             ConditionalCall(!State.Flags.Zero);
         }
 
-        private void JpNZ()
+        protected void JpNZ()
         {
             ConditionalJmp(!State.Flags.Zero);
         }
 
-        private void JpNC()
+        protected void JpNC()
         {
             ConditionalJmp(!State.Flags.Carry);
         }
 
-        private void Ld_C_A()
+        protected void Ld_C_A()
         {
             MMU[0xFF00 + State.C] = State.A;
             IncreaseCycles(8);
         }
 
-        private void Ld_A_C()
+        protected void Ld_A_C()
         {
             State.A = MMU[0xFF00 + State.C];
             IncreaseCycles(8);
         }
 
-        private void JpC()
+        protected void JpC()
         {
             ConditionalJmp(State.Flags.Carry);
         }
 
-        private void Jp()
+        protected void Jp()
         {
             ushort addr = GetNextWord();
             State.PC = addr;
             IncreaseCycles(16);
         }
 
-        private void Di()
+        protected void Di()
         {
             State.EnableInterrupts = false;
             IncreaseCycles(4);
         }
 
-        private void Pop(Register register)
+        protected void Pop(Register register)
         {
             switch (register)
             {
@@ -506,7 +506,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(12);
         }
 
-        private void PopPsw()
+        protected void PopPsw()
         {
             ushort af = PopStack();
             State.A = (byte)(af >> 8);
@@ -520,29 +520,29 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(10);
         }
 
-        private void Ldh_A_a8()
+        protected void Ldh_A_a8()
         {
             State.A = MMU[0xFF00 | GetNextByte()];
             IncreaseCycles(12);
         }
 
-        private void Ldh_a8_A()
+        protected void Ldh_a8_A()
         {
             MMU[0xFF00 | GetNextByte()] = State.A;
             IncreaseCycles(12);
         }
 
-        private void RetNC()
+        protected void RetNC()
         {
             ConditionalRet(!State.Flags.Carry);
         }
 
-        private void RetNZ()
+        protected void RetNZ()
         {
             ConditionalRet(!State.Flags.Zero);
         }
 
-        private void ConditionalRet(bool condition)
+        protected void ConditionalRet(bool condition)
         {
             if (condition)
             {
@@ -553,7 +553,7 @@ namespace bEmu.Core.CPUs.LR35902
                 IncreaseCycles(8);
         }
 
-        private void Cp(Register register)
+        protected void Cp(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -569,7 +569,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Or(Register register)
+        protected void Or(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -584,7 +584,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Xor(Register register)
+        protected void Xor(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -599,7 +599,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void And(Register register)
+        protected void And(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -614,7 +614,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Sbc(Register register)
+        protected void Sbc(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -634,7 +634,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Sub(Register register)
+        protected void Sub(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -650,7 +650,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);   
         }
 
-        private void Adc(Register register)
+        protected void Adc(Register register)
         {
             if (register == Register.HL)
                 IncreaseCycles(4);
@@ -669,7 +669,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Add(Register register)
+        protected void Add(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -686,13 +686,13 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Halt()
+        protected void Halt()
         {
             State.Halted = true;
             IncreaseCycles(4);
         }
 
-        private void Ld(Register registerA, Register registerB)
+        protected void Ld(Register registerA, Register registerB)
         {
             byte value = GetByteFromRegister(registerB);
 
@@ -714,7 +714,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Ccf()
+        protected void Ccf()
         {
             State.Flags.Carry = !State.Flags.Carry;
             State.Flags.HalfCarry = false;
@@ -723,7 +723,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Cpl()
+        protected void Cpl()
         {
             State.A = (byte) ~State.A;
             State.Flags.Subtract = true;
@@ -731,7 +731,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Rra()
+        protected void Rra()
         {
             bool previousCarry = State.Flags.Carry;
             State.Flags.Carry = (State.A & 0x1) == 1;
@@ -747,7 +747,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Rrca()
+        protected void Rrca()
         {
             State.Flags.Carry = (State.A & 0x1) == 1;
             State.A >>= 1;
@@ -762,7 +762,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void LdA(Register register, Action action)
+        protected void LdA(Register register, Action action)
         {
             byte value = GetByteFromRegister(register);
             State.A = value;
@@ -775,7 +775,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void AddHL(Register register)
+        protected void AddHL(Register register)
         {
             ushort word = GetWordFromRegister(register);
             int result = (State.HL + word);
@@ -786,17 +786,17 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void Jrc()
+        protected void Jrc()
         {
             ConditionalJr(State.Flags.Carry);
         }
 
-        private void Jrz()
+        protected void Jrz()
         {
             ConditionalJr(State.Flags.Zero);
         }
 
-        private void Jr()
+        protected void Jr()
         {
             sbyte value = (sbyte) GetNextByte();
             int result = State.PC + value;
@@ -804,7 +804,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(12);
         }
 
-        private void ConditionalJr(bool condition)
+        protected void ConditionalJr(bool condition)
         {
             if (condition)
                 Jr();
@@ -815,7 +815,7 @@ namespace bEmu.Core.CPUs.LR35902
             }
         }
 
-        private void Ld_SP()
+        protected void Ld_SP()
         {
             var addr = GetNextWord();
             BitUtils.Get2BytesFromWord(State.SP, out byte msb, out byte lsb);
@@ -825,7 +825,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(20);
         }
 
-        private void Scf()
+        protected void Scf()
         {
             State.Flags.Carry = true;
             State.Flags.HalfCarry = false;
@@ -834,7 +834,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Daa()
+        protected void Daa()
         {
             if (!State.Flags.Subtract) 
             {
@@ -862,7 +862,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Rla()
+        protected void Rla()
         {
             bool previousCarry = State.Flags.Carry;
             State.Flags.Carry = ((State.A & 0x80) >> 7) == 1;
@@ -878,7 +878,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Rlca()
+        protected void Rlca()
         {
             State.Flags.Carry = ((State.A & 0x80) >> 7) == 1;
             State.A <<= 1;
@@ -893,7 +893,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void Ld_d8(Register register)
+        protected void Ld_d8(Register register)
         {
             switch (register)
             {
@@ -913,7 +913,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);   
         }
 
-        private void DecRegPair(Register register)
+        protected void DecRegPair(Register register)
         {
             switch (register)
             {
@@ -926,7 +926,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void DecRef()
+        protected void DecRef()
         {
             byte reference = MMU[State.HL];
             MMU[State.HL]--;
@@ -936,7 +936,7 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.Subtract = true;
         }
 
-        private void Dec(Register register)
+        protected void Dec(Register register)
         {
             byte regValue;
 
@@ -990,7 +990,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void IncRegPair(Register register)
+        protected void IncRegPair(Register register)
         {
             switch (register)
             {
@@ -1003,7 +1003,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void IncRef()
+        protected void IncRef()
         {
             byte reference = MMU[State.HL];
             MMU[State.HL]++;
@@ -1014,7 +1014,7 @@ namespace bEmu.Core.CPUs.LR35902
             State.Flags.Subtract = false;
         }
 
-        private void Inc(Register register)
+        protected void Inc(Register register)
         {
             byte regValue;
             switch (register)
@@ -1068,7 +1068,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        private void LD_A(Register register, Action action)
+        protected void LD_A(Register register, Action action)
         {
             if (register == Register.BC)
                 MMU[State.BC] = State.A;
@@ -1085,7 +1085,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(8);
         }
 
-        private void LD_d16(Register register)
+        protected void LD_d16(Register register)
         {
             switch (register)
             {
@@ -1109,17 +1109,17 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(12);
         }
 
-        private void JrNC()
+        protected void JrNC()
         {
             ConditionalJr(!State.Flags.Carry);
         }
 
-        private void JrNZ()
+        protected void JrNZ()
         {
             ConditionalJr(!State.Flags.Zero);
         }
 
-        private void ConditionalJmp(bool condition)
+        protected void ConditionalJmp(bool condition)
         {
             if (condition)
                 Jp();
@@ -1130,12 +1130,12 @@ namespace bEmu.Core.CPUs.LR35902
             }            
         }
 
-        private void Nop()
+        protected void Nop()
         {
             IncreaseCycles(4);
         }
 
-        private void Stop()
+        protected void Stop()
         {
             byte value = GetNextByte();
 

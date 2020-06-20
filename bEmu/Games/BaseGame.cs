@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
 using System.Threading;
+using bEmu.Components;
 using bEmu.Core;
+using bEmu.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -20,7 +22,7 @@ namespace bEmu
         protected int Width { get; }
         protected int Height { get; }
         private GraphicsDeviceManager graphics;
-        private SpriteBatch spriteBatch;
+        protected SpriteBatch SpriteBatch { get; private set; }
         protected bool IsRunning { get; set; }
         private Keys[] frameskipKeys;
         private int lastRenderedFrame;
@@ -63,11 +65,11 @@ namespace bEmu
 
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
+            SpriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("Common/Font");
             BackBuffer = new Texture2D(GraphicsDevice, Width, Height);
             destinationRectangle = new Rectangle(0, 0, Width * PixelSize, Height * PixelSize);
-            osd = new OSD(System, spriteBatch, font);
+            osd = new OSD(System, SpriteBatch, font);
 
             thread = new Thread(() =>
             {
@@ -116,10 +118,8 @@ namespace bEmu
 
             lastRenderedFrame = Gpu.Frame;
             
-            spriteBatch.Begin();
-            spriteBatch.Draw(BackBuffer, destinationRectangle, Color.White);
+            SpriteBatch.Draw(BackBuffer, destinationRectangle, Color.White);
             osd.Draw(gameTime);
-            spriteBatch.End();
             DrawCounter++;
 
             base.Draw(gameTime);

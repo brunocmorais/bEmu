@@ -30,6 +30,8 @@ namespace bEmu.Core.Systems.Generic8080
                         SetPixel(y, Height - 1 - x, 0x00000000);
                 }
             }
+
+            Frame++;
         }
     }
 }

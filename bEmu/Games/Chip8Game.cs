@@ -99,7 +99,9 @@ namespace bEmu
 
         protected override void Draw (GameTime gameTime)
 		{
+            SpriteBatch.Begin();
             base.Draw (gameTime);
+            SpriteBatch.End();
             State.Draw = false;
 		}
     }

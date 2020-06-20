@@ -3,7 +3,7 @@ using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.LR35902
 {
-    public partial class LR35902<TState, TMMU> : CPU<TState, TMMU> 
+    public abstract partial class LR35902<TState, TMMU> : CPU<TState, TMMU> 
         where TState : State
         where TMMU : Core.Systems.Gameboy.MMU
     {
@@ -95,7 +95,7 @@ namespace bEmu.Core.CPUs.LR35902
             }
         }
 
-        void SetByteToRegister(Register register, byte value)
+        protected void SetByteToRegister(Register register, byte value)
         {
             switch (register)
             {
@@ -132,34 +132,7 @@ namespace bEmu.Core.CPUs.LR35902
             return (((a ^ b ^ result) & 0x10) == 0x10);
         }
 
-        public void HandleInterrupts()
-        {
-            if (!(State is bEmu.Core.Systems.Gameboy.State))
-                return;
-
-            var state = State as bEmu.Core.Systems.Gameboy.State;
-
-            if (state.IE == 0 || state.IF == 0)
-                return;
-
-            for (int i = 0; i < 5; i++)
-            {
-                int mask = (0x1 << i);
-
-                if ((state.IE & state.IF & mask) == mask)
-                {
-                    state.Halted = false;
-
-                    if (!state.EnableInterrupts)
-                        return;
-
-                    state.EnableInterrupts = false;
-                    Rst((ushort) (0x40 + (0x8 * i)));
-                    state.IF &= (byte) ~mask;
-                    break;
-                }
-            }
-        }
+        public abstract void HandleInterrupts();
 
         public override IOpcode StepCycle()
         {

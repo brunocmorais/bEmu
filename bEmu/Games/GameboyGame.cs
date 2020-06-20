@@ -6,6 +6,7 @@ using State = bEmu.Core.Systems.Gameboy.State;
 using APU = bEmu.Core.Systems.Gameboy.Sound.APU;
 using GPU = bEmu.Core.Systems.Gameboy.GPU.GPU;
 using Gameboy = bEmu.Core.Systems.Gameboy;
+using Microsoft.Xna.Framework;
 
 namespace bEmu
 {
@@ -61,6 +62,13 @@ namespace bEmu
                         Gpu.StepCycle();
                 }
             }
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            SpriteBatch.Begin();
+            base.Draw(gameTime);
+            SpriteBatch.End();
         }
 
         public override void StopGame()
