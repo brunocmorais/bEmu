@@ -8,7 +8,7 @@ namespace bEmu.Core.Systems.Chip8
         {
             State state = (State as State);
             state.SuperChipMode = true;
-            PPU = new PPU(state, 128, 64);
+            PPU.DefineSize(128, 64);
             state.R = new byte[8];
         }
 

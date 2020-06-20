@@ -16,19 +16,19 @@ namespace bEmu
         where TGPU : IPPU
         where TAPU : IAPU
     {
-        private int tamanhoPixel;
-        private int width;
-        private int height;
+        protected int PixelSize { get; }
+        protected int Width { get; }
+        protected int Height { get; }
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        private bool isRunning;
+        protected bool IsRunning { get; set; }
         private Keys[] frameskipKeys;
         private int lastRenderedFrame;
         private Thread thread;
         private SpriteFont font;
-        private Texture2D backBuffer;
         private Rectangle destinationRectangle;
         private OSD osd;
+        protected Texture2D BackBuffer { get; set; }
         protected string Rom { get; }
         protected int DrawCounter { get; private set; }
         protected TSystem System { get; }
@@ -37,23 +37,23 @@ namespace bEmu
         protected TMMU Mmu { get; }
         protected TAPU Apu { get; }
 
-        public BaseGame(TSystem system, string rom, int width, int height, int tamanhoPixel)
+        public BaseGame(TSystem system, string rom, int width, int height, int pixelSize)
         {
             System = system;
             State = (TState) System.State;
             Mmu = (TMMU) System.MMU;
             Gpu = (TGPU) System.PPU;
             Apu = (TAPU) System.APU;
-            this.width = width;
-            this.height = height;
-            this.tamanhoPixel = tamanhoPixel;
+            this.Width = width;
+            this.Height = height;
+            this.PixelSize = pixelSize;
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = this.width * this.tamanhoPixel;
-            graphics.PreferredBackBufferHeight = this.height * this.tamanhoPixel;
+            graphics.PreferredBackBufferWidth = this.Width * this.PixelSize;
+            graphics.PreferredBackBufferHeight = this.Height * this.PixelSize;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             this.Rom = rom;
-            isRunning = false;
+            IsRunning = false;
             frameskipKeys = new Keys[]
             {
                 Keys.D0, Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6, Keys.D7, Keys.D8, Keys.D9
@@ -61,30 +61,26 @@ namespace bEmu
             DrawCounter = 0;
         }
 
-        protected override void Initialize()
-        {
-            base.Initialize();
-        }
-
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("Common/Font");
-            backBuffer = new Texture2D(GraphicsDevice, width, height);
-            destinationRectangle = new Rectangle(0, 0, width * tamanhoPixel, height * tamanhoPixel);
+            BackBuffer = new Texture2D(GraphicsDevice, Width, Height);
+            destinationRectangle = new Rectangle(0, 0, Width * PixelSize, Height * PixelSize);
             osd = new OSD(System, spriteBatch, font);
-
-            isRunning = true;
 
             thread = new Thread(() =>
             {
-                while (isRunning)
+                while (IsRunning)
                     UpdateGame();
             });
 
-            thread.Start();
-
             base.LoadContent();
+        }
+
+        public void StartMainThread()
+        {
+            thread.Start();
         }
 
         protected override void Update(GameTime gameTime)
@@ -97,7 +93,7 @@ namespace bEmu
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.F1))
             {
-                isRunning = false;
+                IsRunning = false;
                 Initialize();
             }
 
@@ -116,12 +112,12 @@ namespace bEmu
             GraphicsDevice.Clear(Color.Black);
 
             if (Gpu.Frame > lastRenderedFrame)
-                backBuffer.SetData(Gpu.FrameBuffer);
+                BackBuffer.SetData(Gpu.FrameBuffer);
 
             lastRenderedFrame = Gpu.Frame;
             
             spriteBatch.Begin();
-            spriteBatch.Draw(backBuffer, destinationRectangle, Color.White);
+            spriteBatch.Draw(BackBuffer, destinationRectangle, Color.White);
             osd.Draw(gameTime);
             spriteBatch.End();
             DrawCounter++;
@@ -131,11 +127,15 @@ namespace bEmu
 
         protected override void UnloadContent()
         {
-            isRunning = false;
+            IsRunning = false;
+        }
+
+        public virtual void StopGame()
+        {
+            Exit();
         }
 
         public abstract void UpdateGame();
         public abstract void UpdateGamePad(KeyboardState keyboardState);
-        public abstract void StopGame();
     }
 }

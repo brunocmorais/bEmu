@@ -25,7 +25,7 @@ namespace bEmu.Core.Systems.Gameboy
             base.Initialize();
             MMU = new MMU(State as State);
             PPU = new GPU.GPU(this);
-            APU = new APU(this);
+            APU = new bEmu.Core.Systems.Gameboy.Sound.APU(this);
             Runner = new LR35902<State, MMU>(this);
         }
     }

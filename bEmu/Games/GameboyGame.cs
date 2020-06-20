@@ -31,7 +31,9 @@ namespace bEmu
         protected override void LoadContent()
         {
             base.LoadContent();
+            IsRunning = true;
             Gpu.Frameskip = 1;
+            StartMainThread();
         }
 
         public override void UpdateGame()
@@ -63,7 +65,7 @@ namespace bEmu
 
         public override void StopGame()
         {
-            Exit();
+            base.StopGame();
             Mmu.MBC.Shutdown();
         }
 

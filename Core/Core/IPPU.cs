@@ -11,7 +11,7 @@ namespace bEmu.Core
         int Frameskip { get; set; }
         int Frame { get; set; }
         int Cycles { get; set; }
-
         void StepCycle();
+        void DefineSize(int width, int height);
     }
 }

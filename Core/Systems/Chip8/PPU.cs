@@ -15,6 +15,7 @@ namespace bEmu.Core.Systems.Chip8
         private void DrawNextTime()
         {
             state.Draw = true;
+            Frame++;
         }
 
         public void ScrollRight()

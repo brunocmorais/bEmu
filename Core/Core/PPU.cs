@@ -4,9 +4,9 @@ namespace bEmu.Core
     public abstract class PPU : IPPU
     {
         public ISystem System { get; }
-        public int Width { get; }
-        public int Height { get; }
-        public byte[] FrameBuffer { get; set; }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+        public byte[] FrameBuffer { get; private set; }
         public int Frameskip { get; set; }
         public int Frame { get; set; }
         public int Cycles { get; set; }
@@ -14,6 +14,11 @@ namespace bEmu.Core
         public PPU(ISystem system, int width, int height)
         {
             System = system;
+            DefineSize(width, height);
+        }
+
+        public void DefineSize(int width, int height)
+        {
             Width = width;
             Height = height;
             FrameBuffer = new byte[width * height * 4];
