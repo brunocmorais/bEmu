@@ -3,38 +3,36 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using bEmu.Core.Systems.Gameboy.GPU;
 using bEmu.Core.Systems.Gameboy.MBCs;
 
 namespace bEmu.Core.Systems.Gameboy
 {
     public class MMU : IMMU
     {
-        private readonly State state;
-        public byte[] VRAM { get; }
+        public State State { get; }
+        public VRAM VRAM { get; }
         public byte[] IO { get; }
         public byte[] WRAM { get; }
-        public byte[] OAM { get; }
+        public OAM OAM { get; }
         public byte[] ZeroPage { get; }
         public IMBC MBC { get; private set; }
         public BIOS Bios { get; }
         public int Length => 0x10000;
         public CartridgeHeader CartridgeHeader { get; private set; }
+        public ColorPaletteData ColorPaletteData { get; }
 
         public MMU(State state)
         {
-            this.state = state;
+            State = state;
             Bios = new BIOS();
 
-            VRAM = InitializeRAMPart(8192);
-            IO = InitializeRAMPart(128);
-            WRAM = InitializeRAMPart(8192);
-            OAM = InitializeRAMPart(160);
-            ZeroPage = InitializeRAMPart(128);
-        }
-
-        private byte[] InitializeRAMPart(int size)
-        {
-            return new byte[size];
+            VRAM = new VRAM(this);
+            IO = new byte[128];
+            WRAM = new byte[8192];
+            OAM = new OAM(this);
+            ZeroPage = new byte[128];
+            ColorPaletteData = new ColorPaletteData();
         }
 
         public byte this[int addr] 
@@ -58,7 +56,10 @@ namespace bEmu.Core.Systems.Gameboy
                 else if (addr >= 0xFF00 && addr <= 0xFF7F)
                 {
                     if (addr == 0xFF00) // joypad
-                        return state.Joypad.GetJoypadInfo();
+                        return State.Joypad.GetJoypadInfo();
+
+                    if (addr >= 0xFF68 && addr <= 0xFF6B) // paletas de cor
+                        return ColorPaletteData[addr];
 
                     return IO[addr - 0xFF00];
                 }
@@ -82,26 +83,28 @@ namespace bEmu.Core.Systems.Gameboy
                 else if (addr >= 0xFE00 && addr <= 0xFE9F)
                     OAM[addr - 0xFE00] = value;
                 else if (addr >= 0xFF00 && addr <= 0xFF7F)
-                {
-                    if (addr == 0xFF00) // joypad
-                        state.Joypad.SetJoypadColumn(value);
-                    else if (addr == 0xFF04) // DIV timer
-                        IO[addr - 0xFF00] = 0;
-                    else if (addr == 0xFF44) // registrador LY 
-                        return;
-                    else if (addr == 0xFF46) // OAM DMA
-                    {
-                        var oamStartAddress = (value << 8);
-
-                        for (int i = 0; i < 0x9F; i++)
-                            OAM[i] = this[oamStartAddress + i];
-                    }
-                    else
-                        IO[addr - 0xFF00] = value;
-                }
+                    SetRegister(addr, value);
                 else if (addr >= 0xFF80 && addr <= 0xFFFF)
                     ZeroPage[addr - 0xFF80] = value;
             }
+        }
+
+        public void SetRegister(int addr, byte value)
+        {
+            if (addr == 0xFF00) // joypad
+                State.Joypad.SetJoypadColumn(value);
+            else if (addr == 0xFF04) // DIV timer
+                IO[addr - 0xFF00] = 0;
+            else if (addr == 0xFF44) // registrador LY 
+                return;
+            else if (addr == 0xFF46) // OAM DMA
+                OAM.StartDMATransfer(value);
+            else if (addr == 0xFF55) // VRAM DMA
+                VRAM.StartDMATransfer(value);
+            else if (addr >= 0xFF68 && addr <= 0xFF6B) // paletas de cor
+                ColorPaletteData[addr] = value;
+            else
+                IO[addr - 0xFF00] = value;
         }
 
         public void LoadProgram(string fileName, int startAddress = 0)

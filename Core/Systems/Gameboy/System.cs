@@ -28,5 +28,7 @@ namespace bEmu.Core.Systems.Gameboy
             APU = new bEmu.Core.Systems.Gameboy.Sound.APU(this);
             Runner = new CPU(this);
         }
+
+        public bool GBCMode { get; set; }
     }
 }

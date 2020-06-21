@@ -12,6 +12,26 @@ namespace bEmu.Core.Systems.Gameboy.GPU
         public bool Priority => (Attr & 0x80) == 0x80;
         public bool XFlip => (Attr & 0x20) == 0x20;
         public bool YFlip => (Attr & 0x40) == 0x40;
+        public PaletteType ColorPaletteType
+        {
+            get
+            {
+                int value = Attr & 0x7;
+
+                switch (value)
+                {
+                    case 0: return PaletteType.OBJ0;
+                    case 1: return PaletteType.OBJ1;
+                    case 2: return PaletteType.OBJ2;
+                    case 3: return PaletteType.OBJ3;
+                    case 4: return PaletteType.OBJ4;
+                    case 5: return PaletteType.OBJ5;
+                    case 6: return PaletteType.OBJ6;
+                    case 7: return PaletteType.OBJ7;
+                    default: return 0;
+                }
+            }
+        }
 
         public Sprite(int x, int y, byte address, byte attr)
         {

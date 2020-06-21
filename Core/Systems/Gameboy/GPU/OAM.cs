@@ -7,10 +7,18 @@ namespace bEmu.Core.Systems.Gameboy.GPU
     {
         public MMU MMU { get; }
         public Sprite[] Sprites { get; }
+        private readonly byte[] oam;
+
+        public byte this[int index]
+        {
+            get { return oam[index]; }
+            set { oam[index] = value; }
+        }
 
         public OAM(MMU mmu)
         {
             MMU = mmu;
+            oam = new byte[160];
             Sprites = new Sprite[40];
         }
 
@@ -52,10 +60,18 @@ namespace bEmu.Core.Systems.Gameboy.GPU
             index *= 4;
 
             return new Sprite(
-                MMU.OAM[index + 1] - 8,
-                MMU.OAM[index + 0] - 16,
-                MMU.OAM[index + 2],
-                MMU.OAM[index + 3]);
+                this[index + 1] - 8,
+                this[index + 0] - 16,
+                this[index + 2],
+                this[index + 3]);
+        }
+
+        public void StartDMATransfer(byte value)
+        {
+            var oamStartAddress = (value << 8);
+
+            for (int i = 0; i < 0x9F; i++)
+                this[i] = MMU[oamStartAddress + i];
         }
     }
 }

@@ -8,3 +8,4 @@ https://gbdev.io/pandocs/feedSamples
 https://gekkio.fi/files/gb-docs/gbctr.pdf
 https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf
 https://github.com/geaz/emu-gameboy/blob/master/src/hardware/audio/apu.cpp
+https://gist.github.com/drhelius/3398793

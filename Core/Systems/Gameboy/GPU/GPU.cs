@@ -9,11 +9,10 @@ namespace bEmu.Core.Systems.Gameboy.GPU
 {
     public class GPU : Core.PPU
     {
-        private readonly uint[] palette;
+        private readonly Palette palette;
         private readonly State state;
         private readonly MMU mmu;
         private GPUMode Mode;
-        private OAM oam;
         private int spriteSize;
         private bool lcdEnabled;
         private bool bgDisplay;
@@ -24,6 +23,7 @@ namespace bEmu.Core.Systems.Gameboy.GPU
         private int bgMapSelect;
         private IEnumerable<Sprite> spritesCurrentLine;
         private bool SkipFrame => (Frameskip >= 1 && Frame % (Frameskip + 1) != 0);
+        private bool GBCMode => (System as System).GBCMode;
 
         public GPU(System system) : base(system, 160, 144) 
         {
@@ -36,59 +36,9 @@ namespace bEmu.Core.Systems.Gameboy.GPU
             mmu = System.MMU as MMU;
             spriteSize = 8;
             lcdEnabled = true;
-            palette = new uint[8];
+            palette = new Palette(mmu);
             spritesCurrentLine = Enumerable.Empty<Sprite>();
-            oam = new OAM(mmu);
-            oam.UpdateSprites();
-        }
-
-        private uint GetColorFrom(PaletteType type, int colorNumber)
-        {
-            byte val = 0;
-
-            switch (type)
-            {
-                case PaletteType.BGP: val = state.LCD.BGP; break;
-                case PaletteType.OBP0: val = state.LCD.OBP0; break;
-                case PaletteType.OPB1: val = state.LCD.OBP1; break;
-            }
-
-            int bitOffset = (colorNumber * 2);
-            byte color = GetColor(((val & (3 << bitOffset)) >> bitOffset));
-
-            return (uint)((color << 24) | (color << 16) | (color << 8) | 0xFF);
-        }
-
-        private byte GetColor(int shadeNumber)
-        {
-            switch (shadeNumber)
-            {
-                case 0: return 0xFF;
-                case 1: return 0xC0;
-                case 2: return 0x60;
-                case 3: return 0x00;
-                default: throw new Exception();
-            }
-        }
-
-        private void GetPaletteFromBytes(PaletteType paletteType, byte byte1, byte byte2)
-        {
-            for (int i = 0; i < 8; i++)
-            {
-                byte colorNumber = 0;
-                int v1 = (1 << (7 - i));
-                
-                if ((byte2 & v1) == v1)
-                    colorNumber += 2;
-
-                if ((byte1 & v1) == v1)
-                    colorNumber += 1;
-
-                if (paletteType == PaletteType.BGP || colorNumber > 0)
-                    palette[i] = GetColorFrom(paletteType, colorNumber);
-                else
-                    palette[i] = 0;
-            }
+            mmu.OAM.UpdateSprites();
         }
 
         public void SetLCYRegisterCoincidence(int ly)
@@ -122,6 +72,8 @@ namespace bEmu.Core.Systems.Gameboy.GPU
                 case GPUMode.HBlank:
                     if (Cycles >= 204)
                     {
+                        mmu.VRAM.ExecuteHBlankDMATransfer();
+
                         if (state.LCD.GetSTATFlag(STAT.Mode0HBlankInterrupt) == 1)
                             state.RequestInterrupt(InterruptType.LcdStat);
 
@@ -194,8 +146,8 @@ namespace bEmu.Core.Systems.Gameboy.GPU
 
                         if (!SkipFrame && lcdEnabled && spriteDisplay)
                         {
-                            spritesCurrentLine = oam.GetSpritesForScanline(state.LCD.LY, spriteSize);
-                            oam.UpdateSprites();
+                            spritesCurrentLine = mmu.OAM.GetSpritesForScanline(state.LCD.LY, spriteSize);
+                            mmu.OAM.UpdateSprites();
                         }
                         
                         Cycles -= 80;
@@ -251,7 +203,12 @@ namespace bEmu.Core.Systems.Gameboy.GPU
                 else
                     paletteAddr = ((tileNumber & 0x80) == 0x80 ? 0x800 : 0x1000) + ((tileNumber & 0x7F) << 4) + (2 * (line % 8));
 
-                GetPaletteFromBytes(PaletteType.BGP, mmu.VRAM[paletteAddr], mmu.VRAM[paletteAddr + 1]);
+                if (GBCMode)
+                    palette.Type = mmu.VRAM.GetBackgroundPaletteType(addr);
+                else
+                    palette.Type = PaletteType.BGP;
+
+                palette.UpdatePaletteFromBytes(mmu.VRAM[paletteAddr], mmu.VRAM[paletteAddr + 1]);
 
                 for (int j = 0; j < palette.Length; j++)
                 {
@@ -277,7 +234,12 @@ namespace bEmu.Core.Systems.Gameboy.GPU
                 else
                     paletteAddr = ((mmu.VRAM[addr] & 0x80) == 0x80 ? 0x800 : 0x1000) + ((mmu.VRAM[addr] & 0x7F) << 4) + (2 * (line % 8));
 
-                GetPaletteFromBytes(PaletteType.BGP, mmu.VRAM[paletteAddr], mmu.VRAM[paletteAddr + 1]);
+                if (GBCMode)
+                    palette.Type = mmu.VRAM.GetBackgroundPaletteType(addr);
+                else
+                    palette.Type = PaletteType.BGP;
+
+                palette.UpdatePaletteFromBytes(mmu.VRAM[paletteAddr], mmu.VRAM[paletteAddr + 1]);
 
                 for (int j = 0; j < palette.Length; j++)
                 {
@@ -294,7 +256,13 @@ namespace bEmu.Core.Systems.Gameboy.GPU
             foreach (var sprite in spritesCurrentLine)
             {
                 int paletteAddr = (sprite.Address << 4) + (2 * ((sprite.LineOffset) % sprite.Size));
-                GetPaletteFromBytes(sprite.PaletteType, mmu.VRAM[paletteAddr], mmu.VRAM[paletteAddr + 1]);
+
+                if (GBCMode)
+                    palette.Type = sprite.ColorPaletteType;
+                else
+                    palette.Type = sprite.PaletteType;
+
+                palette.UpdatePaletteFromBytes(mmu.VRAM[paletteAddr], mmu.VRAM[paletteAddr + 1]);
 
                 for (int j = 0; j < palette.Length; j++)
                 {
@@ -309,8 +277,7 @@ namespace bEmu.Core.Systems.Gameboy.GPU
                         coordX = j + sprite.X;
 
                     if (coordX >= 0 && coordX < 160)
-                    
-                        if (!sprite.Priority || GetPixel(coordX, state.LCD.LY) == GetColorFrom(PaletteType.BGP, 0))
+                        if (!sprite.Priority || GetPixel(coordX, state.LCD.LY) == palette.GetShadeFrom(PaletteType.BGP, 0))
                             SetPixel(coordX, state.LCD.LY, palette[j]);
                 }
             }
