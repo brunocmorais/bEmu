@@ -43,11 +43,11 @@ namespace bEmu
             {
                 Mmu.Bios.Running = false;
 
-                if ((Mmu.CartridgeHeader.GBCFlag & 0x80) == 0x80) // set gameboy color mode
-                {
-                    State.A = 0x11;
-                    System.GBCMode = true;
-                }
+                // if ((Mmu.CartridgeHeader.GBCFlag & 0x80) == 0x80) // set gameboy color mode
+                // {
+                //     State.A = 0x11;
+                //     System.GBCMode = true;
+                // }
             }
 
             int prevCycles = State.Cycles;

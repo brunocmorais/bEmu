@@ -188,6 +188,11 @@ namespace bEmu.Core.Systems.Gameboy.GPU
             }
         }
 
+        public void PrepareGBCTile(ushort addr, ushort paletteAddr)
+        {
+            
+        }
+
         public uint this[int index] => palette[index];
         public int Length => palette.Length;
     }

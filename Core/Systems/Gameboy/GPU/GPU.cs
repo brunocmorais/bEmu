@@ -38,7 +38,7 @@ namespace bEmu.Core.Systems.Gameboy.GPU
             lcdEnabled = true;
             palette = new Palette(mmu);
             spritesCurrentLine = Enumerable.Empty<Sprite>();
-            mmu.OAM.UpdateSprites();
+            //mmu.OAM.UpdateSprites();
         }
 
         public void SetLCYRegisterCoincidence(int ly)
@@ -147,7 +147,7 @@ namespace bEmu.Core.Systems.Gameboy.GPU
                         if (!SkipFrame && lcdEnabled && spriteDisplay)
                         {
                             spritesCurrentLine = mmu.OAM.GetSpritesForScanline(state.LCD.LY, spriteSize);
-                            mmu.OAM.UpdateSprites();
+                            //mmu.OAM.UpdateSprites();
                         }
                         
                         Cycles -= 80;
@@ -203,8 +203,13 @@ namespace bEmu.Core.Systems.Gameboy.GPU
                 else
                     paletteAddr = ((tileNumber & 0x80) == 0x80 ? 0x800 : 0x1000) + ((tileNumber & 0x7F) << 4) + (2 * (line % 8));
 
+                Background bgMapAttributes = default;
+
                 if (GBCMode)
-                    palette.Type = mmu.VRAM.GetBackgroundPaletteType(addr);
+                {
+                    bgMapAttributes = mmu.VRAM.GetBackgroundPaletteType(addr);
+                    palette.Type = bgMapAttributes.BackgroundPaletteNumber;
+                }
                 else
                     palette.Type = PaletteType.BGP;
 
@@ -224,6 +229,7 @@ namespace bEmu.Core.Systems.Gameboy.GPU
         {
             byte line = (byte)((state.LCD.LY + state.LCD.SCY));
             int paletteAddr;
+            Background bgMapAttributes = default;
 
             for (int i = 0; i <= 20; i++)
             {
@@ -235,7 +241,10 @@ namespace bEmu.Core.Systems.Gameboy.GPU
                     paletteAddr = ((mmu.VRAM[addr] & 0x80) == 0x80 ? 0x800 : 0x1000) + ((mmu.VRAM[addr] & 0x7F) << 4) + (2 * (line % 8));
 
                 if (GBCMode)
-                    palette.Type = mmu.VRAM.GetBackgroundPaletteType(addr);
+                {
+                    bgMapAttributes = mmu.VRAM.GetBackgroundPaletteType(addr);
+                    palette.Type = bgMapAttributes.BackgroundPaletteNumber;
+                }
                 else
                     palette.Type = PaletteType.BGP;
 

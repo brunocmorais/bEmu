@@ -46,6 +46,9 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
                 {
                     byte[] ramBytes = GetOrCreateSaveFile();
 
+                    if (ramBytes.Length != RamBankCount * ExternalRamSize)
+                        return;
+
                     for (int i = 0; i < RamBankCount; i++)
                         for (int j = 0; j < ExternalRamSize; j++)
                             RamBanks[i][j] = ramBytes[j + (i * ExternalRamSize)];

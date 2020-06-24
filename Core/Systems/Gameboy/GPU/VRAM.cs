@@ -81,22 +81,16 @@ namespace bEmu.Core.Systems.Gameboy.GPU
             transferLength = 0;
         }
 
-        public PaletteType GetBackgroundPaletteType(int addr)
+        public Background GetBackgroundPaletteType(int addr)
         {
-            int value = bank1[addr] & 0x7;
-
-            switch (value)
-            {
-                case 0: return PaletteType.BG0;
-                case 1: return PaletteType.BG1;
-                case 2: return PaletteType.BG2;
-                case 3: return PaletteType.BG3;
-                case 4: return PaletteType.BG4;
-                case 5: return PaletteType.BG5;
-                case 6: return PaletteType.BG6;
-                case 7: return PaletteType.BG7;
-                default: return 0;
-            }
+            return new Background
+            (
+                (PaletteType)((bank1[addr] & 0x7) + 3),
+                (bank1[addr] & 0x8) == 0x8 ? 1 : 0,
+                (bank1[addr] & 0x20) == 0x20,
+                (bank1[addr] & 0x40) == 0x40,
+                (bank1[addr] & 0x80) == 0x80
+            );
         }
     }
 }

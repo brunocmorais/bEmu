@@ -6,7 +6,6 @@ namespace bEmu.Core.Systems.Gameboy.GPU
     public class OAM
     {
         public MMU MMU { get; }
-        public Sprite[] Sprites { get; }
         private readonly byte[] oam;
 
         public byte this[int index]
@@ -19,20 +18,14 @@ namespace bEmu.Core.Systems.Gameboy.GPU
         {
             MMU = mmu;
             oam = new byte[160];
-            Sprites = new Sprite[40];
-        }
-
-        public void UpdateSprites()
-        {
-            for (int i = 0; i < Sprites.Length; i++)
-                Sprites[i] = GetSprite(i);
         }
 
         public IEnumerable<Sprite> GetSpritesForScanline(int ly, int spriteSize)
         {
             int counter = 0;
+            var sprites = Enumerable.Range(0, 40).Select(x => GetSprite(x)).OrderByDescending(sprite => sprite.X);
 
-            foreach (var sprite in Sprites.Where(x => x != null).OrderByDescending(sprite => sprite.X))
+            foreach (var sprite in sprites.Where(x => x != null).OrderByDescending(sprite => sprite.X))
             {
                 if (counter == 10) // limite de 10 sprites por linha
                     yield break;
