@@ -6,7 +6,7 @@ namespace bEmu.Core
         public ISystem System { get; }
         public int Width { get; private set; }
         public int Height { get; private set; }
-        public byte[] FrameBuffer { get; private set; }
+        public virtual byte[] FrameBuffer { get; private set; }
         public int Frameskip { get; set; }
         public int Frame { get; set; }
         public int Cycles { get; set; }
@@ -22,6 +22,11 @@ namespace bEmu.Core
             Width = width;
             Height = height;
             FrameBuffer = new byte[width * height * 4];
+        }
+
+        public void ResetFrameBuffer()
+        {
+            FrameBuffer = new byte[Width * Height * 4];
         }
 
         public virtual void SetPixel(int x, int y, uint color)

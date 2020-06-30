@@ -3,8 +3,8 @@ namespace bEmu.Core.Systems.Gameboy.GPU
     public class VRAM
     {
         public MMU MMU { get; }
-        private readonly byte[] bank0;
-        private readonly byte[] bank1;
+        public byte[] Bank0 { get; }
+        public byte[] Bank1 { get; }
         public ushort DMASourceAddr => (ushort) ((MMU[0xFF51] << 8) | (MMU[0xFF52] & 0xF0));
         public ushort DMADestinationAddr => (ushort) (((MMU[0xFF53] & 0xF) << 8) | (MMU[0xFF54] & 0xF0));
         private bool hblankDMA;
@@ -14,8 +14,8 @@ namespace bEmu.Core.Systems.Gameboy.GPU
         public VRAM(MMU mmu)
         {
             MMU = mmu;
-            bank0 = new byte[8192];
-            bank1 = new byte[8192];
+            Bank0 = new byte[8192];
+            Bank1 = new byte[8192];
             InitDMAConfig();
         }
 
@@ -33,13 +33,13 @@ namespace bEmu.Core.Systems.Gameboy.GPU
         
         public byte this[int index]
         {
-            get { return VBK ? bank1[index] : bank0[index]; }
+            get { return VBK ? Bank1[index] : Bank0[index]; }
             set 
             {
                 if (VBK)
-                    bank1[index] = value;
+                    Bank1[index] = value;
                 else
-                    bank0[index] = value;
+                    Bank0[index] = value;
             }
         }
 
@@ -51,7 +51,7 @@ namespace bEmu.Core.Systems.Gameboy.GPU
             if (!hblankDMA)
             {
                 for (int i = 0; i < transferLength; i++)
-                    this[DMADestinationAddr - 0x8000 + i] = MMU[DMASourceAddr + i];
+                    MMU[DMADestinationAddr - 0x8000 + i] = MMU[DMASourceAddr + i];
             }
         }
 
@@ -85,11 +85,11 @@ namespace bEmu.Core.Systems.Gameboy.GPU
         {
             return new Background
             (
-                (PaletteType)((bank1[addr] & 0x7) + 3),
-                (bank1[addr] & 0x8) == 0x8 ? 1 : 0,
-                (bank1[addr] & 0x20) == 0x20,
-                (bank1[addr] & 0x40) == 0x40,
-                (bank1[addr] & 0x80) == 0x80
+                (PaletteType)((Bank1[addr] & 0x7) + 3),
+                (Bank1[addr] & 0x8) == 0x8 ? 1 : 0,
+                (Bank1[addr] & 0x20) == 0x20,
+                (Bank1[addr] & 0x40) == 0x40,
+                (Bank1[addr] & 0x80) == 0x80
             );
         }
     }

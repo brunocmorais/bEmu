@@ -33,6 +33,8 @@ namespace bEmu.Core.Systems.Gameboy.GPU
             }
         }
 
+        public int PaletteAddress => (Address << 4) + (2 * ((LineOffset) % Size));
+
         public Sprite(int x, int y, byte address, byte attr)
         {
             X = x;

@@ -7,6 +7,11 @@ using APU = bEmu.Core.Systems.Gameboy.Sound.APU;
 using GPU = bEmu.Core.Systems.Gameboy.GPU.GPU;
 using Gameboy = bEmu.Core.Systems.Gameboy;
 using Microsoft.Xna.Framework;
+using System.Linq;
+using System.Timers;
+using Timer = System.Timers.Timer;
+using System.Diagnostics;
+using bEmu.Core.Systems.Gameboy.GPU;
 
 namespace bEmu
 {
@@ -20,6 +25,8 @@ namespace bEmu
             // instance = new DynamicSoundEffectInstance(APU.AudioSampleRate, AudioChannels.Stereo);
             // instanceBuffer = new byte[2 * APU.AudioBufferFrames * APU.BytesPerSample];
         }
+        private Timer timer = new Timer();
+        bool debug = false;
 
         protected override void Initialize()
         {
@@ -27,6 +34,25 @@ namespace bEmu
             State.PC = 0x00;
             Window.Title = $"bEmu - {Mmu.CartridgeHeader.Title}";
             base.Initialize();
+            // timer.Interval = 1000;
+            // timer.Elapsed += (sender, e) => 
+            // {
+            //     var color0a = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 0];
+            //     var color0b = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 1];
+            //     var color1a = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 2];
+            //     var color1b = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 3];
+            //     var color2a = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 4];
+            //     var color2b = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 5];
+            //     var color3a = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 6];
+            //     var color3b = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 7];
+            //     var color0 = (color0b << 8) | color0a;
+            //     var color1 = (color1b << 8) | color1a;
+            //     var color2 = (color2b << 8) | color2a;
+            //     var color3 = (color3b << 8) | color3a;
+
+            //     Debug.WriteLine("{0:x} {1:x} {2:x} {3:x}", color0, color1, color2, color3);
+            // };
+            // timer.Start();
         }
 
         protected override void LoadContent()
@@ -43,12 +69,15 @@ namespace bEmu
             {
                 Mmu.Bios.Running = false;
 
-                // if ((Mmu.CartridgeHeader.GBCFlag & 0x80) == 0x80) // set gameboy color mode
-                // {
-                //     State.A = 0x11;
-                //     System.GBCMode = true;
-                // }
+                if ((Mmu.CartridgeHeader.GBCFlag & 0x80) == 0x80) // set gameboy color mode
+                {
+                    State.A = 0x11;
+                    System.GBCMode = true;
+                }
             }
+
+            // if (State.PC == 0x4066 && (Mmu.MBC as MBC5).BankNumber == 0x21 && debug)
+            //     Debugger.Break();
 
             int prevCycles = State.Cycles;
             var opcode = System.Runner.StepCycle();
@@ -75,6 +104,7 @@ namespace bEmu
         protected override void Draw(GameTime gameTime)
         {
             SpriteBatch.Begin();
+            GraphicsDevice.Clear(Color.Black);
             base.Draw(gameTime);
             SpriteBatch.End();
         }

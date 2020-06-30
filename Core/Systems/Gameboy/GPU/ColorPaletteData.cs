@@ -10,6 +10,8 @@ namespace bEmu.Core.Systems.Gameboy.GPU
         public ColorPaletteData()
         {
             BackgroundPalettes = new byte[64];
+            for (int i = 0; i < BackgroundPalettes.Length; i++)
+                BackgroundPalettes[i] = 0xFF;
             SpritePalettes = new byte[64];
             backgroundPaletteIndex = 0;
             spritePaletteIndex = 0;
@@ -29,7 +31,7 @@ namespace bEmu.Core.Systems.Gameboy.GPU
                 BackgroundPalettes[BCPS & 0x3F] = value;
 
                 if ((BCPS & 0x80) == 0x80)
-                    BCPS = (byte) (0x80 | ((BCPS + 1) & 0x3F));
+                    BCPS = (byte) (0x80 | ((BCPS & 0x3F) + 1));
             }
         }
 

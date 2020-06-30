@@ -21,18 +21,18 @@ namespace bEmu
         protected int PixelSize { get; }
         protected int Width { get; }
         protected int Height { get; }
-        private GraphicsDeviceManager graphics;
-        protected SpriteBatch SpriteBatch { get; private set; }
+        protected GraphicsDeviceManager graphics;
+        protected SpriteBatch SpriteBatch { get; set; }
         protected bool IsRunning { get; set; }
-        private Keys[] frameskipKeys;
-        private int lastRenderedFrame;
-        private Thread thread;
-        private SpriteFont font;
-        private Rectangle destinationRectangle;
-        private OSD osd;
+        protected Keys[] frameskipKeys;
+        protected int lastRenderedFrame;
+        protected Thread thread;
+        protected SpriteFont font;
+        protected Rectangle destinationRectangle;
+        protected OSD osd;
         protected Texture2D BackBuffer { get; set; }
         protected string Rom { get; }
-        protected int DrawCounter { get; private set; }
+        protected int DrawCounter { get; set; }
         protected TSystem System { get; }
         protected TGPU Gpu { get; }
         protected TState State { get; }

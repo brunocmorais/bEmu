@@ -37,10 +37,12 @@ namespace bEmu.Core.Systems.Gameboy.MBCs
             if (addr >= 0x0000 && addr <= 0x3FFF)
                 return Rom0[addr];
             else if (addr >= 0x4000 && addr <= 0x7FFF)
-                return RomBanks[(((romb1 << 8) | romb0)) % RomBanks.Length][addr - 0x4000];
+                return RomBanks[BankNumber][addr - 0x4000];
 
             return 0xFF;
         }
+
+        public int BankNumber => (((romb1 << 8) | romb0)) % RomBanks.Length;
 
         public override void WriteCartRAM(int addr, byte value)
         {

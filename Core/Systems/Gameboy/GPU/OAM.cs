@@ -23,7 +23,7 @@ namespace bEmu.Core.Systems.Gameboy.GPU
         public IEnumerable<Sprite> GetSpritesForScanline(int ly, int spriteSize)
         {
             int counter = 0;
-            var sprites = Enumerable.Range(0, 40).Select(x => GetSprite(x)).OrderByDescending(sprite => sprite.X);
+            var sprites = Enumerable.Range(0, 40).Select(x => GetSprite(x));
 
             foreach (var sprite in sprites.Where(x => x != null).OrderByDescending(sprite => sprite.X))
             {
@@ -32,19 +32,19 @@ namespace bEmu.Core.Systems.Gameboy.GPU
 
                 // if (sprite.X <= -8 || sprite.X >= 168 || sprite.Y <= -8 || sprite.Y >= 144)
                 //     continue;
-                    
+
                 int lineOffset = ly - sprite.Y;
 
                 if (sprite.YFlip)
                     lineOffset = spriteSize - lineOffset - 1;
 
-                if (lineOffset >= 0 && lineOffset < spriteSize)
-                {
-                    sprite.LineOffset = lineOffset;
-                    sprite.Size = spriteSize;
-                    counter++;
-                    yield return sprite;
-                }
+                if (lineOffset < 0 || lineOffset >= spriteSize)
+                    continue;
+
+                sprite.LineOffset = lineOffset;
+                sprite.Size = spriteSize;
+                counter++;
+                yield return sprite;
             }
         }
 
