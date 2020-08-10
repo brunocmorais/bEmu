@@ -41,7 +41,11 @@ namespace bEmu.Core.Systems.Gameboy.GPU
         public byte LY
         {
             get { return mmu.IO[0x44]; }
-            set { mmu.IO[0x44] = value; }
+            set 
+            { 
+                mmu.IO[0x44] = value; 
+                SetLCYRegisterCoincidence();
+            }
         }
 
         public byte LYC
@@ -64,36 +68,31 @@ namespace bEmu.Core.Systems.Gameboy.GPU
 
         public bool GetLCDCFlag(LCDC option)
         {
-            int op = (0x1 << (int) option);
-            return (LCDC & op) == op;
+            return (LCDC & (int) option) == (int) option;
         }
 
-        public int GetSTATFlag(STAT option)
+        public bool GetSTATFlag(STAT option)
         {
-            int op = (int) option;
-
-            if (op < 1)
-                return STAT & 0x3;
-
-            return (STAT & (0x1 << op)) >> op;
+            return (STAT & (int) option) == (int) option;
         }
 
-        public void SetSTATFlag(STAT option, bool value)
+        public GPUMode Mode
         {
-            byte mask = (byte) (0x1 << (int) option);
+            get => (GPUMode) (STAT & 0x3);
+            set => STAT = (byte) ((STAT & 0xFC) | (int) value);
+        }
 
-            if (value)
+        public void SetLCYRegisterCoincidence()
+        {
+            if (LY == LYC)
             {
-                mask = (byte) ~mask;
-                STAT &= mask;
+                STAT |= 0x4;
+
+                if (GetSTATFlag(Core.Systems.Gameboy.GPU.STAT.LYCoincidenceInterrupt))
+                    mmu.State.RequestInterrupt(InterruptType.LcdStat);
             }
             else
-                STAT |= mask;
-        }
-
-        public void SetSTATMode(int number)
-        {
-            STAT = (byte) ((STAT & 0xFC) | number);
+                STAT &= 0xFB;
         }
     }
 }

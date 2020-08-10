@@ -11,7 +11,6 @@ namespace bEmu.Core.Systems.Gameboy.GPU
     {
         private readonly State state;
         private readonly MMU mmu;
-        private GPUMode Mode;
         private int spriteSize;
         private bool lcdEnabled;
         private bool bgDisplay;
@@ -28,12 +27,12 @@ namespace bEmu.Core.Systems.Gameboy.GPU
 
         public GPU(System system) : base(system, 160, 144) 
         {
-            Mode = GPUMode.HBlank;
             Cycles = 0;
             Frame = 0;
             Frameskip = 0;
             state = System.State as State;
             state.LCD = new LCD(System.MMU as MMU);
+            state.LCD.Mode = GPUMode.HBlank;
             mmu = System.MMU as MMU;
             spriteSize = 8;
             lcdEnabled = true;
@@ -42,19 +41,9 @@ namespace bEmu.Core.Systems.Gameboy.GPU
             currentLine = new uint[Width];
         }
 
-        public void SetLCYRegisterCoincidence(int ly)
-        {
-            bool lycCoincidence = ly == state.LCD.LYC;
-            state.LCD.SetSTATFlag(STAT.CoincidenceFlag, lycCoincidence);
-
-            if (lycCoincidence && state.LCD.GetSTATFlag(STAT.LYCoincidenceInterrupt) == 1)
-                state.RequestInterrupt(InterruptType.LcdStat);
-        }
-
         public void TurnOffLCD()
         {
-            Mode = GPUMode.HBlank;
-            state.LCD.SetSTATMode(0);
+            state.LCD.Mode = GPUMode.HBlank;
             Cycles = 0;
         }
 
@@ -68,92 +57,88 @@ namespace bEmu.Core.Systems.Gameboy.GPU
                     return;
             }
 
-            switch (Mode)
+            switch (state.LCD.Mode)
             {
-                case GPUMode.HBlank:
-                    if (Cycles >= 204)
-                    {
-                        mmu.VRAM.ExecuteHBlankDMATransfer();
+                case GPUMode.HBlank: HBlank(); break;
+                case GPUMode.VBlank: VBlank(); break;
+                case GPUMode.ScanlineOAM: ScanlineOAM(); break;
+                case GPUMode.ScanlineVRAM: ScanlineVRAM(); break;
+            }
+        }
 
-                        if (state.LCD.GetSTATFlag(STAT.Mode0HBlankInterrupt) == 1)
-                            state.RequestInterrupt(InterruptType.LcdStat);
+        private void ScanlineVRAM()
+        {
+            if (Cycles >= 172)
+            {
+                state.LCD.Mode = GPUMode.HBlank;
+                Cycles -= 172;
+            }
+        }
 
-                        if (!SkipFrame && lcdEnabled)
-                        {
-                            windowDisplay = state.LCD.GetLCDCFlag(LCDC.WindowDisplayEnable);
-                            spriteDisplay = state.LCD.GetLCDCFlag(LCDC.SpriteDisplayEnable);
-                            spriteSize = state.LCD.GetLCDCFlag(LCDC.SpriteSize) ? 16 : 8;
-                            bgDisplay = state.LCD.GetLCDCFlag(LCDC.BGDisplayEnable);
+        private void ScanlineOAM()
+        {
+            if (Cycles >= 80)
+            {
+                state.LCD.Mode = GPUMode.ScanlineVRAM;
 
-                            Renderscan();
-                        }
+                if (state.LCD.GetSTATFlag(STAT.Mode2OAMInterrupt))
+                    state.RequestInterrupt(InterruptType.LcdStat);
 
-                        SetLCYRegisterCoincidence(++state.LCD.LY);
+                if (!SkipFrame && lcdEnabled && spriteDisplay)
+                    spritesCurrentLine = mmu.OAM.GetSpritesForScanline(state.LCD.LY, spriteSize);
 
-                        Cycles -= 204;
+                Cycles -= 80;
+            }
+        }
 
-                        if (state.LCD.LY == 144)
-                            Mode = GPUMode.VBlank;
-                        else
-                            Mode = GPUMode.ScanlineOAM;
+        private void VBlank()
+        {
+            if (Cycles >= 456)
+            {
+                if (state.LCD.LY == 144)
+                    state.RequestInterrupt(InterruptType.VBlank);
 
-                        state.LCD.SetSTATMode((int) Mode);
-                    }
+                if (state.LCD.GetSTATFlag(STAT.Mode1VBlankInterrupt))
+                    state.RequestInterrupt(InterruptType.LcdStat);
 
-                    break;
-                case GPUMode.VBlank:
+                Cycles -= 456;
+                state.LCD.LY = (byte)((state.LCD.LY + 1) % 154);
 
-                    if (Cycles >= 456)
-                    {
-                        if (state.LCD.LY == 144)
-                            state.RequestInterrupt(InterruptType.VBlank);
-                        
-                        if (state.LCD.GetSTATFlag(STAT.Mode1VBlankInterrupt) == 1)
-                            state.RequestInterrupt(InterruptType.LcdStat);
+                if (state.LCD.LY == 0)
+                {
+                    state.LCD.Mode = GPUMode.ScanlineOAM;
+                    lcdEnabled = state.LCD.GetLCDCFlag(LCDC.LCDDisplayEnable);
 
-                        Cycles -= 456;
-                        SetLCYRegisterCoincidence(++state.LCD.LY);
+                    if (!lcdEnabled)
+                        TurnOffLCD();
 
-                        if (state.LCD.LY > 153)
-                        {
-                            state.LCD.LY = 0;
-                            SetLCYRegisterCoincidence(0);
-                            Mode = GPUMode.ScanlineOAM;
-                            state.LCD.SetSTATMode((int) Mode);
+                    Frame++;
+                }
+            }
+        }
 
-                            lcdEnabled = state.LCD.GetLCDCFlag(LCDC.LCDDisplayEnable);
+        private void HBlank()
+        {
+            if (Cycles >= 204)
+            {
+                mmu.VRAM.ExecuteHBlankDMATransfer();
 
-                            if (!lcdEnabled)
-                                TurnOffLCD();
+                if (state.LCD.GetSTATFlag(STAT.Mode0HBlankInterrupt))
+                    state.RequestInterrupt(InterruptType.LcdStat);
 
-                            Frame++;
-                        }
-                    }
-                    break;
-                case GPUMode.ScanlineOAM:
-                    if (Cycles >= 80)
-                    {
-                        Mode = GPUMode.ScanlineVRAM;
-                        state.LCD.SetSTATMode((int) Mode);
+                if (!SkipFrame && lcdEnabled)
+                {
+                    windowDisplay = state.LCD.GetLCDCFlag(LCDC.WindowDisplayEnable);
+                    spriteDisplay = state.LCD.GetLCDCFlag(LCDC.SpriteDisplayEnable);
+                    spriteSize = state.LCD.GetLCDCFlag(LCDC.SpriteSize) ? 16 : 8;
+                    bgDisplay = state.LCD.GetLCDCFlag(LCDC.BGDisplayEnable);
 
-                        if (state.LCD.GetSTATFlag(STAT.Mode2OAMInterrupt) == 1)
-                            state.RequestInterrupt(InterruptType.LcdStat);
+                    Renderscan();
+                }
 
-                        if (!SkipFrame && lcdEnabled && spriteDisplay)
-                            spritesCurrentLine = mmu.OAM.GetSpritesForScanline(state.LCD.LY, spriteSize);
-                        
-                        Cycles -= 80;
-                    }
-                    break;
-                case GPUMode.ScanlineVRAM:
-                    if (Cycles >= 172)
-                    {
-                        Mode = GPUMode.HBlank;
-                        state.LCD.SetSTATMode((int) Mode);
-                        Cycles -= 172;
-                    }
-
-                    break;
+                state.LCD.LY++;
+                Cycles -= 204;
+                state.LCD.Mode = state.LCD.LY == 144 ? GPUMode.VBlank : GPUMode.ScanlineOAM;
             }
         }
 
@@ -217,7 +202,7 @@ namespace bEmu.Core.Systems.Gameboy.GPU
                     drawWindow = true;
                 }
 
-                if (!drawWindow && bgDisplay)
+                if (!drawWindow && (bgDisplay))
                 {
                     backgroundMap.Window = false;
                     background = SetBGWindowPalette(bgPalette, i, line, state.LCD.SCX);

@@ -22,6 +22,7 @@ namespace bEmu
 
         public GameboyGame(string rom) : base(new Gameboy.System(), rom, 160, 144, 2)
         {
+            Gpu.Frameskip = 1;
             // instance = new DynamicSoundEffectInstance(APU.AudioSampleRate, AudioChannels.Stereo);
             // instanceBuffer = new byte[2 * APU.AudioBufferFrames * APU.BytesPerSample];
         }
