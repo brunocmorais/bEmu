@@ -3,9 +3,9 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using bEmu.Core;
-using State = bEmu.Core.Systems.Chip8.State;
+using State = bEmu.Systems.Chip8.State;
 using System.Threading;
-using Chip8 = bEmu.Core.Systems.Chip8;
+using Chip8 = bEmu.Systems.Chip8;
 
 namespace bEmu
 {

@@ -10,7 +10,7 @@ namespace bEmu.Core.CPUs.Intel8080
         where TState : State
         where TMMU : MMU
     {
-        public Intel8080(bEmu.Core.Systems.Generic8080.System system) : base(system) { }
+        public Intel8080(ISystem system) : base(system) { }
 
         protected ushort GetNextWord()
         {

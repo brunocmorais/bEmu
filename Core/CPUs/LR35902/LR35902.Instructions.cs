@@ -8,7 +8,7 @@ namespace bEmu.Core.CPUs.LR35902
 {
     public abstract partial class LR35902<TState, TMMU> : CPU<TState, TMMU> 
         where TState : State
-        where TMMU : Core.Systems.Gameboy.MMU
+        where TMMU : MMU
     {
         protected void Bit(int bitNumber, Register register)
         {

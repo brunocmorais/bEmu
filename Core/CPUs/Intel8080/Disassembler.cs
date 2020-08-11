@@ -4,7 +4,7 @@ namespace bEmu.Core.CPUs.Intel8080
 
     public class Disassembler : Core.Disassembler
     {
-        public Disassembler(bEmu.Core.Systems.Generic8080.System system) : base(system) {}
+        public Disassembler(ISystem system) : base(system) {}
 
         public override Instruction GetInstruction(int pointer)
         {

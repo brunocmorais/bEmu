@@ -4,7 +4,7 @@ namespace bEmu.Core.CPUs.LR35902
 {
     public class Disassembler : Core.Disassembler
     {
-        public Disassembler(bEmu.Core.Systems.Gameboy.System system) : base(system) { }
+        public Disassembler(ISystem system) : base(system) { }
 
         public override Instruction GetInstruction(int pointer)
         {

@@ -4,17 +4,17 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using bEmu.Core;
-using bEmu.Core.Systems.Generic8080;
+using bEmu.Systems.Generic8080;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json;
-using Generic8080 = bEmu.Core.Systems.Generic8080;
-using State = bEmu.Core.Systems.Generic8080.State;
+using Generic8080 = bEmu.Systems.Generic8080;
+using State = bEmu.Systems.Generic8080.State;
 
 namespace bEmu
 {
-    public class Generic8080Game : BaseGame<Generic8080.System, Generic8080.State, MMU, Generic8080.PPU, APU>
+    public class Generic8080Game : BaseGame<Generic8080.System, Generic8080.State, Generic8080.MMU, Generic8080.PPU, APU>
     {
         protected const int Delay = 8;
         protected const int CycleCount = 8000;

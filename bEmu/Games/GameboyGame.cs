@@ -1,17 +1,17 @@
 using Microsoft.Xna.Framework.Input;
 using bEmu.Core.CPUs.LR35902;
-using bEmu.Core.Systems.Gameboy.MBCs;
-using bEmu.Core.Systems.Gameboy;
-using State = bEmu.Core.Systems.Gameboy.State;
-using APU = bEmu.Core.Systems.Gameboy.Sound.APU;
-using GPU = bEmu.Core.Systems.Gameboy.GPU.GPU;
-using Gameboy = bEmu.Core.Systems.Gameboy;
+using bEmu.Systems.Gameboy.MBCs;
+using bEmu.Systems.Gameboy;
+using State = bEmu.Systems.Gameboy.State;
+using APU = bEmu.Systems.Gameboy.Sound.APU;
+using GPU = bEmu.Systems.Gameboy.GPU.GPU;
+using Gameboy = bEmu.Systems.Gameboy;
 using Microsoft.Xna.Framework;
 using System.Linq;
 using System.Timers;
 using Timer = System.Timers.Timer;
 using System.Diagnostics;
-using bEmu.Core.Systems.Gameboy.GPU;
+using bEmu.Systems.Gameboy.GPU;
 
 namespace bEmu
 {
@@ -119,40 +119,40 @@ namespace bEmu
         public override void UpdateGamePad(KeyboardState keyboardState)
         {
             if (keyboardState.IsKeyDown(Keys.Z))
-                State.Joypad.Column1 &= 0xE;
+                Mmu.Joypad.Column1 &= 0xE;
             if (keyboardState.IsKeyDown(Keys.X))
-                State.Joypad.Column1 &= 0xD;
+                Mmu.Joypad.Column1 &= 0xD;
             if (keyboardState.IsKeyDown(Keys.RightShift))
-                State.Joypad.Column1 &= 0xB;
+                Mmu.Joypad.Column1 &= 0xB;
             if (keyboardState.IsKeyDown(Keys.Enter))
-                State.Joypad.Column1 &= 0x7;
+                Mmu.Joypad.Column1 &= 0x7;
             if (keyboardState.IsKeyDown(Keys.Right))
-                State.Joypad.Column2 &= 0xE;
+                Mmu.Joypad.Column2 &= 0xE;
             if (keyboardState.IsKeyDown(Keys.Left))
-                State.Joypad.Column2 &= 0xD;
+                Mmu.Joypad.Column2 &= 0xD;
             if (keyboardState.IsKeyDown(Keys.Up))
-                State.Joypad.Column2 &= 0xB;
+                Mmu.Joypad.Column2 &= 0xB;
             if (keyboardState.IsKeyDown(Keys.Down))
-                State.Joypad.Column2 &= 0x7;
+                Mmu.Joypad.Column2 &= 0x7;
 
             if (keyboardState.IsKeyUp(Keys.Z))
-                State.Joypad.Column1 |= 0x1;
+                Mmu.Joypad.Column1 |= 0x1;
             if (keyboardState.IsKeyUp(Keys.X))
-                State.Joypad.Column1 |= 0x2;
+                Mmu.Joypad.Column1 |= 0x2;
             if (keyboardState.IsKeyUp(Keys.RightShift))
-                State.Joypad.Column1 |= 0x4;
+                Mmu.Joypad.Column1 |= 0x4;
             if (keyboardState.IsKeyUp(Keys.Enter))
-                State.Joypad.Column1 |= 0x8;
+                Mmu.Joypad.Column1 |= 0x8;
             if (keyboardState.IsKeyUp(Keys.Right))
-                State.Joypad.Column2 |= 0x1;
+                Mmu.Joypad.Column2 |= 0x1;
             if (keyboardState.IsKeyUp(Keys.Left))
-                State.Joypad.Column2 |= 0x2;
+                Mmu.Joypad.Column2 |= 0x2;
             if (keyboardState.IsKeyUp(Keys.Up))
-                State.Joypad.Column2 |= 0x4;
+                Mmu.Joypad.Column2 |= 0x4;
             if (keyboardState.IsKeyUp(Keys.Down))
-                State.Joypad.Column2 |= 0x8;
+                Mmu.Joypad.Column2 |= 0x8;
 
-            if (State.Joypad.Column1 != 0xF || State.Joypad.Column2 != 0xF)
+            if (Mmu.Joypad.Column1 != 0xF || Mmu.Joypad.Column2 != 0xF)
                 State.RequestInterrupt(InterruptType.Joypad);
         }
     }
