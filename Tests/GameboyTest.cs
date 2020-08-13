@@ -17,7 +17,7 @@ namespace Tests
         {
             var system = new bEmu.Systems.Gameboy.System();
             string fileName = "../../../test_roms/gb/10-bit ops.gb";
-            var disassembler = new bEmu.Core.CPUs.LR35902.Disassembler(system);
+            var disassembler = new bEmu.Core.CPUs.LR35902.Disassembler(system.MMU);
             var sb = new StringBuilder();
 
             system.MMU.LoadProgram(fileName);

@@ -38,8 +38,8 @@ namespace bEmu.Core.VMs.Chip8
                                 case 0x000B: PPU.ScrollLeft(); break;
                                 case 0x000C: PPU.ScrollRight(); break;
                                 case 0x000D: Quit(); break;
-                                case 0x000E: (System as Systems.Chip8.System).SetChip8Mode(); break;
-                                case 0x000F: (System as Systems.Chip8.System).SetSuperChipMode(); break;
+                                case 0x000E: (System as bEmu.Systems.Chip8.System).SetChip8Mode(); break;
+                                case 0x000F: (System as bEmu.Systems.Chip8.System).SetSuperChipMode(); break;
                             }
                             break;
                     }

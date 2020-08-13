@@ -4,15 +4,13 @@ namespace bEmu.Core.CPUs.Intel8080
 
     public class Disassembler : Core.Disassembler
     {
-        public Disassembler(ISystem system) : base(system) {}
+        public Disassembler(IMMU mmu) : base(mmu) {}
 
         public override Instruction GetInstruction(int pointer)
         {
-            IMMU codeBuffer = system.MMU;
-
-            byte opcode = codeBuffer[pointer];
-            byte minInstruction = pointer + 1 < codeBuffer.Length ? codeBuffer[pointer + 1] : (byte)0;
-            int maxInstruction = pointer + 2 < codeBuffer.Length ? (codeBuffer[pointer + 2] << 8) | minInstruction : 0;
+            byte opcode = mmu[pointer];
+            byte minInstruction = pointer + 1 < mmu.Length ? mmu[pointer + 1] : (byte)0;
+            int maxInstruction = pointer + 2 < mmu.Length ? (mmu[pointer + 2] << 8) | minInstruction : 0;
 
             switch (opcode)
             {

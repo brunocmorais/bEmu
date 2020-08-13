@@ -126,7 +126,7 @@ namespace bEmu.Systems.Gameboy.GPU
                 if (state.LCD.GetSTATFlag(STAT.Mode0HBlankInterrupt))
                     state.RequestInterrupt(InterruptType.LcdStat);
 
-                if (!SkipFrame && lcdEnabled)
+                if (!SkipFrame && lcdEnabled && state.LCD.LY < 144)
                 {
                     windowDisplay = state.LCD.GetLCDCFlag(LCDC.WindowDisplayEnable);
                     spriteDisplay = state.LCD.GetLCDCFlag(LCDC.SpriteDisplayEnable);
