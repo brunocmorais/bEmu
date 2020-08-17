@@ -25,9 +25,9 @@ namespace bEmu.Systems.Generic8080
                     byte sprite = System.MMU [VRAMAddress + ((y * Height / 8) + coordX / 8)];
 
                     if ((sprite & (1 << offsetX)) > 0)
-                        SetPixel(y, Height - 1 - x, 0xFFFFFFFF);
+                        Framebuffer[y, Height - 1 - x] = 0xFFFFFFFF;
                     else
-                        SetPixel(y, Height - 1 - x, 0x00000000);
+                        Framebuffer[y, Height - 1 - x] = 0x00000000;
                 }
             }
 

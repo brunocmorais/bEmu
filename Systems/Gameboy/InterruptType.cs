@@ -1,4 +1,4 @@
-namespace bEmu.Core.CPUs.LR35902
+namespace bEmu.Systems.Gameboy
 {
     public enum InterruptType
     {

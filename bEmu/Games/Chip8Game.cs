@@ -6,21 +6,36 @@ using bEmu.Core;
 using State = bEmu.Systems.Chip8.State;
 using System.Threading;
 using Chip8 = bEmu.Systems.Chip8;
+using bEmu.Factory;
+using bEmu.Systems;
+using bEmu.Components;
+using bEmu.Scalers;
 
 namespace bEmu
 {
-    public class Chip8Game : BaseGame<Chip8.System, State, MMU, Chip8.PPU, APU>
+    public class Chip8Game : BaseGame
     {
         private const int CycleCount = 16;
         private SoundEffect tone;
         private SoundEffectInstance soundEffectInstance;
         private int cycle;
+        private readonly Chip8.System system;
+        private readonly Chip8.PPU gpu;
+        private readonly State state;
+        private readonly Chip8.MMU mmu;
 
-        public Chip8Game(string rom) : base(new Chip8.System(), rom, 64, 32, 10) { }
+        public Chip8Game(string rom) : base(SystemFactory.Get(SupportedSystems.Chip8), rom, 64, 32, 10) 
+        { 
+            Options = new Options();
+            system = System as Chip8.System;
+            gpu = Gpu as Chip8.PPU;
+            state = State as State;
+            mmu = Mmu as Chip8.MMU;
+        }
 
         protected override void Initialize()
         {
-            System.MMU.LoadProgram(Rom, 0x200);
+            system.MMU.LoadProgram(Rom, 0x200);
             base.Initialize();
         }
 
@@ -31,22 +46,22 @@ namespace bEmu
 
             base.LoadContent();
 
-            State.SuperChipMode = true;
+            state.SuperChipMode = true;
 
-            if (State.SuperChipMode && BackBuffer.Width == Width)
+            if (state.SuperChipMode && BackBuffer.Width == Width)
                 BackBuffer = new Texture2D(GraphicsDevice, Width * 2, Height * 2);
-            
+
             IsRunning = true;
             StartMainThread();
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (State.Delay > 0)
-                State.Delay--;
+            if (state.Delay > 0)
+                state.Delay--;
 
-            if (State.Sound > 0)
-                State.Sound--;
+            if (state.Sound > 0)
+                state.Sound--;
 
             UpdateSound();
             cycle = CycleCount;
@@ -58,18 +73,18 @@ namespace bEmu
             lock (this)
             {
                 while (cycle-- >= 0)
-                    System.Runner.StepCycle();
+                    system.Runner.StepCycle();
             }
         }
 
         private void UpdateSound()
         {
-            if (State.Sound == 0)
+            if (state.Sound == 0)
             {
                 soundEffectInstance.IsLooped = false;
                 soundEffectInstance.Stop();
             }
-            else if (State.Sound > 0 && !soundEffectInstance.IsLooped)
+            else if (state.Sound > 0 && !soundEffectInstance.IsLooped)
             {
                 soundEffectInstance.IsLooped = true;
                 soundEffectInstance.Play();
@@ -94,7 +109,7 @@ namespace bEmu
             };
 
             for (int i = 0; i < keys.Length; i++)
-                State.Keys[keyboard[i]] = keyboardState.IsKeyDown(keys[i]);
+                state.Keys[keyboard[i]] = keyboardState.IsKeyDown(keys[i]);
         }
 
         protected override void Draw (GameTime gameTime)
@@ -102,7 +117,12 @@ namespace bEmu
             SpriteBatch.Begin();
             base.Draw (gameTime);
             SpriteBatch.End();
-            State.Draw = false;
+            state.Draw = false;
 		}
+
+        protected override void OnOptionChanged(object sender, OnOptionChangedEventArgs e)
+        {
+            base.OnOptionChanged(sender, e);
+        }
     }
 }

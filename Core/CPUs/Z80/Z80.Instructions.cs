@@ -1,8 +1,11 @@
+using System;
+using System.Diagnostics;
+using bEmu.Core;
 using bEmu.Core.Util;
 
-namespace bEmu.Core.CPUs.LR35902
+namespace bEmu.Core.CPUs.Z80
 {
-    public abstract partial class LR35902<TState, TMMU> : CPU<TState, TMMU> 
+    public abstract partial class Z80<TState, TMMU> : CPU<TState, TMMU> 
         where TState : State
         where TMMU : MMU
     {

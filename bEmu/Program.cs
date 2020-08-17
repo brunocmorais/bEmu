@@ -2,12 +2,12 @@
 using bEmu.Systems;
 using bEmu.Exceptions;
 using bEmu.Factory;
+using Microsoft.Xna.Framework;
 
 namespace bEmu
 {
     public class Program
     {
-        [STAThread]
         private static void Main(string[] args)
         {
             try

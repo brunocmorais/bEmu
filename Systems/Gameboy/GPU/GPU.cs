@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using bEmu.Core;
 using bEmu.Core.CPUs.LR35902;
+using bEmu.Systems.Gameboy.GPU.Palettes;
 
 namespace bEmu.Systems.Gameboy.GPU
 {
@@ -24,6 +25,7 @@ namespace bEmu.Systems.Gameboy.GPU
         private bool GBCMode => (System as System).GBCMode;
         private BackgroundMap backgroundMap;
         private uint[] currentLine;
+        private IColorPalette colorPalette;
 
         public GPU(System system) : base(system, 160, 144) 
         {
@@ -39,6 +41,7 @@ namespace bEmu.Systems.Gameboy.GPU
             spritesCurrentLine = Enumerable.Empty<Sprite>();
             backgroundMap = new BackgroundMap(mmu);
             currentLine = new uint[Width];
+            colorPalette = ColorPaletteFactory.Get(MonochromePaletteType.Gray);
         }
 
         public void TurnOffLCD()
@@ -156,7 +159,7 @@ namespace bEmu.Systems.Gameboy.GPU
         private void UpdateFramebuffer()
         {
             for (int i = 0; i < currentLine.Length; i++)
-                SetPixel(i, state.LCD.LY, currentLine[i]);
+                Framebuffer[i, state.LCD.LY] = currentLine[i];
         }
 
         private void SetBGWindowPixel(Palette palette, int padding, int i, bool horizontalFlip)
@@ -285,7 +288,7 @@ namespace bEmu.Systems.Gameboy.GPU
                     }
                     else
                     {
-                        var color = Palette.ShadeToRGB(state.LCD.BGP, 0);
+                        var color = Palette.ShadeToRGB(state.LCD.BGP, 0, colorPalette);
 
                         if (!sprite.Priority || (currentLine[coordX] == color))
                             currentLine[coordX] = objPalette[j];
@@ -305,7 +308,7 @@ namespace bEmu.Systems.Gameboy.GPU
                 case PaletteType.OPB1: val = state.LCD.OBP1; break;
             }
 
-            return Palette.ShadeToRGB(val, colorNumber);
+            return Palette.ShadeToRGB(val, colorNumber, colorPalette);
         }
 
         private IEnumerable<uint> GetBGColors()
@@ -356,6 +359,11 @@ namespace bEmu.Systems.Gameboy.GPU
                 else
                     palette[i] = 0;
             }
+        }
+
+        public void SetShadeColorPalette(MonochromePaletteType paletteType)
+        {
+            colorPalette = ColorPaletteFactory.Get(paletteType);
         }
     }
 }

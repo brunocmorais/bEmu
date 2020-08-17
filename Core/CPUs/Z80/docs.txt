@@ -1,0 +1,23 @@
+Z80
+
+0x08 - ex af, af'
+0x10 - djnz *
+0xE0 - ret po
+0xF0 - ret p
+0xD3 - out (*), a
+0xE3 - ex (sp), hl
+0xE4 - call po, **
+0xF4 - call p, **
+0xE8 - ret pe
+0xF8 - ret m
+0xD9 - exx
+0xEA - jp pe, **
+0xFA - jp m, **
+0xCB - prefixo CB (bit instructions)
+0xDB - in a, **
+0xEB - ex de,hl
+0xEC - call pe, **
+0xFC - call m, **
+0xDD - prefixo DD (instruções IX)
+0xED - prefixo ED (extended instructions)
+0xFD - prefixo FD (instruções IY)

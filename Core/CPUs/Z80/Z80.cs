@@ -1,13 +1,13 @@
 using System;
 using bEmu.Core.Util;
 
-namespace bEmu.Core.CPUs.LR35902
+namespace bEmu.Core.CPUs.Z80
 {
-    public abstract partial class LR35902<TState, TMMU> : CPU<TState, TMMU> 
+    public abstract partial class Z80<TState, TMMU> : CPU<TState, TMMU> 
         where TState : State
         where TMMU : MMU
     {
-        public LR35902(ISystem system) : base(system) { }
+        public Z80(ISystem system) : base(system) { }
 
         protected ushort GetNextWord()
         {

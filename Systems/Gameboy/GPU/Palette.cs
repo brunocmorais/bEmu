@@ -1,4 +1,5 @@
 using System;
+using bEmu.Systems.Gameboy.GPU.Palettes;
 
 namespace bEmu.Systems.Gameboy.GPU
 {
@@ -34,22 +35,31 @@ namespace bEmu.Systems.Gameboy.GPU
             return (uint)((r << 24) | (g << 16) | (b << 8) | 0xFF);
         }
 
-        public static uint ShadeToRGB(byte paletteBytes, int colorNumber)
+        public static uint ShadeToRGB(byte paletteBytes, int colorNumber, IColorPalette colorPalette)
         {
             int bitOffset = (colorNumber * 2);
             var shadeNumber = ((paletteBytes & (3 << bitOffset)) >> bitOffset);
-            int color;
+            // int color;
+            
+            // switch (shadeNumber)
+            // {
+            //     case 0: color = 0xFF; break;
+            //     case 1: color = 0xC0; break;
+            //     case 2: color = 0x60; break;
+            //     case 3: color = 0x00; break;
+            //     default: throw new Exception();
+            // }
+
+            // return (uint)((color << 24) | (color << 16) | (color << 8) | 0xFF);
             
             switch (shadeNumber)
             {
-                case 0: color = 0xFF; break;
-                case 1: color = 0xC0; break;
-                case 2: color = 0x60; break;
-                case 3: color = 0x00; break;
+                case 0: return colorPalette.Shade0;
+                case 1: return colorPalette.Shade1;
+                case 2: return colorPalette.Shade2;
+                case 3: return colorPalette.Shade3;
                 default: throw new Exception();
             }
-
-            return (uint)((color << 24) | (color << 16) | (color << 8) | 0xFF);
         }
 
         public static int GetIndexFromPalette(PaletteType type)

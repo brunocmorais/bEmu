@@ -3,18 +3,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using bEmu.Components;
 using bEmu.Core;
+using bEmu.Factory;
+using bEmu.Systems;
 using bEmu.Systems.Generic8080;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json;
 using Generic8080 = bEmu.Systems.Generic8080;
+using MMU = bEmu.Systems.Generic8080.MMU;
 using State = bEmu.Systems.Generic8080.State;
 
 namespace bEmu
 {
-    public class Generic8080Game : BaseGame<Generic8080.System, Generic8080.State, Generic8080.MMU, Generic8080.PPU, APU>
+    public class Generic8080Game : BaseGame
     {
         protected const int Delay = 8;
         protected const int CycleCount = 8000;
@@ -26,9 +30,18 @@ namespace bEmu
         protected string[] fileNames;
         protected string[] memoryPositions;
         private int cycle = 0;
+        protected readonly Generic8080.System system;
+        protected readonly Generic8080.PPU gpu;
+        protected readonly State state;
+        protected readonly MMU mmu;
 
-        public Generic8080Game(string rom) : base(new Generic8080.System(), rom, 224, 256, 2)
+        public Generic8080Game(string rom) : base(SystemFactory.Get(SupportedSystems.Generic8080), rom, 224, 256, 2)
         {
+            Options = new Options();
+            system = System as Generic8080.System;
+            gpu = Gpu as Generic8080.PPU;
+            state = State as State;
+            mmu = Mmu as Generic8080.MMU;
             TargetElapsedTime = new TimeSpan(0, 0, 0, 0, Delay);
             lastInterruptTime = TimeSpan.Zero;
             lastInterrupt = 1;
@@ -70,14 +83,14 @@ namespace bEmu
             }
 
             for (int i = 0; i < fileNames.Length; i++)
-                System.MMU.LoadProgram(entries[fileNames[i]], Convert.ToInt32(memoryPositions[i], 16));
+                system.MMU.LoadProgram(entries[fileNames[i]], Convert.ToInt32(memoryPositions[i], 16));
         }
 
         protected override void LoadContent()
         {
             base.LoadContent();
-            State.UpdatePorts(1, 0x01);
-            State.UpdatePorts(2, 0x00);
+            state.UpdatePorts(1, 0x01);
+            state.UpdatePorts(2, 0x00);
             IsRunning = true;
             StartMainThread();
         }
@@ -88,7 +101,7 @@ namespace bEmu
             {
                 cycle = CycleCount;
                 
-                if (State.EnableInterrupts)
+                if (state.EnableInterrupts)
                 {
                     lastInterruptTime = gameTime.TotalGameTime;
                     lastInterrupt = lastInterrupt == 1 ? 2 : 1;
@@ -120,20 +133,20 @@ namespace bEmu
             if (Keyboard.GetState().IsKeyDown(Keys.Right))
                 read1 = (byte) (read1 | (1 << 6));
 
-            State.UpdatePorts(1, read1);
+            state.UpdatePorts(1, read1);
         }
 
         protected override void Draw (GameTime gameTime)
 		{
             if (this is SpaceInvadersGame)
             {
-                Gpu.UpdateFrameBuffer();
+                gpu.UpdateFrameBuffer();
                 base.Draw (gameTime);
             }
             else
             {
                 GraphicsDevice.Clear (Color.Black);
-                Gpu.UpdateFrameBuffer();
+                gpu.UpdateFrameBuffer();
                 SpriteBatch.Begin();
                 base.Draw (gameTime);
                 SpriteBatch.End();
@@ -142,7 +155,7 @@ namespace bEmu
 
         protected virtual void GenerateInterrupt(int interruptNumber)
         {
-            (System.Runner as CPU).GenerateInterrupt(interruptNumber);
+            (system.Runner as CPU).GenerateInterrupt(interruptNumber);
         }
 
         private void In()
@@ -157,8 +170,8 @@ namespace bEmu
 
         protected virtual void UpdateSounds()
         {            
-            byte write3 = State.Ports.Write3;
-            byte write5 = State.Ports.Write5;            
+            byte write3 = state.Ports.Write3;
+            byte write5 = state.Ports.Write5;            
             
             lastWrite3 = write3;
             lastWrite5 = write5;
@@ -170,9 +183,14 @@ namespace bEmu
             {
                 while (cycle-- >= 0)
                 {
-                    System.Runner.StepCycle();
+                    system.Runner.StepCycle();
                 }   
             }
+        }
+
+        protected override void OnOptionChanged(object sender, OnOptionChangedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }

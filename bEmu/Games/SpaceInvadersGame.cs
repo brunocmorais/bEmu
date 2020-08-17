@@ -57,8 +57,8 @@ namespace bEmu
 
         protected override void UpdateSounds()
         {
-            byte write3 = State.Ports.Write3;
-            byte write5 = State.Ports.Write5;
+            byte write3 = state.Ports.Write3;
+            byte write5 = state.Ports.Write5;
 
             bool playShot = ((write3 & (1 << 1)) >> 1) == 1;
             bool wasPlayingShot = ((lastWrite3 & (1 << 1)) >> 1) == 1;

@@ -12,92 +12,84 @@ using System.Timers;
 using Timer = System.Timers.Timer;
 using System.Diagnostics;
 using bEmu.Systems.Gameboy.GPU;
+using bEmu.Factory;
+using bEmu.Systems;
+using bEmu.Classes;
+using bEmu.Components;
+using bEmu.Scalers;
 
 namespace bEmu
 {
-    public class GameboyGame : BaseGame<Gameboy.System, State, MMU, GPU, APU>
+    public class GameboyGame : BaseGame
     {
-        // private readonly DynamicSoundEffectInstance instance;
-        // private readonly byte[] instanceBuffer;
-
-        public GameboyGame(string rom) : base(new Gameboy.System(), rom, 160, 144, 2)
-        {
-            Gpu.Frameskip = 1;
-            // instance = new DynamicSoundEffectInstance(APU.AudioSampleRate, AudioChannels.Stereo);
-            // instanceBuffer = new byte[2 * APU.AudioBufferFrames * APU.BytesPerSample];
-        }
+        private readonly Gameboy.System system;
+        private readonly GPU gpu;
+        private readonly State state;
+        private readonly MMU mmu;
         private Timer timer = new Timer();
-        bool debug = false;
+
+        public GameboyGame(string rom) : base(SystemFactory.Get(SupportedSystems.GameBoy), rom, 160, 144, 2)
+        {
+            system = System as Gameboy.System;
+            gpu = Gpu as GPU;
+            state = State as State;
+            mmu = Mmu as MMU;
+            Options = new GameboyOptions();
+            Options.OptionChanged += OnOptionChanged;
+        }
 
         protected override void Initialize()
         {
-            Mmu.LoadProgram(Rom);
-            State.PC = 0x00;
-            Window.Title = $"bEmu - {Mmu.CartridgeHeader.Title}";
+            gpu.Frameskip = 1;
+            mmu.LoadProgram(Rom);
+            state.PC = 0x00;
+            Window.Title = $"bEmu - {mmu.CartridgeHeader.Title}";
             base.Initialize();
-            // timer.Interval = 1000;
-            // timer.Elapsed += (sender, e) => 
-            // {
-            //     var color0a = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 0];
-            //     var color0b = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 1];
-            //     var color1a = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 2];
-            //     var color1b = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 3];
-            //     var color2a = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 4];
-            //     var color2b = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 5];
-            //     var color3a = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 6];
-            //     var color3b = Mmu.ColorPaletteData.BackgroundPalettes[Palette.GetIndexFromPalette(PaletteType.BG1) + 7];
-            //     var color0 = (color0b << 8) | color0a;
-            //     var color1 = (color1b << 8) | color1a;
-            //     var color2 = (color2b << 8) | color2a;
-            //     var color3 = (color3b << 8) | color3a;
-
-            //     Debug.WriteLine("{0:x} {1:x} {2:x} {3:x}", color0, color1, color2, color3);
-            // };
-            // timer.Start();
         }
 
         protected override void LoadContent()
         {
             base.LoadContent();
             IsRunning = true;
-            Gpu.Frameskip = 1;
+
+#if DEBUG            
+            gpu.Frameskip = 1;
+#endif
+
             StartMainThread();
         }
 
         public override void UpdateGame()
         {
-            if (Mmu.Bios.Running && State.PC == 0x100)
+            if (mmu.Bios.Running && state.PC == 0x100)
             {
-                Mmu.Bios.Running = false;
+                mmu.Bios.Running = false;
 
-                if ((Mmu.CartridgeHeader.GBCFlag & 0x80) == 0x80) // set gameboy color mode
+                if ((mmu.CartridgeHeader.GBCFlag & 0x80) == 0x80) // set gameboy color mode
                 {
-                    State.A = 0x11;
-                    System.GBCMode = true;
+                    state.A = 0x11;
+                    system.GBCMode = true;
                 }
             }
 
-            // if (State.PC == 0x4066 && (Mmu.MBC as MBC5).BankNumber == 0x21 && debug)
-            //     Debugger.Break();
-
-            int prevCycles = State.Cycles;
+            int prevCycles = state.Cycles;
             var opcode = System.Runner.StepCycle();
-            int afterCycles = State.Cycles;
+            int afterCycles = state.Cycles;
 
             int lastCycleCount = (afterCycles - prevCycles);
-            State.Timer.UpdateTimers(lastCycleCount);
+            state.Timer.UpdateTimers(lastCycleCount);
 
-            if (Mmu.MBC is IHasRTC)
-                (Mmu.MBC as IHasRTC).Tick(lastCycleCount);
+            if (mmu.MBC is IHasRTC)
+                (mmu.MBC as IHasRTC).Tick(lastCycleCount);
             
             lock (this)
             {
-                if (Gpu.Frame <= DrawCounter)
+                if (gpu.Frame <= DrawCounter)
                 {
-                    Gpu.Cycles += lastCycleCount;
+                    gpu.Cycles += lastCycleCount;
 
-                    if (State.Instructions % 2 == 0)
-                        Gpu.StepCycle();
+                    if (state.Instructions % 2 == 0)
+                        gpu.StepCycle();
                 }
             }
         }
@@ -113,47 +105,59 @@ namespace bEmu
         public override void StopGame()
         {
             base.StopGame();
-            Mmu.MBC.Shutdown();
+            mmu.MBC.Shutdown();
         }
 
         public override void UpdateGamePad(KeyboardState keyboardState)
         {
             if (keyboardState.IsKeyDown(Keys.Z))
-                Mmu.Joypad.Column1 &= 0xE;
+                mmu.Joypad.Column1 &= 0xE;
             if (keyboardState.IsKeyDown(Keys.X))
-                Mmu.Joypad.Column1 &= 0xD;
+                mmu.Joypad.Column1 &= 0xD;
             if (keyboardState.IsKeyDown(Keys.RightShift))
-                Mmu.Joypad.Column1 &= 0xB;
+                mmu.Joypad.Column1 &= 0xB;
             if (keyboardState.IsKeyDown(Keys.Enter))
-                Mmu.Joypad.Column1 &= 0x7;
+                mmu.Joypad.Column1 &= 0x7;
             if (keyboardState.IsKeyDown(Keys.Right))
-                Mmu.Joypad.Column2 &= 0xE;
+                mmu.Joypad.Column2 &= 0xE;
             if (keyboardState.IsKeyDown(Keys.Left))
-                Mmu.Joypad.Column2 &= 0xD;
+                mmu.Joypad.Column2 &= 0xD;
             if (keyboardState.IsKeyDown(Keys.Up))
-                Mmu.Joypad.Column2 &= 0xB;
+                mmu.Joypad.Column2 &= 0xB;
             if (keyboardState.IsKeyDown(Keys.Down))
-                Mmu.Joypad.Column2 &= 0x7;
+                mmu.Joypad.Column2 &= 0x7;
 
             if (keyboardState.IsKeyUp(Keys.Z))
-                Mmu.Joypad.Column1 |= 0x1;
+                mmu.Joypad.Column1 |= 0x1;
             if (keyboardState.IsKeyUp(Keys.X))
-                Mmu.Joypad.Column1 |= 0x2;
+                mmu.Joypad.Column1 |= 0x2;
             if (keyboardState.IsKeyUp(Keys.RightShift))
-                Mmu.Joypad.Column1 |= 0x4;
+                mmu.Joypad.Column1 |= 0x4;
             if (keyboardState.IsKeyUp(Keys.Enter))
-                Mmu.Joypad.Column1 |= 0x8;
+                mmu.Joypad.Column1 |= 0x8;
             if (keyboardState.IsKeyUp(Keys.Right))
-                Mmu.Joypad.Column2 |= 0x1;
+                mmu.Joypad.Column2 |= 0x1;
             if (keyboardState.IsKeyUp(Keys.Left))
-                Mmu.Joypad.Column2 |= 0x2;
+                mmu.Joypad.Column2 |= 0x2;
             if (keyboardState.IsKeyUp(Keys.Up))
-                Mmu.Joypad.Column2 |= 0x4;
+                mmu.Joypad.Column2 |= 0x4;
             if (keyboardState.IsKeyUp(Keys.Down))
-                Mmu.Joypad.Column2 |= 0x8;
+                mmu.Joypad.Column2 |= 0x8;
 
-            if (Mmu.Joypad.Column1 != 0xF || Mmu.Joypad.Column2 != 0xF)
-                State.RequestInterrupt(InterruptType.Joypad);
+            if (mmu.Joypad.Column1 != 0xF || mmu.Joypad.Column2 != 0xF)
+                state.RequestInterrupt(InterruptType.Joypad);
+        }
+
+        protected override void OnOptionChanged(object sender, OnOptionChangedEventArgs e)
+        {
+            base.OnOptionChanged(sender, e);
+
+            switch (e.Property)
+            {
+                case "PaletteType":
+                    gpu.SetShadeColorPalette((Options as GameboyOptions).PaletteType);
+                    break;
+            }
         }
     }
 }
