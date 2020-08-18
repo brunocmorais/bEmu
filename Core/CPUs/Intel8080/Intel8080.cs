@@ -6,13 +6,13 @@ using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.Intel8080
 {
-    public partial class Intel8080<TState, TMMU> : CPU<TState, TMMU> 
+    public abstract partial class Intel8080<TState, TMMU> : CPU<TState, TMMU> 
         where TState : State
         where TMMU : MMU
     {
-        public Intel8080(bEmu.Core.Systems.Generic8080.System system) : base(system) { }
+        public Intel8080(ISystem system) : base(system) { }
 
-        private ushort GetNextWord()
+        protected ushort GetNextWord()
         {
             byte b1 = MMU[State.PC++];
             byte b2 = MMU[State.PC++];
@@ -24,31 +24,31 @@ namespace bEmu.Core.CPUs.Intel8080
             return MMU[State.PC++];
         }
 
-        private byte ReadByteFromMemory(ushort addr)
+        protected byte ReadByteFromMemory(ushort addr)
         {
             return MMU[addr];
         }
 
-        private void WriteByteToMemory(ushort addr, byte value)
+        protected void WriteByteToMemory(ushort addr, byte value)
         {
             MMU[addr] = value;
         }
 
-        private ushort ReadWordFromMemory(ushort addr)
+        protected ushort ReadWordFromMemory(ushort addr)
         {
             byte a = MMU[addr];
             byte b = MMU[addr + 1];
             return BitUtils.GetWordFrom2Bytes(a, b);
         }
 
-        private void WriteWordToMemory(ushort addr, ushort word)
+        protected void WriteWordToMemory(ushort addr, ushort word)
         {
             BitUtils.Get2BytesFromWord(word, out byte a, out byte b);
             MMU[addr] = b;
             MMU[addr + 1] = a;
         }
 
-        private void UpdateFlags(byte value)
+        protected void UpdateFlags(byte value)
         {
             State.Flags.Zero = CheckZero(value);
             State.Flags.Sign = CheckSign(value);
@@ -56,20 +56,20 @@ namespace bEmu.Core.CPUs.Intel8080
             State.Flags.AuxiliaryCarry = false;
         }
 
-        private ushort PopStack()
+        protected ushort PopStack()
         {
             ushort word = ReadWordFromMemory(State.SP);
             State.SP += 2;
             return word;
         }
 
-        private void PushStack(ushort value)
+        protected void PushStack(ushort value)
         {
             State.SP -= 2;
             WriteWordToMemory(State.SP, value);
         }
 
-        private byte GetByteFromRegister(Register register)
+        protected byte GetByteFromRegister(Register register)
         {
             switch (register)
             {
@@ -91,7 +91,7 @@ namespace bEmu.Core.CPUs.Intel8080
             }
         }
 
-        private ushort GetWordFromRegister(Register register)
+        protected ushort GetWordFromRegister(Register register)
         {
             switch (register)
             {
@@ -116,17 +116,17 @@ namespace bEmu.Core.CPUs.Intel8080
             }
         }
 
-        private bool CheckZero(byte value)
+        protected bool CheckZero(byte value)
         {
             return value == 0;
         }
 
-        private bool CheckSign(byte value)
+        protected bool CheckSign(byte value)
         {
             return (value & 0x80) == 0x80;
         }
 
-        private bool CheckParity(byte value)
+        protected bool CheckParity(byte value)
         {
             byte numberOfOneBits = 0;
 
@@ -136,7 +136,7 @@ namespace bEmu.Core.CPUs.Intel8080
             return (numberOfOneBits & 1) == 0;
         }
 
-        private bool CheckAuxiliaryCarryAdd(params byte[] bytes)
+        protected bool CheckAuxiliaryCarryAdd(params byte[] bytes)
         {
             for (int i = 0; i < bytes.Length; i++)
                 bytes[i] &= 0x0F;
@@ -144,7 +144,7 @@ namespace bEmu.Core.CPUs.Intel8080
             return bytes.Sum(x => x) >= 0x10;
         }
 
-        private bool CheckAuxiliaryCarryAdd(params ushort[] words)
+        protected bool CheckAuxiliaryCarryAdd(params ushort[] words)
         {
             for (int i = 0; i < words.Length; i++)
                 words[i] &= 0x0FFF;

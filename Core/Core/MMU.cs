@@ -3,7 +3,7 @@ using System.IO;
 
 namespace bEmu.Core
 {
-    public class MMU : IMMU
+    public abstract class MMU : IMMU
     {
         private byte[] ram;
         public int Length => ram.Length;
@@ -13,7 +13,7 @@ namespace bEmu.Core
             ram = new byte[size];
         }
 
-        public byte this[int addr]
+        public virtual byte this[int addr]
         {
             get
             {
@@ -33,13 +33,13 @@ namespace bEmu.Core
                 throw new ArgumentException($"Tentativa de acessar endereço 0x{index.ToString("x")} em uma memória de tamanho 0x{ram.LongLength.ToString("x")}.");
         }
 
-        public void LoadProgram(string fileName, int startAddress = 0)
+        public virtual void LoadProgram(string fileName, int startAddress = 0)
         {
             byte[] bytes = File.ReadAllBytes(fileName);
             LoadProgram(bytes, startAddress);
         }
 
-        public void LoadProgram(byte[] bytes, int startAddress = 0)
+        public virtual void LoadProgram(byte[] bytes, int startAddress = 0)
         {
             if ((bytes.Length + startAddress) > ram.Length)
                 throw new Exception("Programa não cabe na memória!");

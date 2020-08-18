@@ -26,8 +26,7 @@ namespace bEmu
         private SoundEffect fastInvader4;
         private Color backdropColor = Color.FromNonPremultiplied(255, 255, 255, 160);
 
-        public SpaceInvadersGame(string zipName, string[] fileNames, string[] memoryPositions) : 
-            base(zipName, fileNames, memoryPositions) { }
+        public SpaceInvadersGame(string rom) : base(rom) { }
 
         protected override void LoadContent()
         {
@@ -50,17 +49,16 @@ namespace bEmu
         protected override void Draw (GameTime gameTime)
 		{
             GraphicsDevice.Clear(Color.Black);
-            spriteBatch.Begin ();
-            spriteBatch.Draw(backdrop, new Rectangle(0, 0, Width * TamanhoPixel, Height * TamanhoPixel), backdropColor);
-            spriteBatch.End ();
-
+            SpriteBatch.Begin ();
+            SpriteBatch.Draw(backdrop, new Rectangle(0, 0, Width * Options.Size, Height * Options.Size), backdropColor);
             base.Draw(gameTime);
+            SpriteBatch.End ();
 		}
 
         protected override void UpdateSounds()
         {
-            byte write3 = State.Ports.Write3;
-            byte write5 = State.Ports.Write5;
+            byte write3 = state.Ports.Write3;
+            byte write5 = state.Ports.Write5;
 
             bool playShot = ((write3 & (1 << 1)) >> 1) == 1;
             bool wasPlayingShot = ((lastWrite3 & (1 << 1)) >> 1) == 1;

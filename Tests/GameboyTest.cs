@@ -3,8 +3,8 @@ using System.Diagnostics;
 using System.Text;
 using bEmu.Core;
 using bEmu.Core.CPUs.Intel8080;
-using bEmu.Core.Systems.Gameboy;
-using bEmu.Core.Systems.Generic8080;
+using bEmu.Systems.Gameboy;
+using bEmu.Systems.Generic8080;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -15,9 +15,9 @@ namespace Tests
         [TestMethod]
         public void TestarGameboy()
         {
-            var system = new bEmu.Core.Systems.Gameboy.System();
+            var system = new bEmu.Systems.Gameboy.System();
             string fileName = "../../../test_roms/gb/10-bit ops.gb";
-            var disassembler = new bEmu.Core.CPUs.LR35902.Disassembler(system);
+            var disassembler = new bEmu.Core.CPUs.LR35902.Disassembler(system.MMU);
             var sb = new StringBuilder();
 
             system.MMU.LoadProgram(fileName);
@@ -39,8 +39,8 @@ namespace Tests
         [TestMethod]
         public void Daa()
         {
-            var system = new bEmu.Core.Systems.Gameboy.System();
-            var state = (system.State as bEmu.Core.Systems.Gameboy.State);
+            var system = new bEmu.Systems.Gameboy.System();
+            var state = (system.State as bEmu.Systems.Gameboy.State);
             var fakeRom = new byte[32768];
             fakeRom[0x100] = 0x27;
 

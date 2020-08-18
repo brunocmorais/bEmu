@@ -5,16 +5,16 @@ using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.Intel8080
 {
-    public partial class Intel8080<TState, TMMU> : CPU<TState, TMMU> 
+    public abstract partial class Intel8080<TState, TMMU> : CPU<TState, TMMU> 
         where TState : State
         where TMMU : MMU
     {
-        private void Nop()
+        protected void Nop()
         {
             IncreaseCycles(4);
         }
 
-        private void Lxi(Register register)
+        protected void Lxi(Register register)
         {
             switch (register)
             {
@@ -38,7 +38,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(10);
         }
 
-        private void Stax(Register register)
+        protected void Stax(Register register)
         {
             if (register == Register.BC)
                 MMU[State.BC] = State.A;
@@ -48,7 +48,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(7);
         }
 
-        private void Shld()
+        protected void Shld()
         {
             ushort value = State.HL;
             ushort addr = GetNextWord();
@@ -56,13 +56,13 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(16);
         }
 
-        private void Sta()
+        protected void Sta()
         {
             WriteByteToMemory(GetNextWord(), State.A);
             IncreaseCycles(13);
         }
 
-        private void Inx(Register registers)
+        protected void Inx(Register registers)
         {
             switch (registers)
             {
@@ -76,7 +76,7 @@ namespace bEmu.Core.CPUs.Intel8080
 
         }
 
-        private void Inr(Register register)
+        protected void Inr(Register register)
         {
             switch (register)
             {
@@ -98,7 +98,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(5);
         }
 
-        private void Dcr(Register register)
+        protected void Dcr(Register register)
         {
             switch (register)
             {
@@ -120,7 +120,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(5);
         }
 
-        private void Mvi(Register register)
+        protected void Mvi(Register register)
         {
             switch (register)
             {
@@ -140,7 +140,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(7);   
         }
 
-        private void Rlc()
+        protected void Rlc()
         {
             State.Flags.Carry = ((State.A & 0x80) >> 7) == 1;
             State.A <<= 1;
@@ -151,7 +151,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);
         }
 
-        private void Rrc()
+        protected void Rrc()
         {
             State.Flags.Carry = (State.A & 0x1) == 1;
             State.A >>= 1;
@@ -162,7 +162,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);
         }
 
-        private void Ral()
+        protected void Ral()
         {
             bool previousCarry = State.Flags.Carry;
             State.Flags.Carry = ((State.A & 0x80) >> 7) == 1;
@@ -174,7 +174,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);
         }
 
-        private void Rar()
+        protected void Rar()
         {
             bool previousCarry = State.Flags.Carry;
             State.Flags.Carry = (State.A & 0x1) == 1;
@@ -186,7 +186,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);
         }
 
-        private void Daa()
+        protected void Daa()
         {
             bool carry = State.Flags.Carry;
             byte correction = 0;
@@ -209,13 +209,13 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);
         }
 
-        private void Stc()
+        protected void Stc()
         {
             State.Flags.Carry = true;
             IncreaseCycles(4);
         }
 
-        private void Dad(Register register)
+        protected void Dad(Register register)
         {
             ushort word = GetWordFromRegister(register);
             State.Flags.Carry = ((State.HL + word) & 0x10000) == 0x10000;
@@ -223,27 +223,27 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);
         }
 
-        private void Ldax(Register register)
+        protected void Ldax(Register register)
         {
             byte value = GetByteFromRegister(register);
             State.A = value;
             IncreaseCycles(7);
         }
 
-        private void Lhld()
+        protected void Lhld()
         {
             ushort addr = GetNextWord();
             State.HL = ReadWordFromMemory(addr);
             IncreaseCycles(16);
         }
 
-        private void Lda()
+        protected void Lda()
         {
             State.A = ReadByteFromMemory(GetNextWord());
             IncreaseCycles(13);
         }
 
-        private void Dcx(Register register)
+        protected void Dcx(Register register)
         {
             switch (register)
             {
@@ -256,19 +256,19 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(5);
         }
 
-        private void Cma()
+        protected void Cma()
         {
             State.A = (byte)~State.A;
             IncreaseCycles(4);
         }
 
-        private void Cmc()
+        protected void Cmc()
         {
             State.Flags.Carry = !State.Flags.Carry;
             IncreaseCycles(4);
         }
 
-        private void Mov(Register registerA, Register registerB)
+        protected void Mov(Register registerA, Register registerB)
         {
             byte value = GetByteFromRegister(registerB);
 
@@ -290,7 +290,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(5);
         }
 
-        private void Add(Register register)
+        protected void Add(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -305,7 +305,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);
         }
 
-        private void Adi()
+        protected void Adi()
         {
             byte value = GetNextByte();
             int result = State.A + value;
@@ -316,7 +316,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(7);
         }
 
-        private void Aci()
+        protected void Aci()
         {
             byte value = GetNextByte();
             int carryValue = State.Flags.Carry ? 1 : 0;
@@ -328,7 +328,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(7);
         }
 
-        private void Adc(Register register)
+        protected void Adc(Register register)
         {
             byte value = GetByteFromRegister(register);
             int carryValue = State.Flags.Carry ? 1 : 0;
@@ -344,7 +344,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);
         }
 
-        private void Sub(Register register)
+        protected void Sub(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -358,7 +358,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);   
         }
 
-        private void Sui()
+        protected void Sui()
         {
             byte value = GetNextByte();
             int result = State.A - value;
@@ -368,7 +368,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(7);   
         }
 
-        private void Sbi()
+        protected void Sbi()
         {
             byte value = GetNextByte();
             int carryValue = State.Flags.Carry ? 1 : 0;
@@ -379,7 +379,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(7);   
         }
 
-        private void Sbb(Register register)
+        protected void Sbb(Register register)
         {
             byte value = GetByteFromRegister(register);
             int carryValue = State.Flags.Carry ? 1 : 0;
@@ -394,7 +394,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);   
         }
 
-        private void Ana(Register register)
+        protected void Ana(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -407,7 +407,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);
         }
 
-        private void Ani()
+        protected void Ani()
         {
             byte value = GetNextByte();
             State.Flags.Carry = false;
@@ -416,7 +416,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(7);
         }
 
-        private void Xra(Register register)
+        protected void Xra(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -429,7 +429,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);
         }
 
-        private void Xri()
+        protected void Xri()
         {
             byte value = GetNextByte();
             State.Flags.Carry = false;
@@ -438,7 +438,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(7);
         }
 
-        private void Ora(Register register)
+        protected void Ora(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -451,7 +451,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);
         }
 
-        private void Ori()
+        protected void Ori()
         {
             byte value = GetNextByte();
             State.Flags.Carry = false;
@@ -460,7 +460,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(7);
         }
 
-        private void Cmp(Register register)
+        protected void Cmp(Register register)
         {
             byte value = GetByteFromRegister(register);
 
@@ -473,7 +473,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(4);
         }
 
-        private void Cpi()
+        protected void Cpi()
         {
             byte value = GetNextByte();                
             ushort result = (ushort)(State.A - value);
@@ -482,13 +482,13 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(7);
         }
 
-        private void Ret()
+        protected void Ret()
         {
             State.PC = PopStack();
             IncreaseCycles(10);
         }
 
-        private void ConditionalRet(bool condition)
+        protected void ConditionalRet(bool condition)
         {
             if (condition)
             {
@@ -499,47 +499,47 @@ namespace bEmu.Core.CPUs.Intel8080
                 IncreaseCycles(5);
         }
 
-        private void Rnz()
+        protected void Rnz()
         {
             ConditionalRet(!State.Flags.Zero);
         }
 
-        private void Rnc()
+        protected void Rnc()
         {
             ConditionalRet(!State.Flags.Carry);
         }
 
-        private void Rpo()
+        protected void Rpo()
         {
             ConditionalRet(!State.Flags.Parity);
         }
 
-        private void Rp()
+        protected void Rp()
         {
             ConditionalRet(!State.Flags.Sign);
         }
 
-        private void Rz()
+        protected void Rz()
         {
             ConditionalRet(State.Flags.Zero);
         }
 
-        private void Rc()
+        protected void Rc()
         {
             ConditionalRet(State.Flags.Carry);
         }
 
-        private void Rpe()
+        protected void Rpe()
         {
             ConditionalRet(State.Flags.Parity);
         }
 
-        private void Rm()
+        protected void Rm()
         {
             ConditionalRet(State.Flags.Sign);
         }
 
-        private void Pop(Register register)
+        protected void Pop(Register register)
         {
             switch (register)
             {
@@ -551,7 +551,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(10);
         }
 
-        private void PopPsw()
+        protected void PopPsw()
         {
             ushort af = PopStack();
             State.A = (byte)(af >> 8);
@@ -566,7 +566,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(10);
         }
 
-        private void Push(Register register)
+        protected void Push(Register register)
         {
             switch (register)
             {
@@ -579,20 +579,20 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(11);
         }
 
-        private void Jmp()
+        protected void Jmp()
         {
             ushort addr = GetNextWord();
             State.PC = addr;
             IncreaseCycles(10);
         }
 
-        private void Jmp(ushort addr)
+        protected void Jmp(ushort addr)
         {
             State.PC = addr;
             IncreaseCycles(10);
         }
 
-        private void ConditionalJmp(bool condition)
+        protected void ConditionalJmp(bool condition)
         {
             if (condition)
                 Jmp();
@@ -602,57 +602,51 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(3);
         }
 
-        private void Jnz()
+        protected void Jnz()
         {
             ConditionalJmp(!State.Flags.Zero);
         }
 
-        private void Jnc()
+        protected void Jnc()
         {
             ConditionalJmp(!State.Flags.Carry);
         }
 
-        private void Jpo()
+        protected void Jpo()
         {
             ConditionalJmp(!State.Flags.Parity);
         }
 
-        private void Jp()
+        protected void Jp()
         {
             ConditionalJmp(!State.Flags.Sign);
         }
 
-        private void Jz()
+        protected void Jz()
         {
             ConditionalJmp(State.Flags.Zero);
         }
 
-        private void Jc()
+        protected void Jc()
         {
             ConditionalJmp(State.Flags.Carry);
         }
 
-        private void Jpe()
+        protected void Jpe()
         {
             ConditionalJmp(State.Flags.Parity);
         }
 
-        private void Jm()
+        protected void Jm()
         {
             ConditionalJmp(State.Flags.Sign);
         }
 
-        private void In()
-		{
-            IncreaseCycles(10);
-		}
+        public abstract void In();
 
-        private void Out()
-        {
-            IncreaseCycles(10);
-        }
+        public abstract void Out();
 
-        private void Xthl()
+        protected void Xthl()
         {
             ushort value = ReadWordFromMemory(State.SP);
             WriteWordToMemory(State.SP, State.HL);
@@ -661,19 +655,19 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(18);
         }
 
-        private void Di()
+        protected void Di()
         {
             State.EnableInterrupts = false;
             IncreaseCycles(4);
         }
 
-        private void Ei()
+        protected void Ei()
         {
             State.EnableInterrupts = true;
             IncreaseCycles(4);
         }
 
-        private void Call()
+        protected void Call()
         {
             ushort addr = GetNextWord();
             PushStack(State.PC);
@@ -681,14 +675,14 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(7);
         }
 
-        private void Call(ushort addr)
+        protected void Call(ushort addr)
         {
             PushStack(State.PC);
             Jmp(addr);
             IncreaseCycles(7);
         }
 
-        private void ConditionalCall(bool condition)
+        protected void ConditionalCall(bool condition)
         {
             if (condition)
                 Call();
@@ -699,47 +693,47 @@ namespace bEmu.Core.CPUs.Intel8080
             }
         }
 
-        private void Cnz()
+        protected void Cnz()
         {
             ConditionalCall(!State.Flags.Zero);
         }
 
-        private void Cnc()
+        protected void Cnc()
         {
             ConditionalCall(!State.Flags.Carry);
         }
 
-        private void Cpo()
+        protected void Cpo()
         {
             ConditionalCall(!State.Flags.Parity);
         }
 
-        private void Cp()
+        protected void Cp()
         {
             ConditionalCall(!State.Flags.Sign);
         }
 
-        private void Cz()
+        protected void Cz()
         {
             ConditionalCall(State.Flags.Zero);
         }
 
-        private void Cc()
+        protected void Cc()
         {
             ConditionalCall(State.Flags.Carry);
         }
 
-        private void Cpe()
+        protected void Cpe()
         {
             ConditionalCall(State.Flags.Parity);
         }
 
-        private void Cm()
+        protected void Cm()
         {
             ConditionalCall(State.Flags.Sign);
         }
 
-        private void Rst(int num)
+        protected void Rst(int num)
         {
             switch (num)
             {
@@ -756,19 +750,19 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(11);
         }
 
-        private void Pchl()
+        protected void Pchl()
         {
             State.PC = State.HL;
             IncreaseCycles(5);
         }
 
-        private void Sphl()
+        protected void Sphl()
         {
             State.SP = State.HL;
             IncreaseCycles(5);
         }
 
-        private void Xchg()
+        protected void Xchg()
         {
             ushort de = State.DE;
             State.DE = State.HL;
@@ -776,7 +770,7 @@ namespace bEmu.Core.CPUs.Intel8080
             IncreaseCycles(5);
         }
 
-        private void Hlt()
+        protected void Hlt()
         {
             State.Halted = true;
             IncreaseCycles(7);

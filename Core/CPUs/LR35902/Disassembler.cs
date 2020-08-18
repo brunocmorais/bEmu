@@ -4,15 +4,13 @@ namespace bEmu.Core.CPUs.LR35902
 {
     public class Disassembler : Core.Disassembler
     {
-        public Disassembler(bEmu.Core.Systems.Gameboy.System system) : base(system) { }
+        public Disassembler(IMMU mmu) : base(mmu) { }
 
         public override Instruction GetInstruction(int pointer)
         {
-            IMMU codeBuffer = system.MMU;
-
-            byte opcode = codeBuffer[pointer];
-            byte minInstruction = pointer + 1 < codeBuffer.Length ? codeBuffer[pointer + 1] : (byte)0;
-            int maxInstruction = pointer + 2 < codeBuffer.Length ? (codeBuffer[pointer + 2] << 8) | minInstruction : 0;
+            byte opcode = mmu[pointer];
+            byte minInstruction = pointer + 1 < mmu.Length ? mmu[pointer + 1] : (byte)0;
+            int maxInstruction = pointer + 2 < mmu.Length ? (mmu[pointer + 2] << 8) | minInstruction : 0;
 
             switch (opcode)
             {
@@ -423,7 +421,7 @@ namespace bEmu.Core.CPUs.LR35902
                 case 0xca:
                     return new Instruction($"JP Z, #${maxInstruction:x}", 3, pointer);
                 case 0xcb:
-                    return GetCBInstruction(codeBuffer[pointer + 1], pointer);
+                    return GetCBInstruction(mmu[pointer + 1], pointer);
                 case 0xcc:
                     return new Instruction($"CALL Z, #${maxInstruction:x}", 3, pointer);
                 case 0xcd:

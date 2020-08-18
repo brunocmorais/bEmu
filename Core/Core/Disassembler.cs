@@ -6,11 +6,11 @@ namespace bEmu.Core
 {
     public abstract class Disassembler : IDisassembler
     {
-        protected readonly ISystem system;
+        protected readonly IMMU mmu;
 
-        public Disassembler(ISystem system)
+        public Disassembler(IMMU mmu)
         {
-            this.system = system;
+            this.mmu = mmu;
         }
 
         public abstract Instruction GetInstruction(int pointer);

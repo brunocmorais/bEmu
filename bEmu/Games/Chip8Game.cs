@@ -3,82 +3,89 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using bEmu.Core;
-using State = bEmu.Core.Systems.Chip8.State;
+using State = bEmu.Systems.Chip8.State;
+using System.Threading;
+using Chip8 = bEmu.Systems.Chip8;
+using bEmu.Factory;
+using bEmu.Systems;
+using bEmu.Components;
+using bEmu.Scalers;
 
 namespace bEmu
 {
-    public class Chip8Game : Game
+    public class Chip8Game : BaseGame
     {
-        private const int TamanhoPixel = 10;
-        private const int Width = 64;
-        private const int Height = 32;
-        private const int CycleCount = 15;
-        private GraphicsDeviceManager graphics;
-        private SpriteBatch spriteBatch;
+        private const int CycleCount = 16;
         private SoundEffect tone;
         private SoundEffectInstance soundEffectInstance;
-        private Texture2D backBuffer;
-        private Core.Systems.Chip8.System system;
-        private string rom;
-        private Rectangle destinationRectangle;
-        private State State => system.State as State;
-        
-        public Chip8Game(string rom)
+        private int cycle;
+        private readonly Chip8.System system;
+        private readonly Chip8.PPU gpu;
+        private readonly State state;
+        private readonly Chip8.MMU mmu;
+
+        public Chip8Game(string rom) : base(SystemFactory.Get(SupportedSystems.Chip8), rom, 64, 32, 10) 
         {
-            graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = Width * TamanhoPixel;
-            graphics.PreferredBackBufferHeight = Height * TamanhoPixel;
-            Content.RootDirectory = "Content";
-            IsMouseVisible = true;
-            this.rom = rom;
-            destinationRectangle = new Rectangle(0, 0, Width * TamanhoPixel, Height * TamanhoPixel);
+            system = System as Chip8.System;
+            gpu = Gpu as Chip8.PPU;
+            state = State as State;
+            mmu = Mmu as Chip8.MMU;
         }
 
         protected override void Initialize()
         {
-            system = new Core.Systems.Chip8.System();
-            system.MMU.LoadProgram(rom, 0x200);
-
+            system.MMU.LoadProgram(Rom, 0x200);
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
             tone = Content.Load<SoundEffect>("Chip8/tone");
             soundEffectInstance = tone.CreateInstance();
-            backBuffer = new Texture2D(GraphicsDevice, Width, Height);
+
+            base.LoadContent();
+
+            //state.SuperChipMode = true;
+
+            //if (state.SuperChipMode && BackBuffer.Width == Width)
+                BackBuffer = new Texture2D(GraphicsDevice, Width, Height);
+
+            IsRunning = true;
+            StartMainThread();
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape) || State.Halted)
-                Exit();
+            if (state.Delay > 0)
+                state.Delay--;
 
-            if (Keyboard.GetState().IsKeyDown(Keys.F1))
-                Initialize();
+            if (state.Sound > 0)
+                state.Sound--;
 
-            if (State.SuperChipMode && backBuffer.Width == Width)
-                backBuffer = new Texture2D(GraphicsDevice, Width * 2, Height * 2);
-
-            int cycle = CycleCount;
-
-            while (cycle-- >= 0)
-                system.Runner.StepCycle();
-
-            if (State.Delay > 0)
-                State.Delay--;
-            
-            if (State.Sound > 0)
-                State.Sound--;
-
-            UpdateKeys(Keyboard.GetState(), State);
-            UpdateSound(State);
-
+            UpdateSound();
+            cycle = CycleCount;
             base.Update(gameTime);
         }
 
-        private void UpdateSound(State state)
+        public override void UpdateGame()
+        {
+            lock (this)
+            {
+                while (cycle-- >= 0)
+                {
+                    system.Runner.StepCycle();
+
+                    if (state.SuperChipMode && Width == 64)
+                    {
+                        Width  *= 2;
+                        Height *= 2;
+                        BackBuffer = new Texture2D(GraphicsDevice, Width, Height);
+                    }
+                }
+            }
+        }
+
+        private void UpdateSound()
         {
             if (state.Sound == 0)
             {
@@ -92,7 +99,7 @@ namespace bEmu
             }
         }
 
-        private void UpdateKeys(KeyboardState keyboardState, State state)
+        public override void UpdateGamePad(KeyboardState keyboardState)
         {
             var keys = new Keys[] 
             {
@@ -115,19 +122,15 @@ namespace bEmu
 
         protected override void Draw (GameTime gameTime)
 		{
-            if (!State.Draw)
-                return;
-
-			GraphicsDevice.Clear (Color.Black);
-            spriteBatch.Begin ();
-
-            backBuffer.SetData(system.PPU.FrameBuffer);
-            spriteBatch.Draw(backBuffer, destinationRectangle, Color.White);
-
-            spriteBatch.End ();
-            State.Draw = false;
-
+            SpriteBatch.Begin();
             base.Draw (gameTime);
+            SpriteBatch.End();
+            state.Draw = false;
 		}
+
+        protected override void OnOptionChanged(object sender, OnOptionChangedEventArgs e)
+        {
+            base.OnOptionChanged(sender, e);
+        }
     }
 }

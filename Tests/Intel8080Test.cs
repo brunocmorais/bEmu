@@ -1,8 +1,6 @@
 using System;
 using System.Text;
-using bEmu.Core;
 using bEmu.Core.CPUs.Intel8080;
-using bEmu.Core.Systems.Generic8080;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -15,10 +13,10 @@ namespace Tests
         [TestMethod]
         public void TestarIntel8080()
         {
-            var system = new bEmu.Core.Systems.Generic8080.System();
+            var system = new bEmu.Systems.Generic8080.System();
             system.SetStartPoint(Pc);
             system.MMU.LoadProgram("cpudiag", Pc);
-            bEmu.Core.CPUs.Intel8080.Disassembler disassembler = new bEmu.Core.CPUs.Intel8080.Disassembler(system);
+            bEmu.Core.CPUs.Intel8080.Disassembler disassembler = new bEmu.Core.CPUs.Intel8080.Disassembler(system.MMU);
             var sb = new StringBuilder();
             string diag = "";
 
@@ -31,7 +29,7 @@ namespace Tests
 
                 if (opcode.Byte == 0xCD) // call
                 {
-                    diag = (system.Runner as Intel8080<bEmu.Core.CPUs.Intel8080.State, MMU>).CallDiagnosticsRoutine();
+                    diag = (system.Runner as Intel8080<bEmu.Systems.Generic8080.State, bEmu.Systems.Generic8080.MMU>).CallDiagnosticsRoutine();
 
                     if (!string.IsNullOrWhiteSpace(diag) && diag.Trim() != "CPU IS OPERATIONAL")
                         Assert.Fail(sb.ToString());

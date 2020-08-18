@@ -19,12 +19,19 @@
 /processorParam:Quality=Best
 /build:Chip8/tone.wav
 
-#begin Common/Font.spritefont
+#begin Common/Regular.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:Common/Font.spritefont
+/build:Common/Regular.spritefont
+
+#begin Common/Title.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Common/Title.spritefont
 
 #begin SpaceInvaders/backdrop.png
 /importer:TextureImporter
