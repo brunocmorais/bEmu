@@ -39,5 +39,10 @@ namespace bEmu.Systems.Generic8080
         {
             State.PC = pc;
         }
+
+        public override void Reset()
+        {
+            base.Reset();
+        }
     }
 }

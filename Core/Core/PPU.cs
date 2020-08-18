@@ -29,5 +29,12 @@ namespace bEmu.Core
         }
         
         public abstract void StepCycle();
+
+        public virtual void Reset()
+        {
+            Frame = 0;
+            Cycles = 0;
+            Framebuffer.Reset();
+        }
     }
 }

@@ -77,5 +77,16 @@ namespace bEmu.Systems.Chip8
             0x3C, 0x7E, 0xC3, 0xC3, 0x7E, 0x7E, 0xC3, 0xC3, 0x7E, 0x3C, // "8"
             0x3C, 0x7E, 0xC3, 0xC3, 0x7F, 0x3F, 0x03, 0x03, 0x3E, 0x7C  // "9"
         };
+
+        public override void Reset()
+        {
+            base.Reset();
+            
+            for (int i = 0; i < Numbers.Length; i++)
+                MMU[i] = Numbers[i];
+
+            for (int i = 0; i < NumbersHiRes.Length; i++)
+                MMU[i + 0x50] = NumbersHiRes[i];
+        }
     }
 }

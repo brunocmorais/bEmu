@@ -107,10 +107,7 @@ namespace bEmu
                 StopGame();
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.F3)) // reiniciar jogo
-            {
-                // IsRunning = false;
-                // Initialize();
-            }
+                ResetGame();
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.F1)) // abrir menu
             {
@@ -225,5 +222,7 @@ namespace bEmu
             if (Options.ShowFPS && IsRunning)
                 osd.UpdateMessage(MessageType.FPS, $"{FPS:0.0} fps");
         }
+
+        public abstract void ResetGame();
     }
 }

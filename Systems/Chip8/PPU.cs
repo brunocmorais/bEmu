@@ -177,9 +177,6 @@ namespace bEmu.Systems.Chip8
             DrawNextTime();
         }
 
-        public override void StepCycle()
-        {
-            
-        }
+        public override void StepCycle() { }
     }
 }

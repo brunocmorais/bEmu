@@ -76,5 +76,19 @@ namespace bEmu.Core.CPUs.Intel8080
                    "pc = " + PC.ToString("x") + "\n" +
                    "sp = " + SP.ToString("x") + "\n";
         }
+
+        public override void Reset()
+        {
+            base.Reset();
+            A = 0;
+            B = 0;
+            C = 0;
+            D = 0;
+            E = 0;
+            H = 0;
+            L = 0;
+            Flags = new Flags();
+            EnableInterrupts = false;
+        }
     }
 }

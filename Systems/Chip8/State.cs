@@ -14,5 +14,20 @@ namespace bEmu.Systems.Chip8
         public bool Draw { get; set; }
         public bool SuperChipMode { get; set; }
         public byte[] R { get; set; }
+        public override void Reset()
+        {
+            base.Reset();
+
+            PC = 0x200;
+            V = new byte[16];
+            Keys = new bool[16];
+            I = 0;
+            Stack = new ushort[16];
+            Delay = 0;
+            Sound = 0;
+            Draw = false;
+            SuperChipMode = false;
+            R = new byte[16];
+        }
     }
 }

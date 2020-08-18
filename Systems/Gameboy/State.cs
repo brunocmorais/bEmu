@@ -39,5 +39,11 @@ namespace bEmu.Systems.Gameboy
         {
             IF |= (byte) (0x1 << (int) type);
         }
+
+        public override void Reset()
+        {
+            base.Reset();
+            Timer = new Timer(System as Gameboy.System);
+        }
     }
 }

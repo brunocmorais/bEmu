@@ -8,5 +8,6 @@ namespace bEmu.Core
         int Cycles { get; set; }
         bool Halted { get; set; }
         int Instructions { get; set; }
+        void Reset();
     }
 }

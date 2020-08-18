@@ -30,5 +30,11 @@ namespace bEmu.Systems.Gameboy
         }
 
         public bool GBCMode { get; set; }
+
+        public override void Reset()
+        {
+            base.Reset();
+            GBCMode = false;
+        }
     }
 }

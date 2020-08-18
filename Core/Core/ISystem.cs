@@ -9,5 +9,6 @@ namespace bEmu.Core
         IAPU APU { get; }
         void Initialize();
         IState GetInitialState();
+        void Reset();
     }
 }

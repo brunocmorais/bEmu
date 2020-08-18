@@ -11,5 +11,6 @@ namespace bEmu.Core
         int Cycles { get; set; }
         void StepCycle();
         void DefineSize(int width, int height);
+        void Reset();
     }
 }

@@ -181,5 +181,17 @@ namespace bEmu
         {
             base.OnOptionChanged(sender, e);
         }
+
+        public override void ResetGame()
+        {
+            IsRunning = false;
+            System.Reset();
+            lastInterruptTime = TimeSpan.Zero;
+            lastInterrupt = 1;
+            state.UpdatePorts(1, 0x01);
+            state.UpdatePorts(2, 0x00);
+            IsRunning = true;
+            StartMainThread();
+        }
     }
 }

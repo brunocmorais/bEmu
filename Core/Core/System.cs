@@ -18,5 +18,11 @@ namespace bEmu.Core
         {
             State = GetInitialState();
         }
+
+        public virtual void Reset()
+        {
+            State.Reset();
+            PPU.Reset();
+        }
     }
 }

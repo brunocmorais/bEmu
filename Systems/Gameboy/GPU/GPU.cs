@@ -10,8 +10,8 @@ namespace bEmu.Systems.Gameboy.GPU
 {
     public class GPU : Core.PPU
     {
-        private readonly State state;
-        private readonly MMU mmu;
+        private State state;
+        private MMU mmu;
         private int spriteSize;
         private bool lcdEnabled;
         private bool bgDisplay;
@@ -27,10 +27,15 @@ namespace bEmu.Systems.Gameboy.GPU
         private uint[] currentLine;
         private IColorPalette colorPalette;
 
-        public GPU(System system) : base(system, 160, 144) 
+        public GPU(System system) : base(system, 160, 144)
         {
-            Cycles = 0;
-            Frame = 0;
+            Reset();
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+
             Frameskip = 0;
             state = System.State as State;
             state.LCD = new LCD(System.MMU as MMU, System.State as State);

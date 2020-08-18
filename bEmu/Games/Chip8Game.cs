@@ -132,5 +132,13 @@ namespace bEmu
         {
             base.OnOptionChanged(sender, e);
         }
+
+        public override void ResetGame()
+        {
+            IsRunning = false;
+            System.Reset();
+            IsRunning = true;
+            StartMainThread();
+        }
     }
 }

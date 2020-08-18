@@ -160,5 +160,14 @@ namespace bEmu
                     break;
             }
         }
+
+        public override void ResetGame()
+        {
+            IsRunning = false;
+            System.Reset();
+            mmu.Bios.Running = true;
+            IsRunning = true;
+            StartMainThread();
+        }
     }
 }

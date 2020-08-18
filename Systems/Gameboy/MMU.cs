@@ -10,22 +10,20 @@ namespace bEmu.Systems.Gameboy
 {
     public class MMU : bEmu.Core.MMU
     {
-        public VRAM VRAM { get; }
-        public byte[] IO { get; }
-        public byte[] WRAM { get; }
-        public OAM OAM { get; }
-        public byte[] ZeroPage { get; }
+        public VRAM VRAM { get; private set; }
+        public byte[] IO { get; private set; }
+        public byte[] WRAM { get; private set; }
+        public OAM OAM { get; private set; }
+        public byte[] ZeroPage { get; private set; }
         public IMBC MBC { get; private set; }
-        public BIOS Bios { get; }
-        public new int Length => 0x10000;
+        public BIOS Bios { get; private set; }
         public CartridgeHeader CartridgeHeader { get; private set; }
-        public ColorPaletteData ColorPaletteData { get; }
+        public ColorPaletteData ColorPaletteData { get; private set; }
         public Joypad Joypad { get; set; }
 
         public MMU() : base(0x10000)
         {
             Bios = new BIOS();
-
             VRAM = new VRAM(this);
             IO = new byte[128];
             WRAM = new byte[8192];

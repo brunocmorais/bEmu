@@ -55,13 +55,13 @@ namespace bEmu.Components
 
             spriteBatch.DrawString(fonts.Title, title, new Vector2((float)(width * 0.5 - (titleSize.X / 2)), y), Color.Red);
 
-            y += 20;
+            y += 15;
 
             for (int i = 0; i < menuOptions.Count(); i++)
             {
-                y += 25;
                 var text = menuOptions.ElementAt(i).Description;
                 var textSize = fonts.Regular.MeasureString(text);
+                y += textSize.Y + 5;
 
                 Color color = i == selectedOption ? Color.Green : Color.White;
                 spriteBatch.DrawString(fonts.Regular, text, new Vector2((float)(width * 0.5 - (textSize.X / 2)), y), color);
@@ -72,6 +72,7 @@ namespace bEmu.Components
         {
             yield return new MenuOption("Carregar estado", null, typeof(void), null);
             yield return new MenuOption("Salvar estado", null, typeof(void), null);
+            yield return new MenuOption("Reiniciar", null, typeof(void), (_) => { game.ResetGame(); IsOpen = false; });
 
             var type = game.Options.GetType();
 

@@ -91,5 +91,20 @@ namespace bEmu.Core.CPUs.LR35902
                    " SP = " + SP.ToString("x").PadLeft(4, '0').ToUpper() +
                    " PC = " + PC.ToString("x").PadLeft(4, '0').ToUpper();
         }
+
+        public override void Reset()
+        {
+            base.Reset();
+            A = 0;
+            B = 0;
+            C = 0;
+            D = 0;
+            E = 0;
+            F = 0;
+            H = 0;
+            L = 0;
+            Flags = new Flags();
+            EnableInterrupts = false;
+        }
     }
 }
