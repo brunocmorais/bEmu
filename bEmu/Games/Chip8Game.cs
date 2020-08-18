@@ -25,8 +25,7 @@ namespace bEmu
         private readonly Chip8.MMU mmu;
 
         public Chip8Game(string rom) : base(SystemFactory.Get(SupportedSystems.Chip8), rom, 64, 32, 10) 
-        { 
-            Options = new Options();
+        {
             system = System as Chip8.System;
             gpu = Gpu as Chip8.PPU;
             state = State as State;
@@ -46,10 +45,10 @@ namespace bEmu
 
             base.LoadContent();
 
-            state.SuperChipMode = true;
+            //state.SuperChipMode = true;
 
-            if (state.SuperChipMode && BackBuffer.Width == Width)
-                BackBuffer = new Texture2D(GraphicsDevice, Width * 2, Height * 2);
+            //if (state.SuperChipMode && BackBuffer.Width == Width)
+                BackBuffer = new Texture2D(GraphicsDevice, Width, Height);
 
             IsRunning = true;
             StartMainThread();
@@ -73,7 +72,16 @@ namespace bEmu
             lock (this)
             {
                 while (cycle-- >= 0)
+                {
                     system.Runner.StepCycle();
+
+                    if (state.SuperChipMode && Width == 64)
+                    {
+                        Width  *= 2;
+                        Height *= 2;
+                        BackBuffer = new Texture2D(GraphicsDevice, Width, Height);
+                    }
+                }
             }
         }
 

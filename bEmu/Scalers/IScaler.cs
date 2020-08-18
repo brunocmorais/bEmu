@@ -5,8 +5,8 @@ namespace bEmu.Scalers
     public interface IScaler
     {
         int ScaleFactor { get; set; }
-        Framebuffer Original { get; }
-        Framebuffer Scaled { get; }
+        Framebuffer Framebuffer { get; set; }
+        Framebuffer ScaledFramebuffer { get; }
         void Update();
     }
 }

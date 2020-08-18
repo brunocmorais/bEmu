@@ -34,7 +34,7 @@ namespace bEmu
             gpu = Gpu as GPU;
             state = State as State;
             mmu = Mmu as MMU;
-            Options = new GameboyOptions();
+            Options = new GameboyOptions(Options);
             Options.OptionChanged += OnOptionChanged;
         }
 
@@ -54,6 +54,7 @@ namespace bEmu
 
 #if DEBUG            
             gpu.Frameskip = 1;
+            Options.Frameskip = 1;
 #endif
 
             StartMainThread();

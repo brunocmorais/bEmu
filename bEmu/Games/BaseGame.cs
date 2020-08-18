@@ -5,6 +5,7 @@ using bEmu.Classes;
 using bEmu.Components;
 using bEmu.Core;
 using bEmu.Extensions;
+using bEmu.Factory;
 using bEmu.Scalers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -15,9 +16,8 @@ namespace bEmu
 
     public abstract class BaseGame : Game, IBaseGame 
     {
-        protected int PixelSize { get; }
-        protected int Width { get; }
-        protected int Height { get; }
+        protected int Width { get; set; }
+        protected int Height { get; set; }
         protected GraphicsDeviceManager graphics;
         protected SpriteBatch SpriteBatch { get; set; }
         protected int lastRenderedFrame;
@@ -25,6 +25,7 @@ namespace bEmu
         protected Fonts fonts;
         protected Rectangle destinationRectangle;
         protected OSD osd;
+        protected MainMenu mainMenu;
         protected Texture2D BackBuffer { get; set; }
         protected string Rom { get; }
         protected int DrawCounter { get; private set; }
@@ -36,40 +37,52 @@ namespace bEmu
         public IMMU Mmu => System.MMU;
         public IAPU Apu => System.APU;
         public DateTime LastStartDate { get; private set; }
-        public MainMenu MainMenu { get; private set; }
         public IScaler Scaler { get; protected set; }
+        public double FPS => Math.Round(System.PPU.Frame / (DateTime.Now - LastStartDate).TotalSeconds, 1);
 
         public BaseGame(ISystem system, string rom, int width, int height, int pixelSize)
         {
             System = system;
-            this.Width = width;
-            this.Height = height;
-            this.PixelSize = pixelSize;
+            Width = width;
+            Height = height;
+            Options = new Options();
+            Options.Size = pixelSize;
+            Options.OptionChanged += OnOptionChanged;
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = this.Width * this.PixelSize;
-            graphics.PreferredBackBufferHeight = this.Height * this.PixelSize;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            this.Rom = rom;
+            Rom = rom;
             IsRunning = false;
             DrawCounter = 0;
         }
 
         protected override void LoadContent()
         {
-            SpriteBatch = new SpriteBatch(GraphicsDevice);
             fonts = new Fonts();
             fonts.Regular = Content.Load<SpriteFont>("Common/Regular");
             fonts.Title = Content.Load<SpriteFont>("Common/Title");
-            Scaler = new EagleScaler(Gpu.Framebuffer);
-            BackBuffer = new Texture2D(GraphicsDevice, Width * Scaler.ScaleFactor, Height * Scaler.ScaleFactor);
-            destinationRectangle = new Rectangle(0, 0, Width * PixelSize, Height * PixelSize);
+            SpriteBatch = new SpriteBatch(GraphicsDevice);
             osd = new OSD(this, SpriteBatch, fonts.Regular);
-            MainMenu = new MainMenu(this, SpriteBatch, fonts, Width * PixelSize, Height * PixelSize);
+            mainMenu = new MainMenu(this, SpriteBatch, fonts);
+            SetScaler();
+            SetScreenSize(); 
             base.LoadContent();
         }
 
-        public void StartMainThread()
+        protected void SetScreenSize()
+        {
+            int width = Width * Options.Size;
+            int height = Height * Options.Size;
+            
+            graphics.PreferredBackBufferWidth = width;
+            graphics.PreferredBackBufferHeight = height;
+
+            destinationRectangle = new Rectangle(0, 0, width, height);
+            mainMenu.SetSize(width, height);
+            graphics.ApplyChanges();
+        }
+
+        protected void StartMainThread()
         {
             thread = new Thread(() =>
             {
@@ -88,36 +101,50 @@ namespace bEmu
         {
             KeyboardState keyboardState = Keyboard.GetState();
             KeyboardStateExtensions.UpdateState();
-            MainMenu.Update();
+            mainMenu.Update();
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.Escape)) // sair
                 StopGame();
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.F3)) // reiniciar jogo
             {
-                IsRunning = false;
-                Initialize();
+                // IsRunning = false;
+                // Initialize();
             }
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.F1)) // abrir menu
             {
-                MainMenu.IsOpen = !MainMenu.IsOpen;
+                mainMenu.IsOpen = !mainMenu.IsOpen;
 
-                if ((MainMenu.IsOpen && IsRunning) || (!MainMenu.IsOpen && !IsRunning))
+                if ((mainMenu.IsOpen && IsRunning) || (!mainMenu.IsOpen && !IsRunning))
                     PauseResumeGame();
             }
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.P)) // pausar
-                PauseResumeGame();
+            {
+                if (!mainMenu.IsOpen)
+                {
+                    if (IsRunning)
+                        osd.InsertMessage(MessageType.Default, "Pausado");
+                    else
+                        osd.InsertMessage(MessageType.Default, "Em andamento");
+
+                    PauseResumeGame();
+                }
+            }
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.F2)) // mostrar informações
+            {
                 Options.ShowFPS = !Options.ShowFPS;
+                OnOptionChanged(this, new OnOptionChangedEventArgs() { Property = "ShowFPS" });
+            }
 
             UpdateGamePad(keyboardState);
+            UpdateMessages();
             base.Update(gameTime);
         }
 
-        private void PauseResumeGame()
+        protected void PauseResumeGame()
         {
             IsRunning = !IsRunning;
 
@@ -132,15 +159,14 @@ namespace bEmu
             if (Gpu.Frame > lastRenderedFrame)
             {
                 Scaler.Update();
-                BackBuffer.SetData(Scaler.Scaled.Data);
-                //BackBuffer.SetData(Gpu.Framebuffer.Data);
+                BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
             }
 
             lastRenderedFrame = Gpu.Frame;
 
             SpriteBatch.Draw(BackBuffer, destinationRectangle, Color.White);
-            MainMenu.Draw();
             osd.Draw();
+            mainMenu.Draw();
 
             if (IsRunning)
                 DrawCounter++;
@@ -164,10 +190,40 @@ namespace bEmu
         {
             switch (e.Property)
             {
+                case "ShowFPS":
+                    osd.RemoveMessage(MessageType.FPS);
+
+                    if (Options.ShowFPS)
+                        osd.InsertMessage(MessageType.FPS, string.Empty);
+
+                    break;
                 case "Frameskip":
                     Gpu.Frameskip = Options.Frameskip;
                     break;
+                case "Scaler":
+                    SetScaler();
+                    break;
+                case "Size":
+                    SetScreenSize();
+                    break;
             }
+        }
+
+        protected void SetScaler()
+        {
+            Scaler = ScalerFactory.Get(Options.Scaler, Options.Size);
+            Scaler.Framebuffer = Gpu.Framebuffer;
+            Scaler.Update();
+            BackBuffer = new Texture2D(GraphicsDevice, Width * Scaler.ScaleFactor, Height * Scaler.ScaleFactor);
+            BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
+        }
+
+        protected void UpdateMessages()
+        {
+            osd.Update();
+
+            if (Options.ShowFPS && IsRunning)
+                osd.UpdateMessage(MessageType.FPS, $"{FPS:0.0} fps");
         }
     }
 }

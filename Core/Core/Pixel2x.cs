@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace bEmu.Core
 {
     public struct Pixel2x

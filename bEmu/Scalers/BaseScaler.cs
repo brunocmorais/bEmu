@@ -4,32 +4,35 @@ namespace bEmu.Scalers
 {
     public abstract class BaseScaler : IScaler
     {
+        private Framebuffer original;
         public int ScaleFactor { get; set; }
-        public virtual Framebuffer Original { get; protected set; }
-        public virtual Framebuffer Scaled { get; protected set; }
+        public virtual Framebuffer Framebuffer 
+        { 
+            get => original;
+            set
+            {
+                original = value;
+                ScaledFramebuffer = new Framebuffer(value.Width * ScaleFactor, value.Height * ScaleFactor);
+            } 
+        }
+        public virtual Framebuffer ScaledFramebuffer { get; protected set; }
 
-        public BaseScaler(Framebuffer framebuffer, int size)
+        public BaseScaler(int scaleFactor)
         {
-            this.Original = framebuffer;
-            ScaleFactor = size;
-            Scaled = new Framebuffer(framebuffer.Width * ScaleFactor, framebuffer.Height * ScaleFactor);
+            ScaleFactor = scaleFactor;
         }
 
         public uint this[int x, int y]
         {
             get
             {
-                if (x < 0 || y < 0 || x >= Original.Width || y >= Original.Height)
+                if (x < 0 || y < 0 || x >= Framebuffer.Width || y >= Framebuffer.Height)
                     return 0;
 
-                return Original[x, y];
+                return Framebuffer[x, y];
             }
         }
 
-        public virtual void Update()
-        {
-            if (Scaled.Width != Original.Width * ScaleFactor || Scaled.Height != Original.Height * ScaleFactor)
-                Scaled = new Framebuffer(Original.Width, Original.Height);
-        }
+        public abstract void Update();
     }
 }

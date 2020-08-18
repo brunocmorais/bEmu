@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using bEmu.Scalers;
 
 namespace bEmu.Components
 {
@@ -12,6 +13,13 @@ namespace bEmu.Components
         
         [Description("Exibir FPS")]
         public bool ShowFPS { get; set; }
+
+        [Description("Scaler")]
+        public Scaler Scaler { get; set; }
+
+        [Description("Tamanho")]
+        [Range(1, 10)]
+        public int Size { get; set; }
 
         public event EventHandler<OnOptionChangedEventArgs> OptionChanged;
 

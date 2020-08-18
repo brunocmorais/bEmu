@@ -15,21 +15,19 @@ namespace bEmu.Components
         private readonly BaseGame game;
         private readonly SpriteBatch spriteBatch;
         private readonly Fonts fonts;
-        private readonly int width;
-        private readonly int height;
+        private int width;
+        private int height;
         private readonly Texture2D black;
         private readonly Texture2D white;
         private IEnumerable<MenuOption> menuOptions;
         private int selectedOption = 0;
         public bool IsOpen { get; set; }
 
-        public MainMenu(BaseGame game, SpriteBatch spriteBatch, Fonts fonts, int width, int height)
+        public MainMenu(BaseGame game, SpriteBatch spriteBatch, Fonts fonts)
         {
             this.game = game;
             this.spriteBatch = spriteBatch;
             this.fonts = fonts;
-            this.width = width;
-            this.height = height;
             black = new Texture2D(game.GraphicsDevice, 1, 1);
             black.SetData(new [] { Color.FromNonPremultiplied(0, 0, 0, 0xE0) });
             white = new Texture2D(game.GraphicsDevice, 1, 1);
@@ -132,6 +130,12 @@ namespace bEmu.Components
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.Left) && option.Type != typeof(void))
                 option.Action(false);
+        }
+
+        public void SetSize(int width, int height)
+        {
+            this.width = width;
+            this.height = height;
         }
     }
 }

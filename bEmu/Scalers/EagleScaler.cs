@@ -4,21 +4,19 @@ namespace bEmu.Scalers
 {
     public class EagleScaler : BaseScaler
     {
-        public EagleScaler(Framebuffer framebuffer) : base(framebuffer, 2) { }
+        public EagleScaler() : base(2) { }
 
         public override void Update()
         {
-            base.Update();
-
             int xScale = 0;
             int yScale = 0;
             var pixel2x = new Pixel2x();
 
-            for (int x = 0; x < Original.Width; x++)
+            for (int x = 0; x < Framebuffer.Width; x++)
             {
                 xScale = 0;
 
-                for (int y = 0; y < Original.Height; y++)
+                for (int y = 0; y < Framebuffer.Height; y++)
                 {
                     uint pixel = this[x, y];
                     
@@ -34,7 +32,7 @@ namespace bEmu.Scalers
                     pixel2x.P3 = (adj.V == adj.X && adj.X == adj.Y && adj.X != 0) ? adj.X : adj.C;
                     pixel2x.P4 = (adj.W == adj.Z && adj.Z == adj.Y && adj.Z != 0) ? adj.Z : adj.C;
 
-                    Scaled.SetPixel2x(pixel2x, xScale, yScale);
+                    ScaledFramebuffer.SetPixel2x(pixel2x, xScale, yScale);
 
                     xScale += ScaleFactor;
                 }
@@ -45,7 +43,7 @@ namespace bEmu.Scalers
 
         struct NeighborPixels
         {
-            public uint S, T, U,  V, C, W, X, Y, Z;
+            public uint S, T, U, V, C, W, X, Y, Z;
         }
     }
 }

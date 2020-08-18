@@ -37,7 +37,6 @@ namespace bEmu
 
         public Generic8080Game(string rom) : base(SystemFactory.Get(SupportedSystems.Generic8080), rom, 224, 256, 2)
         {
-            Options = new Options();
             system = System as Generic8080.System;
             gpu = Gpu as Generic8080.PPU;
             state = State as State;
@@ -158,16 +157,6 @@ namespace bEmu
             (system.Runner as CPU).GenerateInterrupt(interruptNumber);
         }
 
-        private void In()
-        {
-            
-        }
-
-        private void Out()
-        {
-            
-        }
-
         protected virtual void UpdateSounds()
         {            
             byte write3 = state.Ports.Write3;
@@ -190,7 +179,7 @@ namespace bEmu
 
         protected override void OnOptionChanged(object sender, OnOptionChangedEventArgs e)
         {
-            throw new NotImplementedException();
+            base.OnOptionChanged(sender, e);
         }
     }
 }

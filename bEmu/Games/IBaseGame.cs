@@ -16,7 +16,6 @@ namespace bEmu
         bool IsRunning { get; set; }
         DateTime LastStartDate { get; }
         Options Options { get; set; }
-        MainMenu MainMenu { get; }
 
         void StopGame();
         void UpdateGame();

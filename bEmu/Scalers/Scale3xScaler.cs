@@ -4,22 +4,24 @@ namespace bEmu.Scalers
 {
     public class Scale3xScaler : BaseScaler
     {
-        struct PixelsAdjacentes
+        struct NeighborPixels
         {
             public uint A, B, C, D, E, F, G, H, I;
         }
 
-        public Scale3xScaler(Framebuffer framebuffer) : base(framebuffer, 3)
+        public Scale3xScaler() : base(3) { }
+
+        public override void Update()
         {
             int xScale = 0;
             int yScale = 0;
             var pixel3x = new Pixel3x();
 
-            for (int x = 0; x < Original.Width; x++)
+            for (int x = 0; x < Framebuffer.Width; x++)
             {
                 xScale = 0;
 
-                for (int y = 0; y < Original.Height; y++)
+                for (int y = 0; y < Framebuffer.Height; y++)
                 {
                     uint pixel = this[x, y];
                     
@@ -27,7 +29,7 @@ namespace bEmu.Scalers
                     pixel3x.P4 = pixel3x.P5 = pixel3x.P6 =
                     pixel3x.P7 = pixel3x.P8 = pixel3x.P9 = pixel;
 
-                    var adj = new PixelsAdjacentes()
+                    var adj = new NeighborPixels()
                     { 
                         A = this[x - 1, y - 1], B = this[x, y - 1], C = this[x + 1, y - 1],
                         D = this[x - 1, y + 0], E = this[x, y + 0], F = this[x + 1, y + 0],
@@ -52,7 +54,7 @@ namespace bEmu.Scalers
                     if (adj.F == adj.H && adj.F != adj.B && adj.H != adj.D) 
                         pixel3x.P9 = adj.F;
                     
-                    Scaled.SetPixel3x(pixel3x, xScale, yScale);
+                    ScaledFramebuffer.SetPixel3x(pixel3x, xScale, yScale);
 
                     xScale += ScaleFactor;
                 }
