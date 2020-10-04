@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using bEmu.Core;
 
 namespace bEmu.Systems.Gameboy.MBCs
 {
@@ -28,7 +29,7 @@ namespace bEmu.Systems.Gameboy.MBCs
         protected override int RamBankCount => 4;
 
 
-        public MBC1(string fileName, bool ram, bool battery) : base(fileName, battery, ram)
+        public MBC1(IMMU mmu, bool ram, bool battery) : base(mmu, battery, ram)
         {
             bank1 = 1;
             bank2 = 0;

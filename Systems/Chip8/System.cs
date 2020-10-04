@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+using System.Linq;
 using bEmu.Core;
 
 namespace bEmu.Systems.Chip8
@@ -26,13 +29,14 @@ namespace bEmu.Systems.Chip8
             state.V = new byte[16];
             state.Stack = new ushort[16];
             state.Keys = new bool[16];
+            state.R = new byte[8];
 
             return state;
         }
 
         public override void Initialize()
         {
-            MMU = new MMU();
+            MMU = new MMU(this);
             base.Initialize();
             SetChip8Mode();
             Runner = new Core.VMs.Chip8.Chip8(this);
@@ -78,6 +82,10 @@ namespace bEmu.Systems.Chip8
             0x3C, 0x7E, 0xC3, 0xC3, 0x7F, 0x3F, 0x03, 0x03, 0x3E, 0x7C  // "9"
         };
 
+        public System(string fileName) : base(fileName)
+        {
+        }
+
         public override void Reset()
         {
             base.Reset();
@@ -87,6 +95,33 @@ namespace bEmu.Systems.Chip8
 
             for (int i = 0; i < NumbersHiRes.Length; i++)
                 MMU[i + 0x50] = NumbersHiRes[i];
+        }
+
+        public override bool LoadState()
+        {
+            if (!File.Exists(SaveStateName))
+                return false;
+
+            byte[] state = File.ReadAllBytes(SaveStateName);
+            State.LoadState(state);
+
+            byte[] framebuffer = state.TakeLast(PPU.Framebuffer.Data.Length).ToArray();
+            PPU.Framebuffer.SetData(framebuffer);
+
+            byte[] memory = new byte[MMU.Length];
+            Array.Copy(state, state.Length - framebuffer.Length - memory.Length, memory, 0, memory.Length);
+            MMU.LoadState(memory);
+
+            return true;
+        }
+
+        public override void SaveState()
+        {
+            byte[] state = State.SaveState();
+            byte[] mmu = MMU.SaveState();
+            byte[] ppu = PPU.Framebuffer.Data;
+
+            File.WriteAllBytes(SaveStateName, Enumerable.Concat(state, mmu).Concat(ppu).ToArray());
         }
     }
 }

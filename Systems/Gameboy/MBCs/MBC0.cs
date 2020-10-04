@@ -1,3 +1,5 @@
+using bEmu.Core;
+
 namespace bEmu.Systems.Gameboy.MBCs
 {
     public class MBC0 : DefaultMBC
@@ -8,7 +10,7 @@ namespace bEmu.Systems.Gameboy.MBCs
 
         protected override int RamBankCount => 1;
 
-        public MBC0(string fileName, bool ram, bool battery) : base(fileName, battery, ram) { }
+        public MBC0(IMMU mmu, bool ram, bool battery) : base(mmu, battery, ram) { }
 
         public override byte ReadCartRAM(int addr)
         {

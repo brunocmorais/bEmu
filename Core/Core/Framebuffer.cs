@@ -62,5 +62,11 @@ namespace bEmu.Core
             this[y + 1, x + 2] = pixel3x.P8;
             this[y + 2, x + 2] = pixel3x.P9;
         }
+
+        public void SetData(byte[] data)
+        {
+            for (int i = 0; i < Data.Length; i++)
+                Data[i] = data[i];
+        }
     }
 }

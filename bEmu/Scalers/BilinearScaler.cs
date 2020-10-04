@@ -19,27 +19,19 @@ namespace bEmu.Scalers
                     float gy = ((float) y) / yScale * (Framebuffer.Height - 1);
                     int gxi = (int) gx;
                     int gyi = (int) gy;
-                    var c00 = Pixel.FromUint(Framebuffer[gxi, gyi]);
-                    var c10 = Pixel.FromUint(Framebuffer[gxi + 1, gyi]);
-                    var c01 = Pixel.FromUint(Framebuffer[gxi, gyi + 1]);
-                    var c11 = Pixel.FromUint(Framebuffer[gxi + 1, gyi + 1]);
-                    byte r = (byte) Blerp(c00.R, c10.R, c01.R, c11.R, gx - gxi, gy - gyi);
-                    byte g = (byte) Blerp(c00.G, c10.G, c01.G, c11.G, gx - gxi, gy - gyi);
-                    byte b = (byte) Blerp(c00.B, c10.B, c01.B, c11.B, gx - gxi, gy - gyi);
+                    var c00 = Framebuffer[gxi, gyi];
+                    var c10 = Framebuffer[gxi + 1, gyi];
+                    var c01 = Framebuffer[gxi, gyi + 1];
+                    var c11 = Framebuffer[gxi + 1, gyi + 1];
+                    float tx = gx - gxi;
+                    float ty = gy - gyi;
+                    var r = (uint) ScalerHelpers.Blerp((c00 >> 24) & 0xFF, (c10 >> 24) & 0xFF, (c01 >> 24) & 0xFF, (c11 >> 24) & 0xFF, tx, ty);
+                    var g = (uint) ScalerHelpers.Blerp((c00 >> 16) & 0xFF, (c10 >> 16) & 0xFF, (c01 >> 16) & 0xFF, (c11 >> 16) & 0xFF, tx, ty);
+                    var b = (uint) ScalerHelpers.Blerp((c00 >>  8) & 0xFF, (c10 >>  8) & 0xFF, (c01 >>  8) & 0xFF, (c11 >>  8) & 0xFF, tx, ty);
 
-                    ScaledFramebuffer[x, y] = new Pixel(r, g, b).ToUint();
+                    ScaledFramebuffer[x, y] = (r << 24) | (g << 16) | (b << 8) | 0xFF;
                 }
             }
-        }
-
-        private static float Lerp(float s, float e, float t) 
-        {
-            return s + (e - s) * t;
-        }
- 
-        private static float Blerp(float c00, float c10, float c01, float c11, float tx, float ty) 
-        {
-            return Lerp(Lerp(c00, c10, tx), Lerp(c01, c11, tx), ty);
         }
     }
 }

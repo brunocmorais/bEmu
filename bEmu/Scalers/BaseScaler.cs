@@ -27,7 +27,7 @@ namespace bEmu.Scalers
             get
             {
                 if (x < 0 || y < 0 || x >= Framebuffer.Width || y >= Framebuffer.Height)
-                    return 0;
+                    return 0xFFFFFFFF;
 
                 return Framebuffer[x, y];
             }

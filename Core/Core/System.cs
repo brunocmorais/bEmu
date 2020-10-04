@@ -1,3 +1,6 @@
+using System.IO;
+using System.Linq;
+
 namespace bEmu.Core
 {
     public abstract class System : ISystem
@@ -7,13 +10,17 @@ namespace bEmu.Core
         public IMMU MMU { get; protected set; }
         public IPPU PPU { get; protected set; }
         public IAPU APU { get; protected set; }
+        public string FileName { get; }
+        public string SaveFileName => FileNameWithoutExtension + ".sav";
+        public string SaveStateName => FileNameWithoutExtension + ".state";
+        private string FileNameWithoutExtension => Path.Combine(Path.GetDirectoryName(FileName), Path.GetFileNameWithoutExtension(FileName));
 
-        public System()
+        public System(string fileName)
         {
+            FileName = fileName;
             Initialize();
         }
 
-        public abstract IState GetInitialState();
         public virtual void Initialize()
         {
             State = GetInitialState();
@@ -24,5 +31,26 @@ namespace bEmu.Core
             State.Reset();
             PPU.Reset();
         }
+
+        public virtual bool LoadState()
+        {
+            if (!File.Exists(SaveStateName))
+                return false;
+
+            byte[] state = File.ReadAllBytes(SaveStateName);
+            State.LoadState(state);
+            MMU.LoadState(state);
+
+            return true;
+        }
+
+        public virtual void SaveState()
+        {
+            byte[] state = State.SaveState();
+            byte[] mmu = MMU.SaveState();
+            File.WriteAllBytes(SaveStateName, Enumerable.Concat(state, mmu).ToArray());
+        }
+
+        public abstract IState GetInitialState();
     }
 }

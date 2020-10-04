@@ -24,7 +24,7 @@ namespace bEmu
         private readonly State state;
         private readonly Chip8.MMU mmu;
 
-        public Chip8Game(string rom) : base(SystemFactory.Get(SupportedSystems.Chip8), rom, 64, 32, 10) 
+        public Chip8Game(string rom) : base(SystemFactory.Get(SupportedSystems.Chip8, rom), 64, 32, 10) 
         {
             system = System as Chip8.System;
             gpu = Gpu as Chip8.PPU;
@@ -34,7 +34,7 @@ namespace bEmu
 
         protected override void Initialize()
         {
-            system.MMU.LoadProgram(Rom, 0x200);
+            system.MMU.LoadProgram(0x200);
             base.Initialize();
         }
 
@@ -135,6 +135,7 @@ namespace bEmu
 
         public override void ResetGame()
         {
+            base.ResetGame();
             IsRunning = false;
             System.Reset();
             IsRunning = true;

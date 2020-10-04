@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.Intel8080
@@ -65,6 +66,16 @@ namespace bEmu.Core.CPUs.Intel8080
         public ushort AF
         {
             get { return BitUtils.GetWordFrom2Bytes(F, A); }
+        }
+
+        public override byte[] SaveState()
+        {
+            throw new global::System.NotImplementedException();
+        }
+
+        public override void LoadState(byte[] value)
+        {
+            throw new global::System.NotImplementedException();
         }
 
         public override string ToString()

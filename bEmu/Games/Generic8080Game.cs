@@ -35,7 +35,7 @@ namespace bEmu
         protected readonly State state;
         protected readonly MMU mmu;
 
-        public Generic8080Game(string rom) : base(SystemFactory.Get(SupportedSystems.Generic8080), rom, 224, 256, 2)
+        public Generic8080Game(string rom) : base(SystemFactory.Get(SupportedSystems.Generic8080, rom), 224, 256, 2)
         {
             system = System as Generic8080.System;
             gpu = Gpu as Generic8080.PPU;
@@ -46,48 +46,12 @@ namespace bEmu
             lastInterrupt = 1;
         }
 
-        public void InitializeRomMetadata()
-        {
-            string gameToRun = Path.GetFileNameWithoutExtension(Rom);
-            var gameInfos = JsonConvert.DeserializeObject<IList<GameInfo>>(File.ReadAllText("gamesIntel8080.json"));
-            var gameInfo = gameInfos.FirstOrDefault(x => x.ZipName == gameToRun);
-            
-            fileNames = gameInfo.FileNames;
-            memoryPositions = gameInfo.MemoryPositions;
-        }
-
-        protected override void Initialize()
-        {
-            base.Initialize();
-            InitializeRomMetadata();
-            LoadZipFile();
-        }
-
-        private void LoadZipFile()
-        {
-            var entries = new Dictionary<string, byte[]>();
-
-            using (var zipFile = ZipFile.OpenRead($"{Rom}"))
-            {
-                foreach (var fileName in fileNames)
-                {
-                    var stream = zipFile.GetEntry(fileName).Open();
-
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        stream.CopyTo(memoryStream);
-                        entries.Add(fileName, memoryStream.ToArray());
-                    }
-                }
-            }
-
-            for (int i = 0; i < fileNames.Length; i++)
-                system.MMU.LoadProgram(entries[fileNames[i]], Convert.ToInt32(memoryPositions[i], 16));
-        }
-
         protected override void LoadContent()
         {
             base.LoadContent();
+            string json = File.ReadAllText("Content/Generic8080/games.json");
+            var games = JsonConvert.DeserializeObject<IList<GameInfo>>(json);
+            system.LoadZipFile(games);
             state.UpdatePorts(1, 0x01);
             state.UpdatePorts(2, 0x00);
             IsRunning = true;
@@ -184,6 +148,7 @@ namespace bEmu
 
         public override void ResetGame()
         {
+            base.ResetGame();
             IsRunning = false;
             System.Reset();
             lastInterruptTime = TimeSpan.Zero;

@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using bEmu.Core.Util;
 
 namespace bEmu.Core
 {
@@ -24,5 +28,8 @@ namespace bEmu.Core
             Halted = false;
             Instructions = 0;
         }
+
+        public abstract byte[] SaveState();
+        public abstract void LoadState(byte[] value);
     }
 }

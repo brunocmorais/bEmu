@@ -30,16 +30,16 @@ namespace bEmu
 
         protected override void LoadContent()
         {
-            backdrop = Content.Load<Texture2D>("SpaceInvaders/backdrop");
-            shot = Content.Load<SoundEffect>("SpaceInvaders/shot");
-            invaderDie = Content.Load<SoundEffect>("SpaceInvaders/invader_die");
-            explosion = Content.Load<SoundEffect>("SpaceInvaders/explosion");
-            ufoLowPitch = Content.Load<SoundEffect>("SpaceInvaders/ufo_lowpitch");
-            fastInvader1 = Content.Load<SoundEffect>("SpaceInvaders/fastinvader1");
-            fastInvader2 = Content.Load<SoundEffect>("SpaceInvaders/fastinvader2");
-            fastInvader3 = Content.Load<SoundEffect>("SpaceInvaders/fastinvader3");
-            fastInvader4 = Content.Load<SoundEffect>("SpaceInvaders/fastinvader4");
-            ufoHighPitch = Content.Load<SoundEffect>("SpaceInvaders/ufo_highpitch").CreateInstance();
+            backdrop = Content.Load<Texture2D>("Generic8080/SpaceInvaders/backdrop");
+            shot = Content.Load<SoundEffect>("Generic8080/SpaceInvaders/shot");
+            invaderDie = Content.Load<SoundEffect>("Generic8080/SpaceInvaders/invader_die");
+            explosion = Content.Load<SoundEffect>("Generic8080/SpaceInvaders/explosion");
+            ufoLowPitch = Content.Load<SoundEffect>("Generic8080/SpaceInvaders/ufo_lowpitch");
+            fastInvader1 = Content.Load<SoundEffect>("Generic8080/SpaceInvaders/fastinvader1");
+            fastInvader2 = Content.Load<SoundEffect>("Generic8080/SpaceInvaders/fastinvader2");
+            fastInvader3 = Content.Load<SoundEffect>("Generic8080/SpaceInvaders/fastinvader3");
+            fastInvader4 = Content.Load<SoundEffect>("Generic8080/SpaceInvaders/fastinvader4");
+            ufoHighPitch = Content.Load<SoundEffect>("Generic8080/SpaceInvaders/ufo_highpitch").CreateInstance();
             ufoHighPitch.IsLooped = false;
             Alpha = 160;
 

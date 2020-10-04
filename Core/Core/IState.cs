@@ -1,6 +1,8 @@
+using System.Collections.Generic;
+
 namespace bEmu.Core
 {
-    public interface IState
+    public interface IState : ISaveable
     {
         ISystem System { get; }
         ushort PC { get; set; }

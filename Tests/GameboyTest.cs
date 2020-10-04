@@ -15,12 +15,12 @@ namespace Tests
         [TestMethod]
         public void TestarGameboy()
         {
-            var system = new bEmu.Systems.Gameboy.System();
             string fileName = "../../../test_roms/gb/10-bit ops.gb";
+            var system = new bEmu.Systems.Gameboy.System(fileName);
             var disassembler = new bEmu.Core.CPUs.LR35902.Disassembler(system.MMU);
             var sb = new StringBuilder();
 
-            system.MMU.LoadProgram(fileName);
+            system.MMU.LoadProgram();
             int counter = 0;
 
             Console.WriteLine();
@@ -39,7 +39,7 @@ namespace Tests
         [TestMethod]
         public void Daa()
         {
-            var system = new bEmu.Systems.Gameboy.System();
+            var system = new bEmu.Systems.Gameboy.System("");
             var state = (system.State as bEmu.Systems.Gameboy.State);
             var fakeRom = new byte[32768];
             fakeRom[0x100] = 0x27;

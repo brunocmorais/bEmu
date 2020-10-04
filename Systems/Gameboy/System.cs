@@ -6,6 +6,10 @@ namespace bEmu.Systems.Gameboy
 {
     public class System : Core.System
     {
+        public System(string fileName) : base(fileName)
+        {
+        }
+
         public override IState GetInitialState()
         {
             var state = new bEmu.Systems.Gameboy.State(this);
@@ -23,7 +27,7 @@ namespace bEmu.Systems.Gameboy
         public override void Initialize()
         {
             base.Initialize();
-            MMU = new MMU();
+            MMU = new MMU(this);
             PPU = new GPU.GPU(this);
             APU = new bEmu.Systems.Gameboy.Sound.APU(this);
             Runner = new CPU(this);

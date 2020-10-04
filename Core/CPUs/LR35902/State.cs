@@ -3,6 +3,7 @@ using System.IO;
 using bEmu.Core.CPUs.LR35902;
 using bEmu.Core;
 using bEmu.Core.Util;
+using System.Collections.Generic;
 
 namespace bEmu.Core.CPUs.LR35902
 {
@@ -80,6 +81,16 @@ namespace bEmu.Core.CPUs.LR35902
                 Flags.HalfCarry = (value & 0x20) == 0x20;
                 Flags.Carry = (value & 0x10) == 0x10;
             }
+        }
+
+        public override byte[] SaveState()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void LoadState(byte[] value)
+        {
+            throw new NotImplementedException();
         }
 
         public override string ToString()

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using bEmu.Core;
 
 namespace bEmu.Systems.Gameboy.MBCs
 {
@@ -19,13 +20,13 @@ namespace bEmu.Systems.Gameboy.MBCs
         {
             get
             {
-                string directory = Path.GetDirectoryName(FileName);
-                string name = Path.GetFileNameWithoutExtension(FileName) + ".rtc";
+                string directory = Path.GetDirectoryName(Mmu.System.FileName);
+                string name = Path.GetFileNameWithoutExtension(Mmu.System.FileName) + ".rtc";
                 return Path.Combine(directory, name);
             }
         }
 
-        public MBC3(string fileName, bool ram, bool timer, bool battery) : base(fileName, battery, ram)
+        public MBC3(IMMU mmu, bool ram, bool timer, bool battery) : base(mmu, battery, ram)
         {
             bank1 = 1;
             bank2 = 0;

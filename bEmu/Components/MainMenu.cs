@@ -70,8 +70,8 @@ namespace bEmu.Components
 
         private IEnumerable<MenuOption> GetMenuOptions()
         {
-            yield return new MenuOption("Carregar estado", null, typeof(void), null);
-            yield return new MenuOption("Salvar estado", null, typeof(void), null);
+            yield return new MenuOption("Carregar estado", null, typeof(void), (_) => { game.LoadState(); IsOpen = false; });
+            yield return new MenuOption("Salvar estado", null, typeof(void), (_) =>{ game.SaveState(); IsOpen = false; });
             yield return new MenuOption("Reiniciar", null, typeof(void), (_) => { game.ResetGame(); IsOpen = false; });
 
             var type = game.Options.GetType();

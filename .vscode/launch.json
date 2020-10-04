@@ -45,6 +45,19 @@
             "stopAtEntry": false
         },
         {
+            "name": "Start Gameboy (production)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "publish",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/bEmu/bin/Release/netcoreapp3.1/bEmu.dll",
+            "args": ["GameBoy", "${workspaceFolder}/Tests/test_roms/gb/zelda.gb"],
+            "cwd": "${workspaceFolder}/bEmu",
+            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+        },
+        {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach",

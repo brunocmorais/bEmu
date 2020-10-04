@@ -17,6 +17,12 @@ namespace bEmu.Scalers
         [Description("Scale3x")]
         Scale3x = 5,
         [Description("Bilinear")]
-        Bilinear = 6
+        Bilinear = 6,
+        [Description("Super Eagle")]
+        SuperEagle = 7,
+        [Description("2xSaI")]
+        _2xSaI = 8,
+        [Description("Super 2xSaI")]
+        Super2xSaI = 9
     }
 }

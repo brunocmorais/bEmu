@@ -28,7 +28,7 @@ namespace bEmu
         private readonly MMU mmu;
         private Timer timer = new Timer();
 
-        public GameboyGame(string rom) : base(SystemFactory.Get(SupportedSystems.GameBoy), rom, 160, 144, 2)
+        public GameboyGame(string rom) : base(SystemFactory.Get(SupportedSystems.GameBoy, rom), 160, 144, 2)
         {
             system = System as Gameboy.System;
             gpu = Gpu as GPU;
@@ -40,8 +40,7 @@ namespace bEmu
 
         protected override void Initialize()
         {
-            gpu.Frameskip = 1;
-            mmu.LoadProgram(Rom);
+            mmu.LoadProgram();
             state.PC = 0x00;
             Window.Title = $"bEmu - {mmu.CartridgeHeader.Title}";
             base.Initialize();
@@ -51,12 +50,6 @@ namespace bEmu
         {
             base.LoadContent();
             IsRunning = true;
-
-#if DEBUG            
-            gpu.Frameskip = 1;
-            Options.Frameskip = 1;
-#endif
-
             StartMainThread();
         }
 
@@ -163,6 +156,7 @@ namespace bEmu
 
         public override void ResetGame()
         {
+            base.ResetGame();
             IsRunning = false;
             System.Reset();
             mmu.Bios.Running = true;

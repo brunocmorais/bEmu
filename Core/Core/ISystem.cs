@@ -7,8 +7,13 @@ namespace bEmu.Core
         IMMU MMU { get; }
         IPPU PPU { get; }
         IAPU APU { get; }
+        string FileName { get; }
+        string SaveFileName { get; }
+        string SaveStateName { get; }
         void Initialize();
         IState GetInitialState();
         void Reset();
+        bool LoadState();
+        void SaveState();
     }
 }

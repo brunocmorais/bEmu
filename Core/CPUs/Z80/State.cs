@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using bEmu.Core;
 using bEmu.Core.Util;
@@ -76,7 +77,17 @@ namespace bEmu.Core.CPUs.Z80
             get => AlternativeRegisters ? Alt.Flags : Main.Flags;
             set { if (AlternativeRegisters) Alt.Flags = value; else Main.Flags = value; }
         }
-        
+
+        public override byte[] SaveState()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void LoadState(byte[] value)
+        {
+            throw new NotImplementedException();
+        }
+
         public State(ISystem system) : base(system) 
         { 
             Main = new RegisterSet();

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using bEmu.Core;
 
 namespace bEmu.Systems.Gameboy.MBCs
 {
@@ -12,21 +13,12 @@ namespace bEmu.Systems.Gameboy.MBCs
         protected abstract byte[] CartRam { get; }
         protected abstract int RamBankCount { get; }
         protected abstract int ExternalRamSize { get; }
-        protected readonly string FileName;
+        protected IMMU Mmu { get; }
         protected readonly bool Battery;
-        protected string SaveName
-        {
-            get
-            {
-                string directory = Path.GetDirectoryName(FileName);
-                string name = Path.GetFileNameWithoutExtension(FileName) + ".sav";
-                return Path.Combine(directory, name);
-            }
-        }
 
-        public DefaultMBC(string fileName, bool battery, bool ram)
+        public DefaultMBC(IMMU mmu, bool battery, bool ram)
         {
-            FileName = fileName;
+            Mmu = mmu;
             Battery = battery;
             InitializeMBC(ram);
         }
@@ -58,11 +50,11 @@ namespace bEmu.Systems.Gameboy.MBCs
 
         private byte[] GetOrCreateSaveFile()
         {
-            if (File.Exists(SaveName))
-                return File.ReadAllBytes(SaveName);
+            if (File.Exists(Mmu.System.SaveFileName))
+                return File.ReadAllBytes(Mmu.System.SaveFileName);
             
             var bytes = new byte[ExternalRamSize * RamBankCount];
-            File.WriteAllBytes(SaveName, bytes);
+            File.WriteAllBytes(Mmu.System.SaveFileName, bytes);
             return bytes;
         }
 
@@ -95,7 +87,7 @@ namespace bEmu.Systems.Gameboy.MBCs
                     for (int j = 0; j < ExternalRamSize; j++)
                         externalRAM[j + (i * ExternalRamSize)] = RamBanks[i][j];
 
-                File.WriteAllBytes(SaveName, externalRAM);
+                File.WriteAllBytes(Mmu.System.SaveFileName, externalRAM);
             }
         }
     }

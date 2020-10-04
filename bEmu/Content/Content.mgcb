@@ -33,7 +33,7 @@
 /processorParam:TextureFormat=Compressed
 /build:Common/Title.spritefont
 
-#begin SpaceInvaders/backdrop.png
+#begin Generic8080/SpaceInvaders/backdrop.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -43,59 +43,71 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:SpaceInvaders/backdrop.png
+/build:Generic8080/SpaceInvaders/backdrop.png
 
-#begin SpaceInvaders/explosion.wav
+#begin Generic8080/SpaceInvaders/backdrop_horizontal.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Generic8080/SpaceInvaders/backdrop_horizontal.png
+
+#begin Generic8080/SpaceInvaders/explosion.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:SpaceInvaders/explosion.wav
+/build:Generic8080/SpaceInvaders/explosion.wav
 
-#begin SpaceInvaders/fastinvader1.wav
+#begin Generic8080/SpaceInvaders/fastinvader1.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:SpaceInvaders/fastinvader1.wav
+/build:Generic8080/SpaceInvaders/fastinvader1.wav
 
-#begin SpaceInvaders/fastinvader2.wav
+#begin Generic8080/SpaceInvaders/fastinvader2.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:SpaceInvaders/fastinvader2.wav
+/build:Generic8080/SpaceInvaders/fastinvader2.wav
 
-#begin SpaceInvaders/fastinvader3.wav
+#begin Generic8080/SpaceInvaders/fastinvader3.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:SpaceInvaders/fastinvader3.wav
+/build:Generic8080/SpaceInvaders/fastinvader3.wav
 
-#begin SpaceInvaders/fastinvader4.wav
+#begin Generic8080/SpaceInvaders/fastinvader4.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:SpaceInvaders/fastinvader4.wav
+/build:Generic8080/SpaceInvaders/fastinvader4.wav
 
-#begin SpaceInvaders/invader_die.wav
+#begin Generic8080/SpaceInvaders/invader_die.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:SpaceInvaders/invader_die.wav
+/build:Generic8080/SpaceInvaders/invader_die.wav
 
-#begin SpaceInvaders/shot.wav
+#begin Generic8080/SpaceInvaders/shot.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:SpaceInvaders/shot.wav
+/build:Generic8080/SpaceInvaders/shot.wav
 
-#begin SpaceInvaders/ufo_highpitch.wav
+#begin Generic8080/SpaceInvaders/ufo_highpitch.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:SpaceInvaders/ufo_highpitch.wav
+/build:Generic8080/SpaceInvaders/ufo_highpitch.wav
 
-#begin SpaceInvaders/ufo_lowpitch.wav
+#begin Generic8080/SpaceInvaders/ufo_lowpitch.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:SpaceInvaders/ufo_lowpitch.wav
+/build:Generic8080/SpaceInvaders/ufo_lowpitch.wav
 

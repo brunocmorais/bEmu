@@ -27,7 +27,6 @@ namespace bEmu
         protected OSD osd;
         protected MainMenu mainMenu;
         protected Texture2D BackBuffer { get; set; }
-        protected string Rom { get; }
         protected int DrawCounter { get; private set; }
         public bool IsRunning { get; set; }
         public Options Options { get; set; }
@@ -40,7 +39,7 @@ namespace bEmu
         public IScaler Scaler { get; protected set; }
         public double FPS => Math.Round(System.PPU.Frame / (DateTime.Now - LastStartDate).TotalSeconds, 1);
 
-        public BaseGame(ISystem system, string rom, int width, int height, int pixelSize)
+        public BaseGame(ISystem system, int width, int height, int pixelSize)
         {
             System = system;
             Width = width;
@@ -51,7 +50,6 @@ namespace bEmu
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            Rom = rom;
             IsRunning = false;
             DrawCounter = 0;
         }
@@ -223,6 +221,24 @@ namespace bEmu
                 osd.UpdateMessage(MessageType.FPS, $"{FPS:0.0} fps");
         }
 
-        public abstract void ResetGame();
+        public virtual void ResetGame()
+        {
+            osd.InsertMessage(MessageType.Default, "Jogo reiniciado");
+        }
+
+        public void LoadState()
+        {
+            bool success = System.LoadState();
+
+            if (success)
+                osd.InsertMessage(MessageType.Default, "Estado carregado");
+            else
+                osd.InsertMessage(MessageType.Default, "Nenhum estado encontrado");
+        }
+        public void SaveState()
+        {
+            System.SaveState();
+            osd.InsertMessage(MessageType.Default, "Estado salvo");
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using bEmu.Core;
 using bEmu.Systems.Gameboy.GPU;
 using bEmu.Systems.Gameboy.MBCs;
 
@@ -21,7 +22,7 @@ namespace bEmu.Systems.Gameboy
         public ColorPaletteData ColorPaletteData { get; private set; }
         public Joypad Joypad { get; set; }
 
-        public MMU() : base(0x10000)
+        public MMU(ISystem system) : base(system, 0x10000)
         {
             Bios = new BIOS();
             VRAM = new VRAM(this);
@@ -105,11 +106,11 @@ namespace bEmu.Systems.Gameboy
                 IO[addr - 0xFF00] = value;
         }
 
-        public override void LoadProgram(string fileName, int startAddress = 0)
+        public override void LoadProgram(int startAddress = 0)
         {
-            byte[] bytes = File.ReadAllBytes(fileName);
+            byte[] bytes = File.ReadAllBytes(System.FileName);
             CartridgeHeader = new CartridgeHeader(bytes);
-            MBC = MBCFactory.GetMBC(fileName, CartridgeHeader.CartridgeType);
+            MBC = MBCFactory.GetMBC(this, CartridgeHeader.CartridgeType);
             MBC.LoadProgram(bytes);
         }
 

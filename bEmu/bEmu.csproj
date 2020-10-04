@@ -16,10 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="games.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\Systems\Systems.csproj" />
   </ItemGroup>

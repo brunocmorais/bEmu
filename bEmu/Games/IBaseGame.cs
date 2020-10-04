@@ -20,6 +20,8 @@ namespace bEmu
         void StopGame();
         void UpdateGame();
         void ResetGame();
+        void LoadState();
+        void SaveState();
         void UpdateGamePad(KeyboardState keyboardState);
     }
 }
