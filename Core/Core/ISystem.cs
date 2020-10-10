@@ -7,7 +7,7 @@ namespace bEmu.Core
         IMMU MMU { get; }
         IPPU PPU { get; }
         IAPU APU { get; }
-        string FileName { get; }
+        string FileName { get; set; }
         string SaveFileName { get; }
         string SaveStateName { get; }
         void Initialize();

@@ -10,7 +10,7 @@ namespace bEmu.Core
         public IMMU MMU { get; protected set; }
         public IPPU PPU { get; protected set; }
         public IAPU APU { get; protected set; }
-        public string FileName { get; }
+        public string FileName { get; set; }
         public string SaveFileName => FileNameWithoutExtension + ".sav";
         public string SaveStateName => FileNameWithoutExtension + ".state";
         private string FileNameWithoutExtension => Path.Combine(Path.GetDirectoryName(FileName), Path.GetFileNameWithoutExtension(FileName));

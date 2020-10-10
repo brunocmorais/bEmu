@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using bEmu.Components;
 using bEmu.Core;
 using Microsoft.Xna.Framework;
@@ -16,7 +17,11 @@ namespace bEmu
         bool IsRunning { get; set; }
         DateTime LastStartDate { get; }
         Options Options { get; set; }
+        int Width { get; set; }
+        int Height { get; set; }
+        Stack<IMenu> Menus { get; }
 
+        void LoadGame(string file);
         void StopGame();
         void UpdateGame();
         void ResetGame();
