@@ -7,10 +7,11 @@ using bEmu.Components;
 using bEmu.Core;
 using bEmu.Extensions;
 using bEmu.Factory;
-using bEmu.Scalers;
+using bEmu.Core.Scalers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using bEmu.Core.Factory;
 
 namespace bEmu
 {
@@ -32,7 +33,7 @@ namespace bEmu
         protected int DrawCounter { get; private set; }
         public bool IsRunning { get; set; }
         public Options Options { get; set; }
-        public ISystem System { get; }
+        public ISystem System { get; set; }
         public IPPU Gpu => System.PPU;
         public IState State => System.State;
         public IMMU Mmu => System.MMU;

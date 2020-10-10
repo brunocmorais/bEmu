@@ -9,7 +9,8 @@ using Chip8 = bEmu.Systems.Chip8;
 using bEmu.Factory;
 using bEmu.Systems;
 using bEmu.Components;
-using bEmu.Scalers;
+using bEmu.Core.Scalers;
+using bEmu.Systems.Factory;
 
 namespace bEmu
 {

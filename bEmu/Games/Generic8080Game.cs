@@ -7,6 +7,7 @@ using bEmu.Components;
 using bEmu.Core;
 using bEmu.Factory;
 using bEmu.Systems;
+using bEmu.Systems.Factory;
 using bEmu.Systems.Generic8080;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

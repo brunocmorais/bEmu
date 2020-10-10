@@ -1,8 +1,7 @@
 using System;
 using bEmu.Core;
-using bEmu.Systems;
 
-namespace bEmu.Factory
+namespace bEmu.Systems.Factory
 {
     public static class SystemFactory
     {

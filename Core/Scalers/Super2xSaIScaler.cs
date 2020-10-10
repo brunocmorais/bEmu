@@ -1,6 +1,6 @@
 using bEmu.Core;
 
-namespace bEmu.Scalers
+namespace bEmu.Core.Scalers
 {
     public class Super2xSaIScaler : BaseScaler
     {

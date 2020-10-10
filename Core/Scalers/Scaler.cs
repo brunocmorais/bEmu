@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace bEmu.Scalers
+namespace bEmu.Core.Scalers
 {
     public enum Scaler
     {

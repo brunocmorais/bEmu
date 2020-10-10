@@ -18,6 +18,19 @@
             "stopAtEntry": false
         },
         {
+            "name": "Menu",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/bEmu/bin/Debug/netcoreapp3.1/bEmu.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/bEmu",
+            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
             "name": "Start Chip-8",
             "type": "coreclr",
             "request": "launch",

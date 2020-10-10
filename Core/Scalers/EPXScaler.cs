@@ -1,7 +1,7 @@
 using System.Linq;
 using bEmu.Core;
 
-namespace bEmu.Scalers
+namespace bEmu.Core.Scalers
 {
     public class EPXScaler : BaseScaler
     {

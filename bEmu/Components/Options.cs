@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using bEmu.Scalers;
+using bEmu.Core.Scalers;
 
 namespace bEmu.Components
 {

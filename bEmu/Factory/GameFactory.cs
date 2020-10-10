@@ -1,6 +1,6 @@
 using System.IO;
 using bEmu.Systems;
-using bEmu.Exceptions;
+using bEmu.Systems.Exceptions;
 using Microsoft.Xna.Framework;
 
 namespace bEmu.Factory

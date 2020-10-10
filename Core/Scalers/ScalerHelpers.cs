@@ -1,4 +1,4 @@
-namespace bEmu.Scalers
+namespace bEmu.Core.Scalers
 {
     public static class ScalerHelpers
     {

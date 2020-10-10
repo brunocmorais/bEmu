@@ -1,7 +1,7 @@
 using System;
 using bEmu.Systems;
 
-namespace bEmu.Exceptions
+namespace bEmu.Systems.Exceptions
 {
     public class SystemNotSupportedException : Exception
     {

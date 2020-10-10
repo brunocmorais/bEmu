@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 
-namespace bEmu.Extensions
+namespace bEmu.Core.Extensions
 {
     public static class EnumExtensions
     {

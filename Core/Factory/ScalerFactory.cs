@@ -1,8 +1,8 @@
 using System;
 using bEmu.Core;
-using bEmu.Scalers;
+using bEmu.Core.Scalers;
 
-namespace bEmu.Factory
+namespace bEmu.Core.Factory
 {
     public static class ScalerFactory
     {
