@@ -11,21 +11,18 @@ namespace bEmu.Components
 
     public abstract class Menu : IMenu
     {
-        protected readonly BaseGame game;
-        protected readonly SpriteBatch spriteBatch;
-        protected readonly Fonts fonts;
+        protected readonly IMainGame game;
         protected int width;
         protected int height;
         protected readonly Texture2D black;
         protected readonly Texture2D white;
         protected int selectedOption = 0;
         public abstract string Title { get; }
+        private double lastSelectionUpdate = 0;
 
-        public Menu(BaseGame game, SpriteBatch spriteBatch, Fonts fonts)
+        public Menu(IMainGame game)
         {
             this.game = game;
-            this.spriteBatch = spriteBatch;
-            this.fonts = fonts;
             black = new Texture2D(game.GraphicsDevice, 1, 1);
             black.SetData(new[] { Color.FromNonPremultiplied(0, 0, 0, 0xE0) });
             white = new Texture2D(game.GraphicsDevice, 1, 1);
@@ -36,29 +33,75 @@ namespace bEmu.Components
         public virtual void Draw()
         {
             Rectangle border = new Rectangle(10, 10, width - 20, height - 20);
+            int screenHeight = border.Height - border.Y;
 
-            spriteBatch.Draw(black, new Rectangle(0, 0, width, height), Color.Black);
-            spriteBatch.Draw(white, new Rectangle(border.Left, border.Top, 1, border.Height), Color.White);
-            spriteBatch.Draw(white, new Rectangle(border.Right, border.Top, 1, border.Height), Color.White);
-            spriteBatch.Draw(white, new Rectangle(border.Left, border.Top, border.Width, 1), Color.White);
-            spriteBatch.Draw(white, new Rectangle(border.Left, border.Bottom, border.Width, 1), Color.White);
+            game.SpriteBatch.Draw(black, new Rectangle(0, 0, width, height), Color.Black);
+            game.SpriteBatch.Draw(white, new Rectangle(border.Left, border.Top, 1, border.Height), Color.White);
+            game.SpriteBatch.Draw(white, new Rectangle(border.Right, border.Top, 1, border.Height), Color.White);
+            game.SpriteBatch.Draw(white, new Rectangle(border.Left, border.Top, border.Width, 1), Color.White);
+            game.SpriteBatch.Draw(white, new Rectangle(border.Left, border.Bottom, border.Width, 1), Color.White);
 
-            var titleSize = fonts.Title.MeasureString(Title);
-            float y = 20.0f;
+            var titleSize = game.Fonts.Title.MeasureString(Title);
+            float y = titleSize.Y;
 
-            spriteBatch.DrawString(fonts.Title, Title, new Vector2((float)(width * 0.5 - (titleSize.X / 2)), y), Color.Red);
-
+            var titlePosition = new Vector2((float)(width * 0.5 - (titleSize.X / 2)), titleSize.Y);
+            game.SpriteBatch.DrawString(game.Fonts.Title, Title, titlePosition, Color.LightGreen);
             y += 10;
+
+            int menuItemCount = GetMenuOptions().Count();
+            int showableItens = GetCountShowableItems(screenHeight, y);
+            int startItem = selectedOption - (showableItens / 2);
+            int endItem = startItem + showableItens;
+
+            if (startItem < 0)
+            {
+                startItem = 0;
+                endItem = showableItens;
+            }
+            
+            if (endItem >= menuItemCount)
+            {
+                endItem = menuItemCount;
+                startItem = endItem - showableItens;
+            }
+
+            for (int i = startItem; i < endItem; i++)
+            {
+                var text = GetMenuOptions().ElementAt(i).Description;
+                var textSize = game.Fonts.Regular.MeasureString(text);
+                y += textSize.Y + 2;
+
+                if (y >= screenHeight - 10)
+                    break;
+
+                Color textColor = Color.White;
+
+                if (i == selectedOption)
+                {
+                    game.SpriteBatch.Draw(white, new Rectangle(10, (int) y + 2, width - 20, (int)textSize.Y), Color.White);   
+                    textColor = Color.Black;
+                }
+
+                float x = (float)(width * 0.5 - (textSize.X / 2));
+                game.SpriteBatch.DrawString(game.Fonts.Regular, text, new Vector2(x, y), textColor);
+            }
+        }
+
+        private int GetCountShowableItems(int screenHeight, float y)
+        {
+            int showableItens = 0;
 
             for (int i = 0; i < GetMenuOptions().Count(); i++)
             {
-                var text = GetMenuOptions().ElementAt(i).Description;
-                var textSize = fonts.Regular.MeasureString(text);
-                y += textSize.Y + 2;
+                y += game.Fonts.Regular.MeasureString(GetMenuOptions().ElementAt(i).Description).Y + 2;
 
-                Color color = i == selectedOption ? Color.Green : Color.White;
-                spriteBatch.DrawString(fonts.Regular, text, new Vector2((float)(width * 0.5 - (textSize.X / 2)), y), color);
+                if (y >= screenHeight - 10)
+                    break;
+
+                showableItens++;
             }
+
+            return showableItens;
         }
 
         protected void SetSize(int width, int height)
@@ -67,15 +110,23 @@ namespace bEmu.Components
             this.height = height;
         }
 
-        public virtual void Update()
+        public virtual void Update(GameTime gameTime)
         {
-            SetSize(game.Width * game.Options.Size, game.Height * game.Options.Size);
+            SetSize(game.GameSystem.Width * game.Options.Size, game.GameSystem.Height * game.Options.Size);
 
-            if (KeyboardStateExtensions.HasBeenPressed(Keys.Down))
+            if (KeyboardStateExtensions.GetPressedKeys().Contains(Keys.Down) && 
+                (gameTime.TotalGameTime.TotalMilliseconds - lastSelectionUpdate) > 150)
+            {
                 selectedOption = (selectedOption + 1) % GetMenuOptions().Count();
+                lastSelectionUpdate = gameTime.TotalGameTime.TotalMilliseconds;
+            }
 
-            if (KeyboardStateExtensions.HasBeenPressed(Keys.Up))
+            if (KeyboardStateExtensions.GetPressedKeys().Contains(Keys.Up) && 
+                (gameTime.TotalGameTime.TotalMilliseconds - lastSelectionUpdate) > 150)
+            {
                 selectedOption = selectedOption == 0 ? GetMenuOptions().Count() - 1 : selectedOption - 1;
+                lastSelectionUpdate = gameTime.TotalGameTime.TotalMilliseconds;
+            }
 
             var option = GetMenuOptions().ElementAt(selectedOption);
 

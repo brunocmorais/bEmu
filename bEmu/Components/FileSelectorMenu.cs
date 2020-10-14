@@ -18,15 +18,10 @@ namespace bEmu.Components
 
         public override string Title => "Selecione um arquivo";
 
-        public FileSelectorMenu(BaseGame game, SpriteBatch spriteBatch, Fonts fonts, Action<string> action) : base(game, spriteBatch, fonts) 
+        public FileSelectorMenu(IMainGame game, Action<string> action) : base(game) 
         { 
             currentDirectory = Environment.CurrentDirectory;
             this.action = action;
-        }
-
-        public override void Update()
-        {
-            base.Update();
         }
 
         protected override IEnumerable<MenuOption> GetMenuOptions()
@@ -37,7 +32,7 @@ namespace bEmu.Components
                 currentDirectory = dir != null ? dir.FullName : currentDirectory;
             });
 
-            foreach (var file in Directory.GetFileSystemEntries(currentDirectory))
+            foreach (var file in Directory.GetFileSystemEntries(currentDirectory).OrderBy(x => Path.GetFileName(x)))
             {
                 var attr = File.GetAttributes(file);
                 

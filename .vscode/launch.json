@@ -5,20 +5,7 @@
    "version": "0.2.0",
    "configurations": [
         {
-            "name": "Start 8080",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bEmu/bin/Debug/netcoreapp3.1/bEmu.dll",
-            "args": ["Generic8080", "/home/bruno/ROMs/intel8080/invaders.zip"],
-            "cwd": "${workspaceFolder}/bEmu",
-            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
-            "console": "integratedTerminal",
-            "stopAtEntry": false
-        },
-        {
-            "name": "Menu",
+            "name": "Debug",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
@@ -31,40 +18,13 @@
             "stopAtEntry": false
         },
         {
-            "name": "Start Chip-8",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bEmu/bin/Debug/netcoreapp3.1/bEmu.dll",
-            "args": ["Chip8", "/home/bruno/ROMs/ch8/BRIX"],
-            "cwd": "${workspaceFolder}/bEmu",
-            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
-            "console": "integratedTerminal",
-            "stopAtEntry": false
-        },
-        {
-            "name": "Start Gameboy",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bEmu/bin/Debug/netcoreapp3.1/bEmu.dll",
-            //"args": ["GameBoy", "${workspaceFolder}/Tests/test_roms/gb/emulator-only/mbc5/rom_64Mb.gb"],
-            "args": ["GameBoy", "${workspaceFolder}/Tests/test_roms/gb/pokemon.gb"],
-            "cwd": "${workspaceFolder}/bEmu",
-            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
-            "console": "integratedTerminal",
-            "stopAtEntry": false
-        },
-        {
-            "name": "Start Gameboy (production)",
+            "name": "Release",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "publish",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bEmu/bin/Release/netcoreapp3.1/bEmu.dll",
-            "args": ["GameBoy", "${workspaceFolder}/Tests/test_roms/gb/zelda.gb"],
+            "args": [],
             "cwd": "${workspaceFolder}/bEmu",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "integratedTerminal",

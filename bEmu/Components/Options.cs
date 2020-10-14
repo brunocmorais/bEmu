@@ -7,6 +7,8 @@ namespace bEmu.Components
 {
     public class Options
     {
+        protected IMainGame Game { get; }
+
         [Description("Pular quadros")]
         [Range(0, 9)]
         public int Frameskip { get; set; }
@@ -22,6 +24,12 @@ namespace bEmu.Components
         public int Size { get; set; }
 
         public event EventHandler<OnOptionChangedEventArgs> OptionChanged;
+
+        public Options(IMainGame game)
+        {
+            Game = game;
+            OptionChanged += OptionChangedEvent;
+        }
 
         public void SetOption(string optionName, bool increment)
         {
@@ -64,6 +72,29 @@ namespace bEmu.Components
 
             if (handler != null)
                 handler(this, e);
+        }
+
+        public virtual void OptionChangedEvent(object sender, OnOptionChangedEventArgs e)
+        {
+            switch (e.Property)
+            {
+                case "ShowFPS":
+                    Game.Osd.RemoveMessage(MessageType.FPS);
+
+                    if (ShowFPS)
+                        Game.Osd.InsertMessage(MessageType.FPS, string.Empty);
+
+                    break;
+                case "Frameskip":
+                    Game.GameSystem.Frameskip = Frameskip;
+                    break;
+                case "Scaler":
+                    Game.SetScaler();
+                    break;
+                case "Size":
+                    Game.SetScreenSize();
+                    break;
+            }
         }
     }
 

@@ -1,61 +1,55 @@
-using Microsoft.Xna.Framework.Input;
-using bEmu.Core.CPUs.LR35902;
-using bEmu.Systems.Gameboy.MBCs;
-using bEmu.Systems.Gameboy;
-using State = bEmu.Systems.Gameboy.State;
-using APU = bEmu.Systems.Gameboy.Sound.APU;
-using GPU = bEmu.Systems.Gameboy.GPU.GPU;
-using Gameboy = bEmu.Systems.Gameboy;
-using Microsoft.Xna.Framework;
-using System.Linq;
-using System.Timers;
-using Timer = System.Timers.Timer;
-using System.Diagnostics;
-using bEmu.Systems.Gameboy.GPU;
-using bEmu.Factory;
-using bEmu.Systems;
 using bEmu.Classes;
 using bEmu.Components;
-using bEmu.Core.Scalers;
+using bEmu.Core;
+using bEmu.Systems;
 using bEmu.Systems.Factory;
+using bEmu.Systems.Gameboy;
+using bEmu.Systems.Gameboy.MBCs;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
-namespace bEmu
+namespace bEmu.GameSystems
 {
-    public class GameboyGame : BaseGame
-    {
-        private readonly Gameboy.System system;
-        private readonly GPU gpu;
-        private readonly State state;
-        private readonly MMU mmu;
-        private Timer timer = new Timer();
 
-        public GameboyGame(string rom) : base(SystemFactory.Get(SupportedSystems.GameBoy, rom), 160, 144, 2)
+    public class GameboyGameSystem : IGameSystem
+    {
+        public SupportedSystems Type => SupportedSystems.GameBoy;
+        public int Width => 160;
+        public int Height => 144;
+        public IMainGame MainGame { get; }
+        public int Frame { get => gpu.Frame; set => gpu.Frame = value; }
+        public int Frameskip { get => gpu.Frameskip; set => gpu.Frameskip = value; }
+        public Framebuffer Framebuffer { get => gpu.Framebuffer; }
+        public int RefreshRate => 16;
+        public ISystem System { get; }
+        private readonly Systems.Gameboy.GPU.GPU gpu;
+        private readonly Systems.Gameboy.State state;
+        private readonly Systems.Gameboy.MMU mmu;
+
+        public GameboyGameSystem(IMainGame mainGame, string rom)
         {
-            system = System as Gameboy.System;
-            gpu = Gpu as GPU;
-            state = State as State;
-            mmu = Mmu as MMU;
-            Options = new GameboyOptions(Options);
-            Options.OptionChanged += OnOptionChanged;
+            System = SystemFactory.Get(SupportedSystems.GameBoy, rom) as Systems.Gameboy.System;
+            gpu = System.PPU as Systems.Gameboy.GPU.GPU;
+            state = System.State as Systems.Gameboy.State;
+            mmu = System.MMU as Systems.Gameboy.MMU;
+            MainGame = mainGame;
+            MainGame.Options = new GameboyOptions(mainGame, MainGame.Options);
+            MainGame.Options.Size = 2;
         }
 
-        protected override void Initialize()
-        {
+        public void Initialize() 
+        { 
             mmu.LoadProgram();
             state.PC = 0x00;
-            Window.Title = $"bEmu - {mmu.CartridgeHeader.Title}";
-            base.Initialize();
         }
-
-        protected override void LoadContent()
-        {
-            base.LoadContent();
-            IsRunning = true;
-            StartMainThread();
-        }
-
-        public override void UpdateGame()
-        {
+        public void LoadContent() { }
+        
+        public void Update(GameTime gameTime) { }
+        
+        public void UpdateGame() 
+        { 
             if (mmu.Bios.Running && state.PC == 0x100)
             {
                 mmu.Bios.Running = false;
@@ -63,7 +57,7 @@ namespace bEmu
                 if ((mmu.CartridgeHeader.GBCFlag & 0x80) == 0x80) // set gameboy color mode
                 {
                     state.A = 0x11;
-                    system.GBCMode = true;
+                    (System as Systems.Gameboy.System).GBCMode = true;
                 }
             }
 
@@ -79,7 +73,7 @@ namespace bEmu
             
             lock (this)
             {
-                if (gpu.Frame <= DrawCounter)
+                if (gpu.Frame <= MainGame.DrawCounter)
                 {
                     gpu.Cycles += lastCycleCount;
 
@@ -88,23 +82,9 @@ namespace bEmu
                 }
             }
         }
-
-        protected override void Draw(GameTime gameTime)
-        {
-            SpriteBatch.Begin();
-            GraphicsDevice.Clear(Color.Black);
-            base.Draw(gameTime);
-            SpriteBatch.End();
-        }
-
-        public override void StopGame()
-        {
-            base.StopGame();
-            mmu.MBC.Shutdown();
-        }
-
-        public override void UpdateGamePad(KeyboardState keyboardState)
-        {
+        
+        public void UpdateGamePad(KeyboardState keyboardState) 
+        { 
             if (keyboardState.IsKeyDown(Keys.Z))
                 mmu.Joypad.Column1 &= 0xE;
             if (keyboardState.IsKeyDown(Keys.X))
@@ -143,26 +123,11 @@ namespace bEmu
                 state.RequestInterrupt(InterruptType.Joypad);
         }
 
-        protected override void OnOptionChanged(object sender, OnOptionChangedEventArgs e)
-        {
-            base.OnOptionChanged(sender, e);
+        public void Draw(GameTime gameTime) { }
 
-            switch (e.Property)
-            {
-                case "PaletteType":
-                    gpu.SetShadeColorPalette((Options as GameboyOptions).PaletteType);
-                    break;
-            }
-        }
-
-        public override void ResetGame()
+        public void StopGame()
         {
-            base.ResetGame();
-            IsRunning = false;
-            System.Reset();
-            mmu.Bios.Running = true;
-            IsRunning = true;
-            StartMainThread();
+            mmu.MBC.Shutdown();
         }
     }
 }

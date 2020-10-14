@@ -6,7 +6,7 @@ namespace bEmu.Core
         public ISystem System { get; }
         public int Width { get; private set; }
         public int Height { get; private set; }
-        public virtual Framebuffer Framebuffer { get; private set; }
+        public virtual Framebuffer Framebuffer { get; protected set; }
         public int Frameskip { get; set; }
         public int Frame { get; set; }
         public int Cycles { get; set; }

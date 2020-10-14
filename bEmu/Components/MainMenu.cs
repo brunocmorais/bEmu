@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using bEmu.Classes;
 using bEmu.Core.Extensions;
+using bEmu.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -14,18 +16,20 @@ namespace bEmu.Components
     {
         public override string Title => "bEmu";
 
-        public MainMenu(BaseGame game, SpriteBatch spriteBatch, Fonts fonts) : base(game, spriteBatch, fonts) { }
+        public MainMenu(IMainGame game) : base(game) { }
 
         protected override IEnumerable<MenuOption> GetMenuOptions()
         {
-            yield return new MenuOption("Carregar jogo", null, typeof(void), (_) => game.Menus.Push(new FileSelectorMenu(game, spriteBatch, fonts, (file) => game.LoadGame(file))));
+            yield return new MenuOption("Carregar jogo", null, typeof(void), 
+                (_) => game.Menu.OpenMenu(new FileSelectorMenu(game, (file) => SelectSystem(file))));
             yield return new MenuOption("Carregar estado", null, typeof(void), (_) => game.LoadState());
             yield return new MenuOption("Salvar estado", null, typeof(void), (_) => game.SaveState());
             yield return new MenuOption("Reiniciar", null, typeof(void), (_) => game.ResetGame());
+            yield return new MenuOption("Fechar jogo", null, typeof(void), (_) => game.CloseGame());
 
             var type = game.Options.GetType();
 
-            foreach (var prop in type.GetProperties())
+            foreach (var prop in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
                 var attr = prop.GetCustomAttributes(typeof(DescriptionAttribute), true)[0] as DescriptionAttribute;
                 var text = attr.Description;
@@ -57,6 +61,11 @@ namespace bEmu.Components
                 return (value as Enum).GetEnumDescription();
 
             return string.Empty;
+        }
+
+        private void SelectSystem(string file)
+        {
+            game.Menu.OpenMenu(new EnumSelectorMenu<SupportedSystems>(game, (system) => game.LoadGame(system, file)));
         }
     }
 }

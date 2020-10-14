@@ -11,16 +11,12 @@ namespace bEmu.Components
 
     public class OSD : IDrawable
     {
-        private readonly SpriteBatch spriteBatch;
-        private readonly SpriteFont font;
-        private readonly BaseGame game;
+        private readonly IMainGame game;
         private List<Message> messages;
         private readonly Texture2D background;
 
-        public OSD(BaseGame game, SpriteBatch spriteBatch, SpriteFont font)
+        public OSD(IMainGame game)
         {
-            this.spriteBatch = spriteBatch;
-            this.font = font;
             this.game = game;
             messages = new List<Message>();
             background = new Texture2D(game.GraphicsDevice, 1, 1);
@@ -48,11 +44,11 @@ namespace bEmu.Components
 
             string text = sb.ToString().Substring(0, sb.Length - 1);
 
-            var size = font.MeasureString(text);
+            var size = game.Fonts.Regular.MeasureString(text);
             Vector2 position = new Vector2(0, 0);
             
-            spriteBatch.Draw(background, position, new Rectangle(0, 0, (int) (size.X + 10), (int) (size.Y + 10)), Color.White);
-            spriteBatch.DrawString(font, text, new Vector2(position.X + 5, position.Y + 5), Color.YellowGreen);
+            game.SpriteBatch.Draw(background, position, new Rectangle(0, 0, (int) (size.X + 10), (int) (size.Y + 10)), Color.White);
+            game.SpriteBatch.DrawString(game.Fonts.Regular, text, new Vector2(position.X + 5, position.Y + 5), Color.YellowGreen);
         }
 
         public void UpdateMessage(MessageType type, string messageText)
