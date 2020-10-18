@@ -29,6 +29,7 @@ namespace bEmu.Components
             white.SetData(new[] { Color.FromNonPremultiplied(0xFF, 0xFF, 0xFF, 0xE0) });
         }
 
+        // TODO: TROCAR ESTE MÉTODO POR UpdateMenuOptions() e atualizar uma variável somente quando pressionar ENTER
         protected abstract IEnumerable<MenuOption> GetMenuOptions();
         public virtual void Draw()
         {
@@ -48,8 +49,9 @@ namespace bEmu.Components
             game.SpriteBatch.DrawString(game.Fonts.Title, Title, titlePosition, Color.LightGreen);
             y += 10;
 
-            int menuItemCount = GetMenuOptions().Count();
-            int showableItens = GetCountShowableItems(screenHeight, y);
+            var menuOptions = GetMenuOptions();
+            int menuItemCount = menuOptions.Count();
+            int showableItens = GetCountShowableItems(menuOptions, screenHeight, y);
             int startItem = selectedOption - (showableItens / 2);
             int endItem = startItem + showableItens;
 
@@ -67,7 +69,7 @@ namespace bEmu.Components
 
             for (int i = startItem; i < endItem; i++)
             {
-                var text = GetMenuOptions().ElementAt(i).Description;
+                var text = menuOptions.ElementAt(i).Description;
                 var textSize = game.Fonts.Regular.MeasureString(text);
                 y += textSize.Y + 2;
 
@@ -87,13 +89,13 @@ namespace bEmu.Components
             }
         }
 
-        private int GetCountShowableItems(int screenHeight, float y)
+        private int GetCountShowableItems(IEnumerable<MenuOption> menuOptions, int screenHeight, float y)
         {
             int showableItens = 0;
 
-            for (int i = 0; i < GetMenuOptions().Count(); i++)
+            for (int i = 0; i < menuOptions.Count(); i++)
             {
-                y += game.Fonts.Regular.MeasureString(GetMenuOptions().ElementAt(i).Description).Y + 2;
+                y += game.Fonts.Regular.MeasureString(menuOptions.ElementAt(i).Description).Y + 2;
 
                 if (y >= screenHeight - 10)
                     break;
@@ -113,22 +115,23 @@ namespace bEmu.Components
         public virtual void Update(GameTime gameTime)
         {
             SetSize(game.GameSystem.Width * game.Options.Size, game.GameSystem.Height * game.Options.Size);
+            var menuOptions = GetMenuOptions();
 
             if (KeyboardStateExtensions.GetPressedKeys().Contains(Keys.Down) && 
                 (gameTime.TotalGameTime.TotalMilliseconds - lastSelectionUpdate) > 150)
             {
-                selectedOption = (selectedOption + 1) % GetMenuOptions().Count();
+                selectedOption = (selectedOption + 1) % menuOptions.Count();
                 lastSelectionUpdate = gameTime.TotalGameTime.TotalMilliseconds;
             }
 
             if (KeyboardStateExtensions.GetPressedKeys().Contains(Keys.Up) && 
                 (gameTime.TotalGameTime.TotalMilliseconds - lastSelectionUpdate) > 150)
             {
-                selectedOption = selectedOption == 0 ? GetMenuOptions().Count() - 1 : selectedOption - 1;
+                selectedOption = selectedOption == 0 ? menuOptions.Count() - 1 : selectedOption - 1;
                 lastSelectionUpdate = gameTime.TotalGameTime.TotalMilliseconds;
             }
 
-            var option = GetMenuOptions().ElementAt(selectedOption);
+            var option = menuOptions.ElementAt(selectedOption);
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.Enter) && option.Type == typeof(void))
             {

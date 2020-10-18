@@ -28,6 +28,11 @@ namespace bEmu.Components
         public Options(IMainGame game)
         {
             Game = game;
+
+            if (game.Options != null)
+                foreach (var property in typeof(Options).GetProperties())
+                    property.SetValue(this, property.GetValue(game.Options));
+
             OptionChanged += OptionChangedEvent;
         }
 

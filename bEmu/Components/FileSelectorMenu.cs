@@ -15,12 +15,11 @@ namespace bEmu.Components
     {
         private string currentDirectory;
         private readonly Action<string> action;
-
         public override string Title => "Selecione um arquivo";
 
         public FileSelectorMenu(IMainGame game, Action<string> action) : base(game) 
         { 
-            currentDirectory = Environment.CurrentDirectory;
+            currentDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             this.action = action;
         }
 
@@ -32,14 +31,17 @@ namespace bEmu.Components
                 currentDirectory = dir != null ? dir.FullName : currentDirectory;
             });
 
-            foreach (var file in Directory.GetFileSystemEntries(currentDirectory).OrderBy(x => Path.GetFileName(x)))
+            foreach (var entry in Directory.GetFileSystemEntries(currentDirectory).OrderBy(x => Path.GetFileName(x)))
             {
-                var attr = File.GetAttributes(file);
+                var attr = File.GetAttributes(entry);
+
+                if ((attr & FileAttributes.Hidden) == FileAttributes.Hidden)
+                    continue;
                 
                 if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                    yield return new MenuOption(Path.GetFileName(file), null, typeof(void), (_) => currentDirectory = file);
+                    yield return new MenuOption(Path.GetFileName(entry), null, typeof(void), (_) => currentDirectory = entry);
                 else
-                    yield return new MenuOption(Path.GetFileName(file), null, typeof(void), (_) => action(file));
+                    yield return new MenuOption(Path.GetFileName(entry), null, typeof(void), (_) => action(entry));
             }
         }
     }

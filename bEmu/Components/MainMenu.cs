@@ -14,14 +14,19 @@ namespace bEmu.Components
 {
     public class MainMenu : Menu
     {
+        private readonly FileSelectorMenu romSelectorMenu;
+
         public override string Title => "bEmu";
 
-        public MainMenu(IMainGame game) : base(game) { }
+        public MainMenu(IMainGame game) : base(game) 
+        { 
+            romSelectorMenu = new FileSelectorMenu(game, (file) => SelectSystem(file));
+        }
 
         protected override IEnumerable<MenuOption> GetMenuOptions()
         {
             yield return new MenuOption("Carregar jogo", null, typeof(void), 
-                (_) => game.Menu.OpenMenu(new FileSelectorMenu(game, (file) => SelectSystem(file))));
+                (_) => game.Menu.OpenMenu(romSelectorMenu));
             yield return new MenuOption("Carregar estado", null, typeof(void), (_) => game.LoadState());
             yield return new MenuOption("Salvar estado", null, typeof(void), (_) => game.SaveState());
             yield return new MenuOption("Reiniciar", null, typeof(void), (_) => game.ResetGame());

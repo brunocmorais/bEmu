@@ -24,7 +24,7 @@ namespace bEmu
         private Rectangle destinationRectangle;
         public Fonts Fonts { get; private set; }
         public OSD Osd { get; private set; }
-        public GameMenu Menu { get; }
+        public GameMenu Menu { get; private set; }
         public Texture2D BackBuffer { get; set; }
         public int DrawCounter { get; private set; }
         public bool IsRunning { get; set; }
@@ -41,7 +41,6 @@ namespace bEmu
             IsMouseVisible = true;
             IsRunning = false;
             DrawCounter = 0;
-            Menu = new GameMenu(this);
         }
 
         protected override void LoadContent()
@@ -52,7 +51,8 @@ namespace bEmu
             SpriteBatch = new SpriteBatch(GraphicsDevice);
             Osd = new OSD(this);
             LoadGameSystem(GameSystemFactory.GetDummyGameSystem(this));
-            Menu.OpenMenu(new MainMenu(this));
+            Menu = new GameMenu(this);
+            Menu.OpenMainMenu();
         }
 
         private void LoadGameSystem(IGameSystem gameSystem)

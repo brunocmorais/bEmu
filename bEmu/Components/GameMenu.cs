@@ -11,6 +11,7 @@ namespace bEmu.Components
         public Stack<IMenu> Menus { get; }
 
         private readonly IMainGame game;
+        private readonly MainMenu mainMenu;
 
         public IMenu Current => Menus.Any() ? Menus.Peek() : null;
         public bool IsOpen => Menus.Any();
@@ -19,6 +20,7 @@ namespace bEmu.Components
         {
             Menus = new Stack<IMenu>();
             this.game = game;
+            mainMenu = new MainMenu(game);
         }
 
         public void CloseAll()
@@ -34,6 +36,11 @@ namespace bEmu.Components
         public void OpenMenu(IMenu menu)
         {
             Menus.Push(menu);
+        }
+
+        public void OpenMainMenu()
+        {
+            Menus.Push(mainMenu);
         }
 
         public void Update(GameTime gameTime)
@@ -60,7 +67,7 @@ namespace bEmu.Components
                 menuRelatedKeyPressed = true;
 
                 if (!game.Menu.IsOpen)
-                    game.Menu.OpenMenu(new MainMenu(game));
+                    game.Menu.OpenMenu(mainMenu);
                 else
                     game.Menu.CloseAll();
             }
