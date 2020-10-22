@@ -21,11 +21,12 @@ namespace bEmu.Components
         { 
             currentDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             this.action = action;
+            IsSelectable = true;
         }
 
-        protected override IEnumerable<MenuOption> GetMenuOptions()
+        public override IEnumerable<MenuOption> GetMenuOptions()
         {
-            yield return new MenuOption("..", null, typeof(void), (_) =>
+            yield return new MenuOption("..", (_) =>
             {
                 var dir = Directory.GetParent(currentDirectory);
                 currentDirectory = dir != null ? dir.FullName : currentDirectory;
@@ -39,9 +40,9 @@ namespace bEmu.Components
                     continue;
                 
                 if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                    yield return new MenuOption(Path.GetFileName(entry), null, typeof(void), (_) => currentDirectory = entry);
+                    yield return new MenuOption(Path.GetFileName(entry), (_) => currentDirectory = entry);
                 else
-                    yield return new MenuOption(Path.GetFileName(entry), null, typeof(void), (_) => action(entry));
+                    yield return new MenuOption(Path.GetFileName(entry), (_) => action(entry));
             }
         }
     }

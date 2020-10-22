@@ -17,11 +17,7 @@ namespace bEmu
 
     public class MainGame : Game, IMainGame
     {
-        private GraphicsDeviceManager graphics;
         public SpriteBatch SpriteBatch { get; private set; }
-        private int lastRenderedFrame;
-        private Thread mainThread;
-        private Rectangle destinationRectangle;
         public Fonts Fonts { get; private set; }
         public OSD Osd { get; private set; }
         public GameMenu Menu { get; private set; }
@@ -33,6 +29,10 @@ namespace bEmu
         public IScaler Scaler { get; private set; }
         public IGameSystem GameSystem { get; private set; }
         public double FPS => Math.Round(GameSystem.Frame / (DateTime.Now - LastStartDate).TotalSeconds, 1);
+        private GraphicsDeviceManager graphics;
+        private int lastRenderedFrame;
+        private Thread mainThread;
+        private Rectangle destinationRectangle;
 
         public MainGame()
         {

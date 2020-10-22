@@ -36,7 +36,9 @@ namespace bEmu.GameSystems
             mmu = System.MMU as Systems.Gameboy.MMU;
             MainGame = mainGame;
             MainGame.Options = new GameboyOptions(mainGame, MainGame.Options);
-            MainGame.Options.Size = 2;
+
+            if (MainGame.Options.Size == 1) 
+                MainGame.Options.Size = 2;
         }
 
         public void Initialize() 
@@ -63,6 +65,7 @@ namespace bEmu.GameSystems
 
             int prevCycles = state.Cycles;
             var opcode = System.Runner.StepCycle();
+
             int afterCycles = state.Cycles;
 
             int lastCycleCount = (afterCycles - prevCycles);

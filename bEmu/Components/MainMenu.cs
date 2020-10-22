@@ -21,16 +21,16 @@ namespace bEmu.Components
         public MainMenu(IMainGame game) : base(game) 
         { 
             romSelectorMenu = new FileSelectorMenu(game, (file) => SelectSystem(file));
+            IsSelectable = true;
         }
 
-        protected override IEnumerable<MenuOption> GetMenuOptions()
+        public override IEnumerable<MenuOption> GetMenuOptions()
         {
-            yield return new MenuOption("Carregar jogo", null, typeof(void), 
-                (_) => game.Menu.OpenMenu(romSelectorMenu));
-            yield return new MenuOption("Carregar estado", null, typeof(void), (_) => game.LoadState());
-            yield return new MenuOption("Salvar estado", null, typeof(void), (_) => game.SaveState());
-            yield return new MenuOption("Reiniciar", null, typeof(void), (_) => game.ResetGame());
-            yield return new MenuOption("Fechar jogo", null, typeof(void), (_) => game.CloseGame());
+            yield return new MenuOption("Carregar jogo", (_) => game.Menu.OpenMenu(romSelectorMenu));
+            yield return new MenuOption("Carregar estado", (_) => game.LoadState());
+            yield return new MenuOption("Salvar estado", (_) => game.SaveState());
+            yield return new MenuOption("Reiniciar", (_) => game.ResetGame());
+            yield return new MenuOption("Fechar jogo", (_) => game.CloseGame());
 
             var type = game.Options.GetType();
 
@@ -48,7 +48,8 @@ namespace bEmu.Components
                 yield return new MenuOption(text, name, propType, (inc) => game.Options.SetOption(name, inc.Value));
             }
 
-            yield return new MenuOption("Sair", null, typeof(void), (_) => game.StopGame());
+            yield return new MenuOption("Sobre", (_) => game.Menu.ShowAbout());
+            yield return new MenuOption("Sair", (_) => game.StopGame());
         }
 
         private string GetTextFromOptionValue(object value)

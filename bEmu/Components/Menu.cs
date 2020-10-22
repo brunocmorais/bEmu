@@ -19,6 +19,8 @@ namespace bEmu.Components
         protected int selectedOption = 0;
         public abstract string Title { get; }
         private double lastSelectionUpdate = 0;
+        protected IEnumerable<MenuOption> menuOptions { get; private set; }
+        public bool IsSelectable { get; set; }
 
         public Menu(IMainGame game)
         {
@@ -27,10 +29,16 @@ namespace bEmu.Components
             black.SetData(new[] { Color.FromNonPremultiplied(0, 0, 0, 0xE0) });
             white = new Texture2D(game.GraphicsDevice, 1, 1);
             white.SetData(new[] { Color.FromNonPremultiplied(0xFF, 0xFF, 0xFF, 0xE0) });
+            menuOptions = Enumerable.Empty<MenuOption>();
         }
 
-        // TODO: TROCAR ESTE MÉTODO POR UpdateMenuOptions() e atualizar uma variável somente quando pressionar ENTER
-        protected abstract IEnumerable<MenuOption> GetMenuOptions();
+        private void UpdateMenuOptions()
+        {
+            menuOptions = GetMenuOptions();
+        }
+
+        public abstract IEnumerable<MenuOption> GetMenuOptions();
+
         public virtual void Draw()
         {
             Rectangle border = new Rectangle(10, 10, width - 20, height - 20);
@@ -49,7 +57,6 @@ namespace bEmu.Components
             game.SpriteBatch.DrawString(game.Fonts.Title, Title, titlePosition, Color.LightGreen);
             y += 10;
 
-            var menuOptions = GetMenuOptions();
             int menuItemCount = menuOptions.Count();
             int showableItens = GetCountShowableItems(menuOptions, screenHeight, y);
             int startItem = selectedOption - (showableItens / 2);
@@ -73,12 +80,9 @@ namespace bEmu.Components
                 var textSize = game.Fonts.Regular.MeasureString(text);
                 y += textSize.Y + 2;
 
-                if (y >= screenHeight - 10)
-                    break;
-
                 Color textColor = Color.White;
 
-                if (i == selectedOption)
+                if (i == selectedOption && IsSelectable)
                 {
                     game.SpriteBatch.Draw(white, new Rectangle(10, (int) y + 2, width - 20, (int)textSize.Y), Color.White);   
                     textColor = Color.Black;
@@ -115,7 +119,9 @@ namespace bEmu.Components
         public virtual void Update(GameTime gameTime)
         {
             SetSize(game.GameSystem.Width * game.Options.Size, game.GameSystem.Height * game.Options.Size);
-            var menuOptions = GetMenuOptions();
+
+            if (!menuOptions.Any())
+                UpdateMenuOptions();
 
             if (KeyboardStateExtensions.GetPressedKeys().Contains(Keys.Down) && 
                 (gameTime.TotalGameTime.TotalMilliseconds - lastSelectionUpdate) > 150)
@@ -133,10 +139,11 @@ namespace bEmu.Components
 
             var option = menuOptions.ElementAt(selectedOption);
 
-            if (KeyboardStateExtensions.HasBeenPressed(Keys.Enter) && option.Type == typeof(void))
+            if (KeyboardStateExtensions.HasBeenPressed(Keys.Enter) && option.Type == typeof(void) && IsSelectable)
             {
                 option.Action(null);
                 selectedOption = 0;
+                UpdateMenuOptions();
             }
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.Right) && option.Type != typeof(void))

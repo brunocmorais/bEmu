@@ -43,6 +43,11 @@ namespace bEmu.Components
             Menus.Push(mainMenu);
         }
 
+        public void ShowAbout()
+        {
+            Menus.Push(new AboutMenu(game));
+        }
+
         public void Update(GameTime gameTime)
         {
             bool menuRelatedKeyPressed = false;

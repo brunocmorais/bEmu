@@ -12,6 +12,22 @@ namespace bEmu.Components
             Action = action;
         }
 
+        public MenuOption(string description)
+        {
+            Description = description;
+            Name = null;
+            Type = typeof(void);
+            Action = (b) => {};
+        }
+
+        public MenuOption(string description, Action<bool?> action)
+        {
+            Description = description;
+            Action = action;
+            Type = typeof(void);
+            Name = null;
+        }
+
         public string Description { get; set; }
         public string Name { get; set; }
         public Type Type { get; set; }

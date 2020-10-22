@@ -14,14 +14,15 @@ namespace bEmu.Components
         public EnumSelectorMenu(IMainGame game, Action<T> action) : base(game)
         {
             this.action = action;
+            IsSelectable = true;
         }
 
         public override string Title => "Selecione uma opção";
 
-        protected override IEnumerable<MenuOption> GetMenuOptions()
+        public override IEnumerable<MenuOption> GetMenuOptions()
         {
             return Enum.GetValues(typeof(T)).Cast<T>()
-                .Select(x => new MenuOption(x.GetEnumDescription(), null, typeof(void), (_) => action(x)));
+                .Select(x => new MenuOption(x.GetEnumDescription(), (_) => action(x)));
         }
     }
 }
