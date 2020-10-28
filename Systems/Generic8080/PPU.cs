@@ -4,34 +4,13 @@ namespace bEmu.Systems.Generic8080
 {
     public class PPU : Core.PPU
     {
-        private const int VRAMAddress = 0x2400;
+        public const int VRAMAddress = 0x2400;
 
-        public PPU(System system, int width, int height) : base(system, width, height) { }
-
-        public override void StepCycle()
-        {
-            
+        public PPU(System system, int width, int height) : base(system, width, height) 
+        { 
+            Framebuffer = new DirectFramebuffer(width, height, this.System.MMU as MMU);
         }
 
-        public void UpdateFrameBuffer()
-        {
-            for (int x = 0; x < Height; x++)
-            {
-                for (int y = 0; y < Width; y++)
-                {
-                    int coordX = (x / 8) * 8;
-                    int offsetX = x - coordX;
-
-                    byte sprite = System.MMU [VRAMAddress + ((y * Height / 8) + coordX / 8)];
-
-                    if ((sprite & (1 << offsetX)) > 0)
-                        Framebuffer[y, Height - 1 - x] = 0xFFFFFFFF;
-                    else
-                        Framebuffer[y, Height - 1 - x] = 0x00000000;
-                }
-            }
-
-            Frame++;
-        }
+        public override void StepCycle() { }
     }
 }

@@ -19,6 +19,8 @@
             "type": "process",
             "args": [
                 "publish",
+                "-c",
+                "Release",
                 "${workspaceFolder}/bEmu.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"

@@ -1,0 +1,127 @@
+[
+    {
+        "zipName" : "ballbomb",
+        "fileNames": [
+            "tn01",
+            "tn02",
+            "tn03",
+            "tn04",
+            "tn05-1"
+        ],
+        "memoryPositions": [
+            "0x0000",
+            "0x0800",
+            "0x1000",
+            "0x1800",
+            "0x4000"
+        ]
+    },
+    {
+        "zipName" : "invaders",
+        "fileNames": [
+            "invaders.h",
+            "invaders.g",
+            "invaders.f",
+            "invaders.e"
+        ],
+        "memoryPositions": [
+            "0x0000",
+            "0x0800",
+            "0x1000",
+            "0x1800"
+        ]
+    },
+    {
+        "zipName" : "lrescue",
+        "fileNames": [
+            "lrescue.1",
+            "lrescue.2",
+            "lrescue.3",
+            "lrescue.4",
+            "lrescue.5",
+            "lrescue.6"
+        ],
+        "memoryPositions": [
+            "0x0000",
+            "0x0800",
+            "0x1000",
+            "0x1800",
+            "0x4000",
+            "0x4800"
+        ]
+    },
+    {
+        "zipName" : "invadpt2",
+        "fileNames": [
+            "pv01",
+            "pv02",
+            "pv03",
+            "pv04",
+            "pv05"
+        ],
+        "memoryPositions": [
+            "0x0000",
+            "0x0800",
+            "0x1000",
+            "0x1800",
+            "0x4000"
+        ]
+    },
+    {
+        "zipName" : "ozmawars",
+        "fileNames": [
+            "mw01",
+            "mw02",
+            "mw03",
+            "mw04",
+            "mw05",
+            "mw06"
+        ],
+        "memoryPositions": [
+            "0x0000",
+            "0x0800",
+            "0x1000",
+            "0x1800",
+            "0x4000",
+            "0x4800"
+        ]
+    },
+    {
+        "zipName" : "spclaser",
+        "fileNames": [
+            "la01",
+            "la02",
+            "la03",
+            "la04"
+        ],
+        "memoryPositions": [
+            "0x0000",
+            "0x0800",
+            "0x1000",
+            "0x1800"
+        ]
+    },
+    {
+        "zipName" : "steelwkr",
+        "fileNames": [
+            "1.36",
+            "2.35",
+            "3.34",
+            "4.33",
+            "5.32",
+            "6.31",
+            "7.42",
+            "8.41"
+        ],
+        "memoryPositions": [
+            "0x0000",
+            "0x0400",
+            "0x0800",
+            "0x0c00",
+            "0x1000",
+            "0x1400",
+            "0x1800",
+            "0x1c00"
+        ]
+    }
+]

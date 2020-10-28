@@ -2,9 +2,9 @@ namespace bEmu.Core
 {
     public class Framebuffer
     {
-        public byte[] Data { get; private set; }
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public virtual byte[] Data { get; protected set; }
+        public int Width { get; protected set; }
+        public int Height { get; protected set; }
 
         public Framebuffer(int width, int height)
         {
@@ -23,7 +23,7 @@ namespace bEmu.Core
             Reset();
         }
 
-        private int GetIndex(int x, int y) => (y * Width * 4) + (x * 4);
+        protected int GetIndex(int x, int y) => (y * Width * 4) + (x * 4);
 
         public virtual uint this[int x, int y]
         {
@@ -61,6 +61,12 @@ namespace bEmu.Core
             this[y + 0, x + 2] = pixel3x.P7;
             this[y + 1, x + 2] = pixel3x.P8;
             this[y + 2, x + 2] = pixel3x.P9;
+        }
+
+        public void SetData(byte[] data)
+        {
+            for (int i = 0; i < Data.Length; i++)
+                Data[i] = data[i];
         }
     }
 }

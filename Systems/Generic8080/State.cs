@@ -26,5 +26,13 @@ namespace bEmu.Systems.Generic8080
                     break;
             }
         }
+
+        public override void Reset()
+        {
+            base.Reset();
+
+            SP = 0xf000;
+            Ports = new Ports();
+        }
     }
 }

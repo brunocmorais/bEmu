@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using bEmu.Core.Util;
 
 namespace bEmu.Core.CPUs.Intel8080
@@ -67,6 +68,16 @@ namespace bEmu.Core.CPUs.Intel8080
             get { return BitUtils.GetWordFrom2Bytes(F, A); }
         }
 
+        public override byte[] SaveState()
+        {
+            throw new global::System.NotImplementedException();
+        }
+
+        public override void LoadState(byte[] value)
+        {
+            throw new global::System.NotImplementedException();
+        }
+
         public override string ToString()
         {
             return "af = " + AF.ToString("x") + "\n" +
@@ -75,6 +86,20 @@ namespace bEmu.Core.CPUs.Intel8080
                    "hl = " + HL.ToString("x") + "\n" +
                    "pc = " + PC.ToString("x") + "\n" +
                    "sp = " + SP.ToString("x") + "\n";
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            A = 0;
+            B = 0;
+            C = 0;
+            D = 0;
+            E = 0;
+            H = 0;
+            L = 0;
+            Flags = new Flags();
+            EnableInterrupts = false;
         }
     }
 }
