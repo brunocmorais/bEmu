@@ -191,7 +191,7 @@ namespace bEmu.Systems.Gameboy.GPU
             bool windowEnabled = windowDisplay && state.LCD.LY >= state.LCD.WY;
             Palette windowPalette = new Palette();
             Palette bgPalette = new Palette();
-            Background background = default;
+            TileInfo background = default;
             tileStartAddress = state.LCD.GetLCDCFlag(LCDC.BGWindowTileDataSelect) ? 0x0000 : 0x0800;
             bgMapSelect = state.LCD.GetLCDCFlag(LCDC.BGTileMapDisplaySelect) ? 0x1C00 : 0x1800;
             windowMapSelect = state.LCD.GetLCDCFlag(LCDC.WindowTileMapDisplaySelect) ? 0x1C00 : 0x1800;
@@ -223,35 +223,42 @@ namespace bEmu.Systems.Gameboy.GPU
                     SetBGWindowPixel(bgPalette, state.LCD.SCX, i, background.HorizontalFlip);
             }
         }
-
-        private Background SetBGWindowPalette(Palette palette, int i, int line, int padding = 0)
+bool debug = false;
+        private TileInfo SetBGWindowPalette(Palette palette, int i, int line, int padding = 0)
         {
             backgroundMap.TileStartAddress = tileStartAddress;
 
             int xb = backgroundMap.GetCoordinateFromPadding((8 * i) + padding);
             int yb = backgroundMap.GetCoordinateFromPadding((line));
+
+            if (debug && xb == 0 && yb == 0xe)
+                Debugger.Break();
+
             Tile tile = backgroundMap[xb % 32, yb % 32];
 
-            Background bg;
+            TileInfo info;
 
             if (GBCMode)
             {
-                bg = mmu.VRAM.GetBackgroundPaletteType(tile.MapAddress);
-                palette.Type = bg.BackgroundPaletteNumber;
+                info = mmu.VRAM.GetBackgroundPaletteType(tile.MapAddress);
+                palette.Type = info.BackgroundPaletteNumber;
             }
             else
             {
-                bg = default;
+                info = default;
                 palette.Type = PaletteType.BGP;
             }
 
-            if (bg.VerticalFlip)
+            if (info.VerticalFlip)
                 palette.Address = tile.TileAddress + (2 * ((7 - (line % 8))));
             else
                 palette.Address = tile.TileAddress + (2 * (line % 8));
 
-            UpdatePaletteFromBytes(palette, mmu.VRAM[palette.Address], mmu.VRAM[palette.Address + 1]);
-            return bg;
+            byte byte1 = tile.TileVRAMBankNumber == 0 ? mmu.VRAM.Bank0[palette.Address] : mmu.VRAM.Bank1[palette.Address];
+            byte byte2 = tile.TileVRAMBankNumber == 0 ? mmu.VRAM.Bank0[palette.Address + 1] : mmu.VRAM.Bank1[palette.Address + 1];
+            
+            UpdatePaletteFromBytes(palette, byte1, byte2);
+            return info;
         }
 
         private void RenderOAMScanline()

@@ -125,9 +125,9 @@ namespace bEmu.Systems.Gameboy.GPU
             // transferLength = 0;
         }
 
-        public Background GetBackgroundPaletteType(int addr)
+        public TileInfo GetBackgroundPaletteType(int addr)
         {
-            return new Background
+            return new TileInfo
             (
                 (PaletteType)((Bank1[addr] & 0x7) + 3),
                 (Bank1[addr] & 0x8) == 0x8 ? 1 : 0,

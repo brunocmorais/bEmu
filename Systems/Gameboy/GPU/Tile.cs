@@ -7,15 +7,24 @@ namespace bEmu.Systems.Gameboy.GPU
         private VRAM VRAM => backgroundMap.MMU.VRAM;
         public int X { get; }
         public int Y { get; }
-        public int TileNumber => VRAM[MapAddress];
+        public int TileNumber
+        {
+            get
+            {
+                if (TileVRAMBankNumber == 1)
+                    return VRAM.Bank1[MapAddress];
+                else
+                    return VRAM.Bank0[MapAddress];
+            }  
+        }
         public ushort MapAddress => (ushort)(Map + X + (Y * 0x20));
         public ushort TileAddress
         {
             get
             {
-                if (backgroundMap.TileStartAddress == 0) // signed
+                if (backgroundMap.TileStartAddress == 0) // unsigned
                     return (ushort)(backgroundMap.TileStartAddress + (TileNumber << 4));
-                else // unsigned
+                else // signed
                     return (ushort)(((TileNumber & 0x80) == 0x80 ? 0x800 : 0x1000) + ((TileNumber & 0x7F) << 4));
             }   
         }

@@ -1,6 +1,6 @@
 namespace bEmu.Systems.Gameboy.GPU
 {
-    public struct Background
+    public struct TileInfo
     {
         public PaletteType BackgroundPaletteNumber { get; }
         public int TileVRAMBankNumber { get; }
@@ -8,7 +8,7 @@ namespace bEmu.Systems.Gameboy.GPU
         public bool VerticalFlip { get; }
         public bool BGToOAMPriority { get; }
 
-        public Background(PaletteType backgroundPaletteNumber, int tileVRAMBankNumber, bool horizontalFlip, bool verticalFlip, bool bGToOAMPriority)
+        public TileInfo(PaletteType backgroundPaletteNumber, int tileVRAMBankNumber, bool horizontalFlip, bool verticalFlip, bool bGToOAMPriority)
         {
             BackgroundPaletteNumber = backgroundPaletteNumber;
             TileVRAMBankNumber = tileVRAMBankNumber;
