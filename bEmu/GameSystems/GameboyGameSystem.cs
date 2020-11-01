@@ -69,6 +69,10 @@ namespace bEmu.GameSystems
             int afterCycles = state.Cycles;
 
             int lastCycleCount = (afterCycles - prevCycles);
+
+            if ((mmu[0xFF4D] & 0x80) == 0x80)
+                lastCycleCount /= 2;
+
             state.Timer.UpdateTimers(lastCycleCount);
 
             if (mmu.MBC is IHasRTC)

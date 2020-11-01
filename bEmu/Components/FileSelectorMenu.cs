@@ -19,30 +19,36 @@ namespace bEmu.Components
 
         public FileSelectorMenu(IMainGame game, Action<string> action) : base(game) 
         { 
-            currentDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             this.action = action;
             IsSelectable = true;
         }
 
         public override IEnumerable<MenuOption> GetMenuOptions()
         {
+            if (currentDirectory == null)
+                currentDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
             yield return new MenuOption("..", (_) =>
             {
                 var dir = Directory.GetParent(currentDirectory);
                 currentDirectory = dir != null ? dir.FullName : currentDirectory;
             });
 
-            foreach (var entry in Directory.GetFileSystemEntries(currentDirectory).OrderBy(x => Path.GetFileName(x)))
+            var entries = Directory.GetFileSystemEntries(currentDirectory)
+                .Select(x => new KeyValuePair<string, string>(x, Path.GetFileName(x)))
+                .Where(x => !x.Value.StartsWith('.')).OrderBy(x => x.Key);
+
+            foreach (var entry in entries)
             {
-                var attr = File.GetAttributes(entry);
+                var attr = File.GetAttributes(entry.Key);
 
                 if ((attr & FileAttributes.Hidden) == FileAttributes.Hidden)
                     continue;
                 
                 if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                    yield return new MenuOption(Path.GetFileName(entry), (_) => currentDirectory = entry);
+                    yield return new MenuOption(entry.Value, (_) => currentDirectory = entry.Key);
                 else
-                    yield return new MenuOption(Path.GetFileName(entry), (_) => action(entry));
+                    yield return new MenuOption(entry.Value, (_) => action(entry.Key));
             }
         }
     }

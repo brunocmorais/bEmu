@@ -39,19 +39,7 @@ namespace bEmu.Systems.Gameboy.GPU
         {
             int bitOffset = (colorNumber * 2);
             var shadeNumber = ((paletteBytes & (3 << bitOffset)) >> bitOffset);
-            // int color;
-            
-            // switch (shadeNumber)
-            // {
-            //     case 0: color = 0xFF; break;
-            //     case 1: color = 0xC0; break;
-            //     case 2: color = 0x60; break;
-            //     case 3: color = 0x00; break;
-            //     default: throw new Exception();
-            // }
 
-            // return (uint)((color << 24) | (color << 16) | (color << 8) | 0xFF);
-            
             switch (shadeNumber)
             {
                 case 0: return colorPalette.Shade0;

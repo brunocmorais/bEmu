@@ -13,7 +13,7 @@ namespace bEmu.Systems.Gameboy
     {
         public VRAM VRAM { get; private set; }
         public byte[] IO { get; private set; }
-        public byte[] WRAM { get; private set; }
+        public WRAM WRAM { get; private set; }
         public OAM OAM { get; private set; }
         public byte[] ZeroPage { get; private set; }
         public IMBC MBC { get; private set; }
@@ -24,10 +24,10 @@ namespace bEmu.Systems.Gameboy
 
         public MMU(ISystem system) : base(system, 0x10000)
         {
+            IO = new byte[128];
             Bios = new BIOS();
             VRAM = new VRAM(this);
-            IO = new byte[128];
-            WRAM = new byte[8192];
+            WRAM = new WRAM(this);
             OAM = new OAM(this);
             ZeroPage = new byte[128];
             ColorPaletteData = new ColorPaletteData();
@@ -57,6 +57,9 @@ namespace bEmu.Systems.Gameboy
                     if (addr == 0xFF00) // joypad
                         return Joypad.GetJoypadInfo();
 
+                    if (addr == 0xFF55)
+                        return VRAM.HDMA5;
+
                     if (addr >= 0xFF68 && addr <= 0xFF6B) // paletas de cor
                         return ColorPaletteData[addr];
 
@@ -68,7 +71,7 @@ namespace bEmu.Systems.Gameboy
                 return 0xFF;
             }
             set
-            {
+            {                    
                 if (addr >= 0x0000 && addr <= 0x7FFF)
                     MBC.SetMode(addr, value);
                 else if (addr >= 0x8000 && addr <= 0x9FFF)
@@ -99,7 +102,7 @@ namespace bEmu.Systems.Gameboy
             else if (addr == 0xFF46) // OAM DMA
                 OAM.StartDMATransfer(value);
             else if (addr == 0xFF55) // VRAM DMA
-                VRAM.StartDMATransfer(value);
+                VRAM.HDMA5 = value;
             else if (addr >= 0xFF68 && addr <= 0xFF6B) // paletas de cor
                 ColorPaletteData[addr] = value;
             else

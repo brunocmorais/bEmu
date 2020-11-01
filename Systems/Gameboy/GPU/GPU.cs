@@ -129,8 +129,9 @@ namespace bEmu.Systems.Gameboy.GPU
         {
             if (Cycles >= 204)
             {
-                mmu.VRAM.ExecuteHBlankDMATransfer();
-
+                if (state.LCD.LY < 144)
+                    mmu.VRAM.ExecuteHBlankDMATransfer();
+                    
                 if (state.LCD.GetSTATFlag(STAT.Mode0HBlankInterrupt))
                     state.RequestInterrupt(InterruptType.LcdStat);
 
@@ -230,6 +231,7 @@ namespace bEmu.Systems.Gameboy.GPU
             int xb = backgroundMap.GetCoordinateFromPadding((8 * i) + padding);
             int yb = backgroundMap.GetCoordinateFromPadding((line));
             Tile tile = backgroundMap[xb % 32, yb % 32];
+
             Background bg;
 
             if (GBCMode)
@@ -244,7 +246,7 @@ namespace bEmu.Systems.Gameboy.GPU
             }
 
             if (bg.VerticalFlip)
-                palette.Address = tile.TileAddress + (2 * ((7 - line) % 8));
+                palette.Address = tile.TileAddress + (2 * ((7 - (line % 8))));
             else
                 palette.Address = tile.TileAddress + (2 * (line % 8));
 
