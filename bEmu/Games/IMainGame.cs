@@ -25,6 +25,7 @@ namespace bEmu
         SpriteBatch SpriteBatch { get; }
         Fonts Fonts { get; }
         bool IsRunning { get; set; }
+        int LastRenderedFrame { get; }
 
         void LoadGame(SupportedSystems system, string file);
         void StopGame();

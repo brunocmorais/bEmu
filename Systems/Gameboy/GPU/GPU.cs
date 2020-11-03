@@ -17,15 +17,13 @@ namespace bEmu.Systems.Gameboy.GPU
         private bool bgDisplay;
         private bool windowDisplay;
         private bool spriteDisplay;
-        private int tileStartAddress;
-        private int windowMapSelect;
-        private int bgMapSelect;
         private IEnumerable<Sprite> spritesCurrentLine;
-        private bool SkipFrame => (Frameskip >= 1 && Frame % (Frameskip + 1) != 0);
+        private bool skipFrame => (Frameskip >= 1 && Frame % (Frameskip + 1) != 0);
         private bool GBCMode => (System as System).GBCMode;
         private BackgroundMap backgroundMap;
         private uint[] currentLine;
-        private IColorPalette colorPalette;
+        private IPaletteData paletteData => (GBCMode ? (IPaletteData) mmu.ColorPaletteData : (IPaletteData) mmu.MonochromePaletteData);
+        private IColorPalette colorPalette => (System as System).ColorPalette;
 
         public GPU(System system) : base(system, 160, 144)
         {
@@ -46,10 +44,9 @@ namespace bEmu.Systems.Gameboy.GPU
             spritesCurrentLine = Enumerable.Empty<Sprite>();
             backgroundMap = new BackgroundMap(mmu);
             currentLine = new uint[Width];
-            colorPalette = ColorPaletteFactory.Get(MonochromePaletteType.Gray);
         }
 
-        public void TurnOffLCD()
+        private void TurnOffLCD()
         {
             state.LCD.Mode = GPUMode.HBlank;
             Cycles = 0;
@@ -92,7 +89,7 @@ namespace bEmu.Systems.Gameboy.GPU
                 if (state.LCD.GetSTATFlag(STAT.Mode2OAMInterrupt))
                     state.RequestInterrupt(InterruptType.LcdStat);
 
-                if (!SkipFrame && lcdEnabled && spriteDisplay)
+                if (!skipFrame && lcdEnabled && spriteDisplay)
                     spritesCurrentLine = mmu.OAM.GetSpritesForScanline(state.LCD.LY, spriteSize);
 
                 Cycles -= 80;
@@ -135,7 +132,7 @@ namespace bEmu.Systems.Gameboy.GPU
                 if (state.LCD.GetSTATFlag(STAT.Mode0HBlankInterrupt))
                     state.RequestInterrupt(InterruptType.LcdStat);
 
-                if (!SkipFrame && lcdEnabled && state.LCD.LY < 144)
+                if (!skipFrame && lcdEnabled && state.LCD.LY < 144)
                 {
                     windowDisplay = state.LCD.GetLCDCFlag(LCDC.WindowDisplayEnable);
                     spriteDisplay = state.LCD.GetLCDCFlag(LCDC.SpriteDisplayEnable);
@@ -168,216 +165,123 @@ namespace bEmu.Systems.Gameboy.GPU
                 Framebuffer[i, state.LCD.LY] = currentLine[i];
         }
 
-        private void SetBGWindowPixel(Palette palette, int padding, int i, bool horizontalFlip)
+        private void Push(Palette palette, int padding, int x)
         {
-            int x;
-
-            for (int j = 0; j < palette.Length; j++)
+            for (int i = 0; i < palette.Length; i++)
             {
-                if (horizontalFlip)
-                    x = ((7 - j) + (i * 8)) - (padding % 8);
-                else
-                    x = (j + (i * 8)) - (padding % 8);
+                int x2 = (i + (x * 8)) - (padding % 8);
 
-                if (x >= 0 && x < Width)
-                    currentLine[x] = palette[j];
+                if (x2 >= 0 && x2 < Width)
+                    currentLine[x2] = palette[i];
             }
         }
 
         private void RenderBGWindowScanline()
         {
-            byte line = (byte)((state.LCD.LY + state.LCD.SCY));
-            byte windowLine = (byte)(state.LCD.LY - state.LCD.WY);
             bool windowEnabled = windowDisplay && state.LCD.LY >= state.LCD.WY;
-            Palette windowPalette = new Palette();
-            Palette bgPalette = new Palette();
-            TileInfo background = default;
-            tileStartAddress = state.LCD.GetLCDCFlag(LCDC.BGWindowTileDataSelect) ? 0x0000 : 0x0800;
-            bgMapSelect = state.LCD.GetLCDCFlag(LCDC.BGTileMapDisplaySelect) ? 0x1C00 : 0x1800;
-            windowMapSelect = state.LCD.GetLCDCFlag(LCDC.WindowTileMapDisplaySelect) ? 0x1C00 : 0x1800;
-            backgroundMap.WindowMapSelect = windowMapSelect;
-            backgroundMap.BackgroundMapSelect = bgMapSelect;
+            backgroundMap.WindowMapSelect = state.LCD.GetLCDCFlag(LCDC.WindowTileMapDisplaySelect) ? 0x1C00 : 0x1800;
+            backgroundMap.BackgroundMapSelect = state.LCD.GetLCDCFlag(LCDC.BGTileMapDisplaySelect) ? 0x1C00 : 0x1800;
+            backgroundMap.TileStartAddress = state.LCD.GetLCDCFlag(LCDC.BGWindowTileDataSelect) ? 0x0000 : 0x0800;
+            int wx = state.LCD.WX - 7;
 
-            for (int i = 0; i <= Width / Palette.Size; i++)
+            for (int x = 0; x <= Width / Palette.PaletteSize; x++)
             {
-                bool drawWindow = false;
-                int wx = state.LCD.WX - 7;
+                int line = 0, padding = 0, tilePadding = 0;
 
-                //window
-                if (windowEnabled && i >= wx)
+                if (windowEnabled && x >= wx)
                 {
                     backgroundMap.Window = true;
-                    background = SetBGWindowPalette(windowPalette, i, windowLine);
-                    drawWindow = true;
+                    line = (state.LCD.LY - state.LCD.WY) & 0xFF;
+                    padding = wx;
                 }
-
-                if (!drawWindow && (bgDisplay))
+                else if (bgDisplay)
                 {
                     backgroundMap.Window = false;
-                    background = SetBGWindowPalette(bgPalette, i, line, state.LCD.SCX);
+                    line = (state.LCD.LY + state.LCD.SCY) & 0xFF;
+                    padding = tilePadding = state.LCD.SCX;
                 }
 
-                if (drawWindow)
-                    SetBGWindowPixel(windowPalette, wx, i, background.HorizontalFlip);
-                else
-                    SetBGWindowPixel(bgPalette, state.LCD.SCX, i, background.HorizontalFlip);
+                if ((windowEnabled && x >= wx) || bgDisplay)
+                {
+                    var tile = GetTile(x, line, tilePadding);
+                    var palette = GetBGWindowPalette(tile, line);
+                    Push(palette, padding, x);
+                }
             }
         }
-bool debug = false;
-        private TileInfo SetBGWindowPalette(Palette palette, int i, int line, int padding = 0)
-        {
-            backgroundMap.TileStartAddress = tileStartAddress;
 
-            int xb = backgroundMap.GetCoordinateFromPadding((8 * i) + padding);
+        private Palette GetBGWindowPalette(Tile tile, int line)
+        {
+            var type = GBCMode ? tile.BackgroundPaletteNumber : PaletteType.BGP;
+            int address;
+
+            if (tile.VerticalFlip)
+                address = tile.TileAddress + (2 * ((7 - (line % 8))));
+            else
+                address = tile.TileAddress + (2 * (line % 8));
+
+            Palette palette = new Palette(type, address);
+
+            ushort tileData = GetTileData(tile.TileVRAMBankNumber, palette.Address);
+            palette.SetColors(paletteData, tileData, tile.HorizontalFlip, colorPalette);
+            
+            return palette;
+        }
+
+        private ushort GetTileData(int tileDataBankNumber, int address)
+        {
+            if (tileDataBankNumber == 0)
+                return (ushort) ((mmu.VRAM.Bank0[address + 1] << 8) | mmu.VRAM.Bank0[address]);
+            else
+                return (ushort) ((mmu.VRAM.Bank1[address + 1] << 8) | mmu.VRAM.Bank1[address]);
+        }
+
+        private Tile GetTile(int x, int line, int padding)
+        {
+            int xb = backgroundMap.GetCoordinateFromPadding((8 * x) + padding);
             int yb = backgroundMap.GetCoordinateFromPadding((line));
 
-            if (debug && xb == 0 && yb == 0xe)
-                Debugger.Break();
-
-            Tile tile = backgroundMap[xb % 32, yb % 32];
-
-            TileInfo info;
-
-            if (GBCMode)
-            {
-                info = mmu.VRAM.GetBackgroundPaletteType(tile.MapAddress);
-                palette.Type = info.BackgroundPaletteNumber;
-            }
-            else
-            {
-                info = default;
-                palette.Type = PaletteType.BGP;
-            }
-
-            if (info.VerticalFlip)
-                palette.Address = tile.TileAddress + (2 * ((7 - (line % 8))));
-            else
-                palette.Address = tile.TileAddress + (2 * (line % 8));
-
-            byte byte1 = tile.TileVRAMBankNumber == 0 ? mmu.VRAM.Bank0[palette.Address] : mmu.VRAM.Bank1[palette.Address];
-            byte byte2 = tile.TileVRAMBankNumber == 0 ? mmu.VRAM.Bank0[palette.Address + 1] : mmu.VRAM.Bank1[palette.Address + 1];
-            
-            UpdatePaletteFromBytes(palette, byte1, byte2);
-            return info;
+            return backgroundMap[xb % 32, yb % 32];
         }
 
         private void RenderOAMScanline()
         {
-            Palette objPalette = new Palette();
-
             foreach (var sprite in spritesCurrentLine)
             {
-                objPalette.Address = sprite.PaletteAddress;
+                var type = GBCMode ? sprite.ColorPaletteType : sprite.PaletteType;
+                Palette palette = new Palette(type, sprite.PaletteAddress);
+                ushort tileData = (ushort) ((mmu.VRAM[palette.Address + 1] << 8) | mmu.VRAM[palette.Address]);
 
-                if (GBCMode)
-                    objPalette.Type = sprite.ColorPaletteType;
-                else
-                    objPalette.Type = sprite.PaletteType;
-
-                UpdatePaletteFromBytes(objPalette, mmu.VRAM[objPalette.Address], mmu.VRAM[objPalette.Address + 1]);
-                DrawSpriteCurrentLine(sprite, objPalette);
+                palette.SetColors(paletteData, tileData, sprite.XFlip, colorPalette);
+                DrawSpriteCurrentLine(sprite, palette);
             }
         }
 
-        private void DrawSpriteCurrentLine(Sprite sprite, Palette objPalette)
+        private void DrawSpriteCurrentLine(Sprite sprite, Palette palette)
         {
-            int coordX;
-
-            for (int j = 0; j < objPalette.Length; j++)
+            for (int i = 0; i < palette.Length; i++)
             {
-                if (objPalette[j] == 0)
+                if (palette[i] == 0)
                     continue;
 
-                if (sprite.XFlip)
-                    coordX = ((objPalette.Length - j) + sprite.X) - 1;
-                else
-                    coordX = j + sprite.X;
+                int coordX = i + sprite.X;
 
                 if (coordX >= 0 && coordX < 160)
                 {
                     if (GBCMode)
                     {
-                        if (!sprite.Priority || (GetBGColors().Contains(currentLine[coordX])))
-                            currentLine[coordX] = objPalette[j];
+                        if (!sprite.Priority || (Util.GetBGColors(mmu.ColorPaletteData).Contains(currentLine[coordX])))
+                            currentLine[coordX] = palette[i];
                     }
                     else
                     {
-                        var color = Palette.ShadeToRGB(state.LCD.BGP, 0, colorPalette);
+                        var color = Util.ShadeToRGB(colorPalette, mmu.MonochromePaletteData.BGP, 0);
 
                         if (!sprite.Priority || (currentLine[coordX] == color))
-                            currentLine[coordX] = objPalette[j];
+                            currentLine[coordX] = palette[i];
                     }
                 }
             }
-        }
-
-        private uint GetShadeFrom(Palette palette, int colorNumber)
-        {
-            byte val = 0;
-
-            switch (palette.Type)
-            {
-                case PaletteType.BGP: val = state.LCD.BGP; break;
-                case PaletteType.OBP0: val = state.LCD.OBP0; break;
-                case PaletteType.OPB1: val = state.LCD.OBP1; break;
-            }
-
-            return Palette.ShadeToRGB(val, colorNumber, colorPalette);
-        }
-
-        private IEnumerable<uint> GetBGColors()
-        {
-            foreach (var paletteType in Palette.BackgroundPalettes)
-            {
-                int pos = Palette.GetIndexFromPalette(paletteType);
-                var firstByte = mmu.ColorPaletteData.BackgroundPalettes[pos];
-                var secondByte = mmu.ColorPaletteData.BackgroundPalettes[pos + 1];
-                yield return Palette.ColorToRGB((ushort)((secondByte << 8) | firstByte));
-            }
-        }
-
-        private uint GetColorFrom(Palette palette, int colorNumber)
-        {
-            byte firstByte, secondByte;
-            int pos = Palette.GetIndexFromPalette(palette.Type) + (colorNumber * 2);
-
-            if (palette.IsBackgroundPalette)
-            {
-                firstByte = mmu.ColorPaletteData.BackgroundPalettes[pos];
-                secondByte = mmu.ColorPaletteData.BackgroundPalettes[pos + 1];
-            }
-            else
-            {
-                firstByte = mmu.ColorPaletteData.SpritePalettes[pos];
-                secondByte = mmu.ColorPaletteData.SpritePalettes[pos + 1];
-            }
-
-            return Palette.ColorToRGB((ushort)((secondByte << 8) | firstByte));
-        }
-
-        private void UpdatePaletteFromBytes(Palette palette, byte byte1, byte byte2)
-        {
-            for (int i = 0; i < Palette.Size; i++)
-            {
-                byte colorNumber = 0;
-                int v1 = (1 << (7 - i));
-                
-                if ((byte2 & v1) == v1)
-                    colorNumber += 2;
-
-                if ((byte1 & v1) == v1)
-                    colorNumber += 1;
-
-                if (palette.IsBackgroundPalette || colorNumber > 0)
-                    palette[i] = palette.IsColorPalette ? GetColorFrom(palette, colorNumber) : GetShadeFrom(palette, colorNumber);
-                else
-                    palette[i] = 0;
-            }
-        }
-
-        public void SetShadeColorPalette(MonochromePaletteType paletteType)
-        {
-            colorPalette = ColorPaletteFactory.Get(paletteType);
         }
     }
 }

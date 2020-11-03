@@ -192,11 +192,6 @@ namespace bEmu.GameSystems
             lastWrite5 = write5;
         }
 
-        public void Draw(GameTime gameTime)
-        {
-            //gpu.UpdateFrameBuffer();
-        }
-
         public void StopGame() { }
     }
 }

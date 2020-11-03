@@ -11,7 +11,7 @@ namespace bEmu.Systems.Gameboy.GPU
         {
             get
             {
-                if (TileVRAMBankNumber == 1)
+                if (TileVRAMBankNumber == 1 && backgroundMap.TileStartAddress > 0) // TODO: review
                     return VRAM.Bank1[MapAddress];
                 else
                     return VRAM.Bank0[MapAddress];

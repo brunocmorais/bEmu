@@ -33,7 +33,7 @@ namespace bEmu.Components
             UpdateMenuOptions();
         }
 
-        private void UpdateMenuOptions()
+        public void UpdateMenuOptions()
         {
             menuOptions = GetMenuOptions().ToArray();
         }

@@ -124,17 +124,5 @@ namespace bEmu.Systems.Gameboy.GPU
             isActive = false;
             // transferLength = 0;
         }
-
-        public TileInfo GetBackgroundPaletteType(int addr)
-        {
-            return new TileInfo
-            (
-                (PaletteType)((Bank1[addr] & 0x7) + 3),
-                (Bank1[addr] & 0x8) == 0x8 ? 1 : 0,
-                (Bank1[addr] & 0x20) == 0x20,
-                (Bank1[addr] & 0x40) == 0x40,
-                (Bank1[addr] & 0x80) == 0x80
-            );
-        }
     }
 }

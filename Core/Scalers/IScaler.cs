@@ -7,6 +7,7 @@ namespace bEmu.Core.Scalers
         int ScaleFactor { get; set; }
         Framebuffer Framebuffer { get; set; }
         Framebuffer ScaledFramebuffer { get; }
-        void Update();
+        int Frame { get; set; }
+        void Update(int frame);
     }
 }

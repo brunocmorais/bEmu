@@ -1,6 +1,6 @@
 namespace bEmu.Systems.Gameboy.GPU
 {
-    public class ColorPaletteData
+    public class ColorPaletteData : IPaletteData
     {
         public byte[] BackgroundPalettes { get; }
         public byte[] SpritePalettes { get; }

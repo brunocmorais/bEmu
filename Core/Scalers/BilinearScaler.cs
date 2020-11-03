@@ -6,7 +6,7 @@ namespace bEmu.Core.Scalers
     {
         public BilinearScaler(int scaleFactor) : base(scaleFactor) { }
 
-        public override void Update()
+        public override void Update(int frame)
         {
             int xScale = Framebuffer.Width * ScaleFactor;
             int yScale = Framebuffer.Height * ScaleFactor;
@@ -32,6 +32,8 @@ namespace bEmu.Core.Scalers
                     ScaledFramebuffer[x, y] = (r << 24) | (g << 16) | (b << 8) | 0xFF;
                 }
             }
+
+            base.Update(frame);
         }
     }
 }

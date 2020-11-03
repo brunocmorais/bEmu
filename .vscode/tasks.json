@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/bEmu.sln",
+                "${workspaceFolder}/bEmu/bEmu.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -21,7 +21,7 @@
                 "publish",
                 "-c",
                 "Release",
-                "${workspaceFolder}/bEmu.sln",
+                "${workspaceFolder}/bEmu/bEmu.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -34,7 +34,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/bEmu;sln",
+                "${workspaceFolder}/bEmu/bEmu.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

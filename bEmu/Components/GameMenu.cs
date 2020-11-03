@@ -40,6 +40,7 @@ namespace bEmu.Components
 
         public void OpenMainMenu()
         {
+            mainMenu.UpdateMenuOptions();
             Menus.Push(mainMenu);
         }
 
@@ -72,7 +73,7 @@ namespace bEmu.Components
                 menuRelatedKeyPressed = true;
 
                 if (!game.Menu.IsOpen)
-                    game.Menu.OpenMenu(mainMenu);
+                    OpenMainMenu();
                 else
                     game.Menu.CloseAll();
             }

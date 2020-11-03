@@ -7,7 +7,7 @@ namespace bEmu.Core.Scalers
     {
         public EPXScaler() : base(2) { }
 
-        public override void Update()
+        public override void Update(int frame)
         {
             int xScale = 0;
             int yScale = 0;
@@ -42,6 +42,8 @@ namespace bEmu.Core.Scalers
 
                 yScale += ScaleFactor;
             }
+
+            base.Update(frame);
         }
 
         struct NeighborPixels

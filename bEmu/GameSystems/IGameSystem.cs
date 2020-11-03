@@ -23,7 +23,6 @@ namespace bEmu.GameSystems
         void Update(GameTime gameTime);
         void UpdateGame();
         void UpdateGamePad(KeyboardState keyboardState);
-        void Draw(GameTime gameTime);
         void StopGame();
     }
 }

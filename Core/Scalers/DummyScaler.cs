@@ -8,11 +8,9 @@ namespace bEmu.Core.Scalers
 
         public DummyScaler() : base(1)  { }
 
-        public override void Update() 
+        public override void Update(int frame) 
         { 
-            // for (int i = 0; i < Framebuffer.Width; i++)
-            //     for (int j = 0; j < Framebuffer.Height; j++)
-            //         ScaledFramebuffer[i, j] = Framebuffer[i, j];
+            base.Update(frame);
         }
     }
 }

@@ -8,6 +8,8 @@ namespace bEmu.Components
         string Title { get; }
         IEnumerable<MenuOption> GetMenuOptions();
         void Update(GameTime gameTime);
+        void UpdateMenuOptions();
+
         bool IsSelectable { get; set; }
     }
 }

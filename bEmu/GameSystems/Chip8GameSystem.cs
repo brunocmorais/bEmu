@@ -12,11 +12,9 @@ namespace bEmu.GameSystems
 
     public class Chip8GameSystem : IGameSystem
     {
-        private const int CycleCount = 16;
         public SupportedSystems Type => SupportedSystems.Chip8;
         private SoundEffect tone;
         private SoundEffectInstance soundEffectInstance;
-        private int cycle;
         public ISystem System { get; }
         private readonly Systems.Chip8.PPU gpu;
         private readonly Systems.Chip8.State state;
@@ -64,24 +62,20 @@ namespace bEmu.GameSystems
                 state.Sound--;
 
             UpdateSound();
-            cycle = CycleCount;
         }
 
         public void UpdateGame()
         {
             lock (this)
             {
-                while (cycle-- >= 0)
-                {
-                    System.Runner.StepCycle();
+                System.Runner.StepCycle();
 
-                    if (state.SuperChipMode && Width == 64)
-                    {
-                        Width *= 2;
-                        Height *= 2;
-                        MainGame.Options.Size /= 2;
-                        MainGame.BackBuffer = new Texture2D(MainGame.GraphicsDevice, Width, Height);
-                    }
+                if (state.SuperChipMode && Width == 64)
+                {
+                    Width *= 2;
+                    Height *= 2;
+                    MainGame.Options.Size /= 2;
+                    MainGame.BackBuffer = new Texture2D(MainGame.GraphicsDevice, Width, Height);
                 }
             }
         }
@@ -119,11 +113,6 @@ namespace bEmu.GameSystems
 
             for (int i = 0; i < keys.Length; i++)
                 state.Keys[keyboard[i]] = keyboardState.IsKeyDown(keys[i]);
-        }
-
-        public void Draw(GameTime gameTime) 
-        { 
-            state.Draw = false;
         }
 
         public void StopGame() { }

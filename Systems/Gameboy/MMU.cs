@@ -20,6 +20,7 @@ namespace bEmu.Systems.Gameboy
         public BIOS Bios { get; private set; }
         public CartridgeHeader CartridgeHeader { get; private set; }
         public ColorPaletteData ColorPaletteData { get; private set; }
+        public MonochromePaletteData MonochromePaletteData { get; private set; }
         public Joypad Joypad { get; set; }
 
         public MMU(ISystem system) : base(system, 0x10000)
@@ -30,6 +31,7 @@ namespace bEmu.Systems.Gameboy
             WRAM = new WRAM(this);
             OAM = new OAM(this);
             ZeroPage = new byte[128];
+            MonochromePaletteData = new MonochromePaletteData(this);
             ColorPaletteData = new ColorPaletteData();
             Joypad = new Joypad();
         }
