@@ -12,6 +12,7 @@ namespace bEmu.Systems.Gameboy.GPU
         public bool Priority => (Attr & 0x80) == 0x80;
         public bool XFlip => (Attr & 0x20) == 0x20;
         public bool YFlip => (Attr & 0x40) == 0x40;
+        public int TileVRAMBankNumber => (Attr & 0x8) == 0x8 ? 1 : 0;
         public PaletteType ColorPaletteType
         {
             get

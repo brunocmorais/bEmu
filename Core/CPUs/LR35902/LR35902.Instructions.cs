@@ -944,7 +944,7 @@ namespace bEmu.Core.CPUs.LR35902
             IncreaseCycles(4);
         }
 
-        protected void Stop()
+        protected virtual void Stop()
         {
             byte value = GetNextByte();
 

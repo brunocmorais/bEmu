@@ -7,10 +7,6 @@ namespace bEmu.Systems.Gameboy.GPU
         private readonly MMU mmu;
         private readonly State state;
 
-        public byte BGP => mmu.IO[0x47];
-        public byte OBP0 => mmu.IO[0x48];
-        public byte OBP1 => mmu.IO[0x49];
-
         public LCD(MMU mmu, State state)
         {
             this.mmu = mmu;

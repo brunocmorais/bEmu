@@ -19,8 +19,9 @@ namespace bEmu.Components
         protected int selectedOption = 0;
         public abstract string Title { get; }
         private double lastSelectionUpdate = 0;
-        protected IEnumerable<MenuOption> menuOptions { get; private set; }
+        protected MenuOption[] menuOptions { get; private set; }
         public bool IsSelectable { get; set; }
+        const int Delay = 150;
 
         public Menu(IMainGame game)
         {
@@ -29,12 +30,12 @@ namespace bEmu.Components
             black.SetData(new[] { Color.FromNonPremultiplied(0, 0, 0, 0xE0) });
             white = new Texture2D(game.GraphicsDevice, 1, 1);
             white.SetData(new[] { Color.FromNonPremultiplied(0xFF, 0xFF, 0xFF, 0xE0) });
-            menuOptions = Enumerable.Empty<MenuOption>();
+            UpdateMenuOptions();
         }
 
-        private void UpdateMenuOptions()
+        public void UpdateMenuOptions()
         {
-            menuOptions = GetMenuOptions();
+            menuOptions = GetMenuOptions().ToArray();
         }
 
         public abstract IEnumerable<MenuOption> GetMenuOptions();
@@ -57,8 +58,8 @@ namespace bEmu.Components
             game.SpriteBatch.DrawString(game.Fonts.Title, Title, titlePosition, Color.LightGreen);
             y += 10;
 
-            int menuItemCount = menuOptions.Count();
-            int showableItens = GetCountShowableItems(menuOptions, screenHeight, y);
+            int menuItemCount = menuOptions.Length;
+            int showableItens = GetCountShowableItems(screenHeight, y);
             int startItem = selectedOption - (showableItens / 2);
             int endItem = startItem + showableItens;
 
@@ -93,13 +94,13 @@ namespace bEmu.Components
             }
         }
 
-        private int GetCountShowableItems(IEnumerable<MenuOption> menuOptions, int screenHeight, float y)
+        private int GetCountShowableItems(int screenHeight, float y)
         {
             int showableItens = 0;
 
             for (int i = 0; i < menuOptions.Count(); i++)
             {
-                y += game.Fonts.Regular.MeasureString(menuOptions.ElementAt(i).Description).Y + 2;
+                y += game.Fonts.Regular.MeasureString(menuOptions[i].Description).Y + 2;
 
                 if (y >= screenHeight - 10)
                     break;
@@ -110,47 +111,59 @@ namespace bEmu.Components
             return showableItens;
         }
 
-        protected void SetSize(int width, int height)
+        protected void UpdateSize()
         {
-            this.width = width;
-            this.height = height;
+            this.width = game.GameSystem.Width * game.Options.Size;
+            this.height = game.GameSystem.Height * game.Options.Size;
         }
 
-        public virtual void Update(GameTime gameTime)
+        public void Update(GameTime gameTime)
         {
-            SetSize(game.GameSystem.Width * game.Options.Size, game.GameSystem.Height * game.Options.Size);
+            var pressedKeys = KeyboardStateExtensions.GetPressedKeys();
+            var option = menuOptions[selectedOption];
+            bool updateSelection = (gameTime.TotalGameTime.TotalMilliseconds - lastSelectionUpdate) > Delay;
+            bool simpleOption = option.Type == typeof(void);
 
-            if (!menuOptions.Any())
-                UpdateMenuOptions();
+            UpdateSize();
 
-            if (KeyboardStateExtensions.GetPressedKeys().Contains(Keys.Down) && 
-                (gameTime.TotalGameTime.TotalMilliseconds - lastSelectionUpdate) > 150)
+            if (pressedKeys.Contains(Keys.Down) && updateSelection)
+                UpdateSelectedOption(1, gameTime);
+            else if (pressedKeys.Contains(Keys.Up) && updateSelection)
+                UpdateSelectedOption(-1, gameTime);
+            else if (pressedKeys.Contains(Keys.Right) && simpleOption && updateSelection)
+                UpdateSelectedOption(10, gameTime);
+            else if (pressedKeys.Contains(Keys.Left) && simpleOption && updateSelection)
+                UpdateSelectedOption(-10, gameTime);
+
+            if (this.IsSelectable)
             {
-                selectedOption = (selectedOption + 1) % menuOptions.Count();
-                lastSelectionUpdate = gameTime.TotalGameTime.TotalMilliseconds;
+                if (KeyboardStateExtensions.HasBeenPressed(Keys.Enter) && simpleOption)
+                    ExecuteAction(option, true);
+                else if (KeyboardStateExtensions.HasBeenPressed(Keys.Right) && !simpleOption)
+                    ExecuteAction(option, false, true);
+                else if (KeyboardStateExtensions.HasBeenPressed(Keys.Left) && !simpleOption)
+                    ExecuteAction(option, false, false);
             }
+        }
 
-            if (KeyboardStateExtensions.GetPressedKeys().Contains(Keys.Up) && 
-                (gameTime.TotalGameTime.TotalMilliseconds - lastSelectionUpdate) > 150)
-            {
-                selectedOption = selectedOption == 0 ? menuOptions.Count() - 1 : selectedOption - 1;
-                lastSelectionUpdate = gameTime.TotalGameTime.TotalMilliseconds;
-            }
+        private void ExecuteAction(MenuOption option, bool resetSelectedOption, bool? parameter = null)
+        {
+            option.Action(parameter);
 
-            var option = menuOptions.ElementAt(selectedOption);
-
-            if (KeyboardStateExtensions.HasBeenPressed(Keys.Enter) && option.Type == typeof(void) && IsSelectable)
-            {
-                option.Action(null);
+            if (resetSelectedOption)
                 selectedOption = 0;
-                UpdateMenuOptions();
-            }
 
-            if (KeyboardStateExtensions.HasBeenPressed(Keys.Right) && option.Type != typeof(void))
-                option.Action(true);
+            UpdateMenuOptions();
+        }
 
-            if (KeyboardStateExtensions.HasBeenPressed(Keys.Left) && option.Type != typeof(void))
-                option.Action(false);
+        private void UpdateSelectedOption(int number, GameTime gameTime)
+        {
+            if (number >= 0)
+                selectedOption = (selectedOption + number) % menuOptions.Length;
+            else
+                selectedOption = selectedOption < -number? menuOptions.Length + number - selectedOption : selectedOption + number;
+
+            lastSelectionUpdate = gameTime.TotalGameTime.TotalMilliseconds;
         }
     }
 }

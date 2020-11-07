@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Input;
 using bEmu.Core.Factory;
 using bEmu.Systems;
 using bEmu.GameSystems;
+using System.Threading.Tasks;
 
 namespace bEmu
 {
@@ -28,10 +29,8 @@ namespace bEmu
         public DateTime LastStartDate { get; private set; }
         public IScaler Scaler { get; private set; }
         public IGameSystem GameSystem { get; private set; }
-        public double FPS => Math.Round(GameSystem.Frame / (DateTime.Now - LastStartDate).TotalSeconds, 1);
+        public int LastRenderedFrame { get; private set; }
         private GraphicsDeviceManager graphics;
-        private int lastRenderedFrame;
-        private Thread mainThread;
         private Rectangle destinationRectangle;
 
         public MainGame()
@@ -79,29 +78,31 @@ namespace bEmu
             graphics.ApplyChanges();
         }
 
-        private void StartMainThread()
+        private void MainLoop()
         {
-            mainThread = new Thread(() =>
-            {
-                while (IsRunning)
-                    GameSystem.UpdateGame();
-            });
-            
-            LastStartDate = DateTime.Now;
-            GameSystem.Frame = 0;
-            lastRenderedFrame = 0;
-            DrawCounter = 0;
-            mainThread.Start();
+            while (IsRunning && GameSystem.Frame <= LastRenderedFrame)
+                GameSystem.UpdateGame();
+
+            if (IsRunning)
+                Scaler.Update(GameSystem.Frame);
         }
 
         public void LoadGame(SupportedSystems system, string file)
         {
-            Menu.CloseAll();
-
             LoadGameSystem(GameSystemFactory.Get(system, this, file));
+            Menu.CloseAll();
+            Start();
+        }
 
+        private void Start()
+        {
             IsRunning = true;
-            StartMainThread();
+            LastStartDate = DateTime.Now;
+            GameSystem.Frame = 0;
+            LastRenderedFrame = 0;
+            DrawCounter = 0;
+
+            Task.Run(MainLoop);
         }
 
         protected override void Update(GameTime gameTime)
@@ -122,23 +123,18 @@ namespace bEmu
             IsRunning = !IsRunning;
 
             if (IsRunning)
-                StartMainThread();
-            else
-            {
-                while (mainThread.IsAlive)
-                    Thread.Sleep(50);
-            }
+                Start();
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
 
-            if (GameSystem.Frame > lastRenderedFrame)
+            if (GameSystem.Frame > LastRenderedFrame)
             {
-                Scaler.Update();
                 BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
-                lastRenderedFrame = GameSystem.Frame;
+                LastRenderedFrame = GameSystem.Frame;
+                Task.Run(MainLoop);
             }
 
             SpriteBatch.Begin();
@@ -176,7 +172,7 @@ namespace bEmu
         {
             Scaler = ScalerFactory.Get(Options.Scaler, Options.Size);
             Scaler.Framebuffer = GameSystem.Framebuffer;
-            Scaler.Update();
+            Scaler.Update(GameSystem.Frame);
             BackBuffer = new Texture2D(GraphicsDevice, GameSystem.Width * Scaler.ScaleFactor, GameSystem.Height * Scaler.ScaleFactor);
             BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
         }
@@ -186,7 +182,10 @@ namespace bEmu
             Osd.Update();
 
             if (Options.ShowFPS && IsRunning)
-                Osd.UpdateMessage(MessageType.FPS, $"{FPS:0.0} fps");
+            {
+                var fps = Math.Round(GameSystem.Frame / (DateTime.Now - LastStartDate).TotalSeconds, 1);
+                Osd.UpdateMessage(MessageType.FPS, $"{fps:0.0} fps");
+            }
         }
 
         public virtual void ResetGame()
@@ -195,9 +194,6 @@ namespace bEmu
                 return;
 
             IsRunning = false;
-
-            while (mainThread.IsAlive)
-                Thread.Sleep(50);
 
             Osd.InsertMessage(MessageType.Default, "Jogo reiniciado");
             LoadGame(GameSystem.Type, GameSystem.System.FileName);

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using bEmu.Components;
+using bEmu.Systems.Gameboy.GPU;
 using bEmu.Systems.Gameboy.GPU.Palettes;
 
 namespace bEmu.Classes
@@ -22,7 +23,8 @@ namespace bEmu.Classes
             switch (e.Property)
             {
                 case "PaletteType":
-                    (Game.GameSystem.System.PPU as Systems.Gameboy.GPU.GPU).SetShadeColorPalette(PaletteType);
+                    var system = (Game.GameSystem.System as Systems.Gameboy.System);
+                    system.ColorPalette = ColorPaletteFactory.Get(PaletteType);
                     break;
             }
         }

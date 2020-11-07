@@ -8,7 +8,7 @@ namespace bEmu.Core.Scalers
         {
         }
 
-        public override void Update()
+        public override void Update(int frame)
         {
             var pixel2x = new Pixel2x();
             int xScale = 0;
@@ -119,6 +119,8 @@ namespace bEmu.Core.Scalers
 
                 yScale += ScaleFactor;
             };
+
+            base.Update(frame);
         }
     }
 }

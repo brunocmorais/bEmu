@@ -34,7 +34,7 @@ namespace bEmu.Components
 
             var type = game.Options.GetType();
 
-            foreach (var prop in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            foreach (var prop in type.GetProperties(BindingFlags.Instance | BindingFlags.Public).OrderBy(x => x.Name))
             {
                 var attr = prop.GetCustomAttributes(typeof(DescriptionAttribute), true)[0] as DescriptionAttribute;
                 var text = attr.Description;

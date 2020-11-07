@@ -30,5 +30,13 @@ namespace bEmu.Systems.Gameboy
                 }
             }
         }
+
+        protected override void Stop()
+        {
+            base.Stop();
+
+            if ((System as System).GBCMode && (MMU[0xFF4D] & 0x1) == 0x1)
+                MMU[0xFF4D] = 0xFE;
+        }
     }
 }

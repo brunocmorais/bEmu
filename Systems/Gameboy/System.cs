@@ -1,11 +1,15 @@
 using bEmu.Core.CPUs.LR35902;
 using bEmu.Core;
 using bEmu.Systems.Gameboy.Sound;
+using bEmu.Systems.Gameboy.GPU.Palettes;
 
 namespace bEmu.Systems.Gameboy
 {
     public class System : Core.System
     {
+        public bool GBCMode { get; set; }
+        public IColorPalette ColorPalette { get; set; }
+        
         public System(string fileName) : base(fileName)
         {
         }
@@ -31,9 +35,8 @@ namespace bEmu.Systems.Gameboy
             PPU = new GPU.GPU(this);
             APU = new bEmu.Systems.Gameboy.Sound.APU(this);
             Runner = new CPU(this);
+            ColorPalette = ColorPaletteFactory.Get(MonochromePaletteType.Gray);
         }
-
-        public bool GBCMode { get; set; }
 
         public override void Reset()
         {

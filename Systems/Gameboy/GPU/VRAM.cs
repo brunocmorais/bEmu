@@ -5,25 +5,42 @@ namespace bEmu.Systems.Gameboy.GPU
         public MMU MMU { get; }
         public byte[] Bank0 { get; }
         public byte[] Bank1 { get; }
-        public ushort DMASourceAddr => (ushort) ((MMU[0xFF51] << 8) | (MMU[0xFF52] & 0xF0));
-        public ushort DMADestinationAddr => (ushort) (((MMU[0xFF53] & 0xF) << 8) | (MMU[0xFF54] & 0xF0));
-        private bool hblankDMA;
-        private int transferLength;
-        private int startAddr;
+        public ushort DMASourceAddr => (ushort) ((MMU.IO[0x51] << 8) | (MMU.IO[0x52] & 0xF0));
+        public ushort DMADestinationAddr => (ushort) (((MMU.IO[0x53] & 0xF) << 8) | (MMU.IO[0x54] & 0xF0));
+        public byte HDMA5 
+        { 
+            get 
+            {
+                if (active) 
+                    return (byte)(MMU.IO[0x55] & 0x7F); 
+                else
+                    return (byte)(MMU.IO[0x55] | 0x80);
+            }
+            set => MMU.IO[0x55] = value; 
+        }
+        private int startAddress = 0;
+        private bool active = false;
 
         public VRAM(MMU mmu)
         {
             MMU = mmu;
             Bank0 = new byte[8192];
             Bank1 = new byte[8192];
-            InitDMAConfig();
+            ResetDMAFlags();
         }
 
-        public byte HDMA5
+        private void ResetDMAFlags()
         {
-            get { return MMU[0xFF55]; }
-            set { MMU[0xFF55] = value; }
+            MMU.IO[0x51] = 0xFF;
+            MMU.IO[0x52] = 0xFF;
+            MMU.IO[0x53] = 0xFF;
+            MMU.IO[0x54] = 0xFF;
+            MMU.IO[0x55] = 0xFF;
         }
+
+        private bool IsHBlankDMAActive => active && (HDMA5 & 0x80) != 0x80 && 
+            MMU.IO[0x51] != 0xFF && MMU.IO[0x52] != 0xFF &&
+            MMU.IO[0x53] != 0xFF && MMU.IO[0x54] != 0xFF;
 
         public bool VBK 
         {
@@ -45,52 +62,60 @@ namespace bEmu.Systems.Gameboy.GPU
 
         public void StartDMATransfer(byte value)
         {
-            hblankDMA = (value & 0x80) == 0x80;
-            transferLength = ((value & 0x7F) + 1) << 4;
+            HDMA5 = value;
+
+            int length = ((HDMA5 & 0x7F) + 1) << 4;
+            bool hblankDMA = (value & 0x80) == 0x80;
 
             if (!hblankDMA)
             {
-                for (int i = 0; i < transferLength; i++)
-                    MMU[DMADestinationAddr - 0x8000 + i] = MMU[DMASourceAddr + i];
+                if (active) // interromper DMA ativo
+                {
+                    active = false;
+                    HDMA5 = ((byte)(HDMA5 & 0x7F));
+                }
+                else
+                    StartGeneralDMATransfer(length);
             }
+            else
+                active = true;
+        }
+
+        private void StartGeneralDMATransfer(int length)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                this[DMADestinationAddr + i] = MMU[DMASourceAddr + i];
+
+                if (i % 0x10 == 0)
+                    HDMA5 = (byte)((((length - i) >> 4) - 1) & 0x7F);
+            }
+
+            ResetDMAFlags();
         }
 
         public void ExecuteHBlankDMATransfer()
         {
-            if (!hblankDMA)
+            if (!IsHBlankDMAActive) // hblank não ativo
                 return;
             
-            if (startAddr == 0)
-                startAddr = DMASourceAddr;
+            if (startAddress == 0)
+                startAddress = DMASourceAddr;
+
+            int padding = (startAddress - DMASourceAddr);
 
             for (int i = 0; i < 0x10; i++)
-                this[DMADestinationAddr - 0x8000 + i + startAddr] = MMU[DMASourceAddr + i + startAddr];
+                this[DMADestinationAddr + i + padding] = MMU[DMASourceAddr + i + padding];
+            
+            startAddress += 0x10;
 
-            startAddr += 0x10;
-
-            HDMA5--;
-
-            if (HDMA5 == 0xFF) // transferência acabou
-                InitDMAConfig();
-        }
-
-        private void InitDMAConfig()
-        {
-            hblankDMA = false;
-            startAddr = 0;
-            transferLength = 0;
-        }
-
-        public Background GetBackgroundPaletteType(int addr)
-        {
-            return new Background
-            (
-                (PaletteType)((Bank1[addr] & 0x7) + 3),
-                (Bank1[addr] & 0x8) == 0x8 ? 1 : 0,
-                (Bank1[addr] & 0x20) == 0x20,
-                (Bank1[addr] & 0x40) == 0x40,
-                (Bank1[addr] & 0x80) == 0x80
-            );
+            if ((HDMA5 & 0x7F) == 0)
+            {
+                active = false;
+                ResetDMAFlags();
+            }
+            else
+                HDMA5--;
         }
     }
 }

@@ -13,23 +13,25 @@ namespace bEmu.Systems.Gameboy
     {
         public VRAM VRAM { get; private set; }
         public byte[] IO { get; private set; }
-        public byte[] WRAM { get; private set; }
+        public WRAM WRAM { get; private set; }
         public OAM OAM { get; private set; }
         public byte[] ZeroPage { get; private set; }
         public IMBC MBC { get; private set; }
         public BIOS Bios { get; private set; }
         public CartridgeHeader CartridgeHeader { get; private set; }
         public ColorPaletteData ColorPaletteData { get; private set; }
+        public MonochromePaletteData MonochromePaletteData { get; private set; }
         public Joypad Joypad { get; set; }
 
         public MMU(ISystem system) : base(system, 0x10000)
         {
+            IO = new byte[128];
             Bios = new BIOS();
             VRAM = new VRAM(this);
-            IO = new byte[128];
-            WRAM = new byte[8192];
+            WRAM = new WRAM(this);
             OAM = new OAM(this);
             ZeroPage = new byte[128];
+            MonochromePaletteData = new MonochromePaletteData(this);
             ColorPaletteData = new ColorPaletteData();
             Joypad = new Joypad();
         }
@@ -56,6 +58,9 @@ namespace bEmu.Systems.Gameboy
                 {
                     if (addr == 0xFF00) // joypad
                         return Joypad.GetJoypadInfo();
+
+                    if (addr == 0xFF55)
+                        return VRAM.HDMA5;
 
                     if (addr >= 0xFF68 && addr <= 0xFF6B) // paletas de cor
                         return ColorPaletteData[addr];

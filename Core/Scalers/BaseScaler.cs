@@ -16,6 +16,7 @@ namespace bEmu.Core.Scalers
             } 
         }
         public virtual Framebuffer ScaledFramebuffer { get; protected set; }
+        public int Frame { get; set; }
 
         public BaseScaler(int scaleFactor)
         {
@@ -33,6 +34,9 @@ namespace bEmu.Core.Scalers
             }
         }
 
-        public abstract void Update();
+        public virtual void Update(int frame)
+        {
+            Frame = frame;
+        }
     }
 }

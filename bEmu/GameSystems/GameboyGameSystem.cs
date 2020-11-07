@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using bEmu.Classes;
 using bEmu.Components;
 using bEmu.Core;
@@ -27,6 +28,7 @@ namespace bEmu.GameSystems
         private readonly Systems.Gameboy.GPU.GPU gpu;
         private readonly Systems.Gameboy.State state;
         private readonly Systems.Gameboy.MMU mmu;
+        bool doubleSpeedMode => (mmu[0xFF4D] & 0x80) == 0x80;
 
         public GameboyGameSystem(IMainGame mainGame, string rom)
         {
@@ -52,37 +54,40 @@ namespace bEmu.GameSystems
         
         public void UpdateGame() 
         { 
-            if (mmu.Bios.Running && state.PC == 0x100)
-            {
-                mmu.Bios.Running = false;
-
-                if ((mmu.CartridgeHeader.GBCFlag & 0x80) == 0x80) // set gameboy color mode
-                {
-                    state.A = 0x11;
-                    (System as Systems.Gameboy.System).GBCMode = true;
-                }
-            }
-
-            int prevCycles = state.Cycles;
-            var opcode = System.Runner.StepCycle();
-
-            int afterCycles = state.Cycles;
-
-            int lastCycleCount = (afterCycles - prevCycles);
-            state.Timer.UpdateTimers(lastCycleCount);
-
-            if (mmu.MBC is IHasRTC)
-                (mmu.MBC as IHasRTC).Tick(lastCycleCount);
-            
             lock (this)
             {
-                if (gpu.Frame <= MainGame.DrawCounter)
+                if (mmu.Bios.Running && state.PC == 0x100)
                 {
-                    gpu.Cycles += lastCycleCount;
+                    mmu.Bios.Running = false;
 
-                    if (state.Instructions % 2 == 0)
-                        gpu.StepCycle();
+                    if ((mmu.CartridgeHeader.GBCFlag & 0x80) == 0x80) // set gameboy color mode
+                    {
+                        state.A = 0x11;
+                        (System as Systems.Gameboy.System).GBCMode = true;
+                    }
                 }
+
+                int prevCycles = state.Cycles;
+
+                // debugar pokemon gold a partir de PC = 1AB8
+
+                // if (state.PC == 0x1B11)
+                //     Debugger.Break();
+
+                System.Runner.StepCycle();
+
+                int lastCycleCount = (state.Cycles - prevCycles);
+
+                if (doubleSpeedMode)
+                    lastCycleCount /= 2;
+
+                state.Timer.UpdateTimers(lastCycleCount);
+
+                if (mmu.MBC is IHasRTC)
+                    (mmu.MBC as IHasRTC).Tick(lastCycleCount);
+                
+                gpu.Cycles += lastCycleCount;
+                gpu.StepCycle();
             }
         }
         
@@ -125,8 +130,6 @@ namespace bEmu.GameSystems
             if (mmu.Joypad.Column1 != 0xF || mmu.Joypad.Column2 != 0xF)
                 state.RequestInterrupt(InterruptType.Joypad);
         }
-
-        public void Draw(GameTime gameTime) { }
 
         public void StopGame()
         {
