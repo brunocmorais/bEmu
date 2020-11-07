@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using bEmu.Classes;
 using bEmu.Components;
 using bEmu.Core;
@@ -67,6 +68,11 @@ namespace bEmu.GameSystems
                 }
 
                 int prevCycles = state.Cycles;
+
+                // debugar pokemon gold a partir de PC = 1AB8
+
+                // if (state.PC == 0x1B11)
+                //     Debugger.Break();
 
                 System.Runner.StepCycle();
 

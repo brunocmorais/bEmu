@@ -73,7 +73,7 @@ namespace bEmu.Systems.Gameboy
                 return 0xFF;
             }
             set
-            {                    
+            {
                 if (addr >= 0x0000 && addr <= 0x7FFF)
                     MBC.SetMode(addr, value);
                 else if (addr >= 0x8000 && addr <= 0x9FFF)
@@ -104,7 +104,7 @@ namespace bEmu.Systems.Gameboy
             else if (addr == 0xFF46) // OAM DMA
                 OAM.StartDMATransfer(value);
             else if (addr == 0xFF55) // VRAM DMA
-                VRAM.HDMA5 = value;
+                VRAM.StartDMATransfer(value);
             else if (addr >= 0xFF68 && addr <= 0xFF6B) // paletas de cor
                 ColorPaletteData[addr] = value;
             else

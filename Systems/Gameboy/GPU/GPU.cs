@@ -186,26 +186,21 @@ namespace bEmu.Systems.Gameboy.GPU
 
             for (int x = 0; x <= Width / Palette.PaletteSize; x++)
             {
-                int line = 0, padding = 0, tilePadding = 0;
-
-                if (windowEnabled && x >= wx)
+                if (windowEnabled && x * Palette.PaletteSize >= wx)
                 {
                     backgroundMap.Window = true;
-                    line = (state.LCD.LY - state.LCD.WY) & 0xFF;
-                    padding = wx;
+                    int line = (state.LCD.LY - state.LCD.WY) & 0xFF;
+                    int padding = wx;
+                    var tile = GetTile(x - (wx / 8), line, 0);
+                    Push(GetBGWindowPalette(tile, line), padding, x);
                 }
                 else if (bgDisplay)
                 {
                     backgroundMap.Window = false;
-                    line = (state.LCD.LY + state.LCD.SCY) & 0xFF;
-                    padding = tilePadding = state.LCD.SCX;
-                }
-
-                if ((windowEnabled && x >= wx) || bgDisplay)
-                {
-                    var tile = GetTile(x, line, tilePadding);
-                    var palette = GetBGWindowPalette(tile, line);
-                    Push(palette, padding, x);
+                    int line = (state.LCD.LY + state.LCD.SCY) & 0xFF;
+                    int padding = state.LCD.SCX;
+                    var tile = GetTile(x, line, padding);
+                    Push(GetBGWindowPalette(tile, line), padding, x);
                 }
             }
         }
@@ -250,7 +245,17 @@ namespace bEmu.Systems.Gameboy.GPU
             {
                 var type = GBCMode ? sprite.ColorPaletteType : sprite.PaletteType;
                 Palette palette = new Palette(type, sprite.PaletteAddress);
-                ushort tileData = (ushort) ((mmu.VRAM[palette.Address + 1] << 8) | mmu.VRAM[palette.Address]);
+                ushort tileData;
+
+                if (GBCMode)
+                {
+                    if (sprite.TileVRAMBankNumber == 1)
+                        tileData = (ushort) ((mmu.VRAM.Bank1[palette.Address + 1] << 8) | mmu.VRAM.Bank1[palette.Address]);
+                    else
+                        tileData = (ushort) ((mmu.VRAM.Bank0[palette.Address + 1] << 8) | mmu.VRAM.Bank0[palette.Address]);
+                }
+                else
+                    tileData = (ushort) ((mmu.VRAM[palette.Address + 1] << 8) | mmu.VRAM[palette.Address]);
 
                 palette.SetColors(paletteData, tileData, sprite.XFlip, colorPalette);
                 DrawSpriteCurrentLine(sprite, palette);

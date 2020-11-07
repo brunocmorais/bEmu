@@ -5,58 +5,42 @@ namespace bEmu.Systems.Gameboy.GPU
         public MMU MMU { get; }
         public byte[] Bank0 { get; }
         public byte[] Bank1 { get; }
-        public ushort DMASourceAddr => (ushort) ((MMU[0xFF51] << 8) | (MMU[0xFF52] & 0xF0));
-        public ushort DMADestinationAddr => (ushort) (((MMU[0xFF53] & 0xF) << 8) | (MMU[0xFF54] & 0xF0));
-        private bool hblankDMA;
-        private int startAddr;
-        private bool isActive;
-        private byte transferLength;
+        public ushort DMASourceAddr => (ushort) ((MMU.IO[0x51] << 8) | (MMU.IO[0x52] & 0xF0));
+        public ushort DMADestinationAddr => (ushort) (((MMU.IO[0x53] & 0xF) << 8) | (MMU.IO[0x54] & 0xF0));
+        public byte HDMA5 
+        { 
+            get 
+            {
+                if (active) 
+                    return (byte)(MMU.IO[0x55] & 0x7F); 
+                else
+                    return (byte)(MMU.IO[0x55] | 0x80);
+            }
+            set => MMU.IO[0x55] = value; 
+        }
+        private int startAddress = 0;
+        private bool active = false;
 
         public VRAM(MMU mmu)
         {
             MMU = mmu;
             Bank0 = new byte[8192];
             Bank1 = new byte[8192];
-            isActive = false;
-            transferLength = 0xFF;
-            MMU[0xFF51] = 0xFF;
-            MMU[0xFF52] = 0xFF;
-            MMU[0xFF53] = 0xFF;
-            MMU[0xFF54] = 0xFF;
-            InitDMAConfig();
+            ResetDMAFlags();
         }
 
-        public byte HDMA5
+        private void ResetDMAFlags()
         {
-            get
-            {
-                byte value = 0;
-
-                if (!isActive)
-                    value |= 0x80;
-
-                value |= transferLength;
-
-                return value;
-            }
-            set
-            {
-                if (isActive)
-                {
-                    if ((value & 0x80) == 0)
-                    {
-                        isActive = false;
-                    }
-                }
-                else
-                {
-                    transferLength = (byte)(value & 0x7F);
-                    hblankDMA = (value & 0x80) == 0x80;
-
-                    StartDMATransfer(value);
-                }
-            }
+            MMU.IO[0x51] = 0xFF;
+            MMU.IO[0x52] = 0xFF;
+            MMU.IO[0x53] = 0xFF;
+            MMU.IO[0x54] = 0xFF;
+            MMU.IO[0x55] = 0xFF;
         }
+
+        private bool IsHBlankDMAActive => active && (HDMA5 & 0x80) != 0x80 && 
+            MMU.IO[0x51] != 0xFF && MMU.IO[0x52] != 0xFF &&
+            MMU.IO[0x53] != 0xFF && MMU.IO[0x54] != 0xFF;
 
         public bool VBK 
         {
@@ -76,53 +60,62 @@ namespace bEmu.Systems.Gameboy.GPU
             }
         }
 
-        private void StartDMATransfer(byte value)
+        public void StartDMATransfer(byte value)
         {
-            int length = ((transferLength) + 1) << 4;
-            isActive = true;
+            HDMA5 = value;
+
+            int length = ((HDMA5 & 0x7F) + 1) << 4;
+            bool hblankDMA = (value & 0x80) == 0x80;
 
             if (!hblankDMA)
             {
-                for (int i = 0; i < length; i++)
+                if (active) // interromper DMA ativo
                 {
-                    this[DMADestinationAddr + i] = MMU[DMASourceAddr + i];
-
-                    if (!isActive)
-                        break;
-
-                    if (i % 0x10 == 0)
-                        transferLength--;
+                    active = false;
+                    HDMA5 = ((byte)(HDMA5 & 0x7F));
                 }
-
-                InitDMAConfig();
+                else
+                    StartGeneralDMATransfer(length);
             }
+            else
+                active = true;
+        }
+
+        private void StartGeneralDMATransfer(int length)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                this[DMADestinationAddr + i] = MMU[DMASourceAddr + i];
+
+                if (i % 0x10 == 0)
+                    HDMA5 = (byte)((((length - i) >> 4) - 1) & 0x7F);
+            }
+
+            ResetDMAFlags();
         }
 
         public void ExecuteHBlankDMATransfer()
         {
-            if (!hblankDMA)
+            if (!IsHBlankDMAActive) // hblank não ativo
                 return;
             
-            if (startAddr == 0)
-                startAddr = DMASourceAddr;
+            if (startAddress == 0)
+                startAddress = DMASourceAddr;
+
+            int padding = (startAddress - DMASourceAddr);
 
             for (int i = 0; i < 0x10; i++)
-                this[DMADestinationAddr + i + (startAddr - DMASourceAddr)] = MMU[DMASourceAddr + i + startAddr];
+                this[DMADestinationAddr + i + padding] = MMU[DMASourceAddr + i + padding];
+            
+            startAddress += 0x10;
 
-            transferLength--;
-            startAddr += 0x10;
-
-            if (HDMA5 == 0xFF) // transferência acabou
-                InitDMAConfig();
-        }
-
-        private void InitDMAConfig()
-        {
-            // HDMA5 = 0x80;
-            hblankDMA = false;
-            startAddr = 0;
-            isActive = false;
-            // transferLength = 0;
+            if ((HDMA5 & 0x7F) == 0)
+            {
+                active = false;
+                ResetDMAFlags();
+            }
+            else
+                HDMA5--;
         }
     }
 }
