@@ -18,8 +18,6 @@ namespace bEmu.GameSystems
     public class Generic8080GameSystem : GameSystem
     {
         public override SupportedSystems Type => SupportedSystems.Generic8080;
-        private TimeSpan lastInterruptTime;
-        private int lastInterrupt;
         private byte lastWrite3;
         private byte lastWrite5;
         
@@ -29,38 +27,17 @@ namespace bEmu.GameSystems
             MainGame.Options.Size = 2;
         }
 
-        public override void Initialize()
+        public override void Initialize(int address)
         {
             string json = File.ReadAllText("Content/Generic8080/games.json");
             var games = JsonConvert.DeserializeObject<IList<GameInfo>>(json);
             (System as Systems.Generic8080.System).LoadZipFile(games);
-            ((Systems.Generic8080.State) System.State).UpdatePorts(1, 0x01);
-            ((Systems.Generic8080.State) System.State).UpdatePorts(2, 0x00);
-            lastInterruptTime = TimeSpan.Zero;
-            lastInterrupt = 1;
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update()
         {
-            var state = (Systems.Generic8080.State) System.State;
-
-            lock (this)
-            {
-                System.ResetCycles();
-
-                if (state.EnableInterrupts)
-                {
-                    lastInterruptTime = gameTime.TotalGameTime;
-                    lastInterrupt = lastInterrupt == 1 ? 2 : 1;
-
-                    if (lastInterrupt == 1)
-                        System.PPU.Frame++;
-
-                    (System.Runner as CPU).GenerateInterrupt(lastInterrupt);
-                }
-
-                UpdateSounds();
-            }
+            base.Update();
+            UpdateSounds();
         }
 
         public override void UpdateGamePad(KeyboardState keyboardState)

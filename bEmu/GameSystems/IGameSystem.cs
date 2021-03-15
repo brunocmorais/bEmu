@@ -11,9 +11,8 @@ namespace bEmu.GameSystems
         IMainGame MainGame { get; }
         ISystem System { get; }
         SupportedSystems Type { get; }
-        void Initialize();
-        void Update(GameTime gameTime);
-        void UpdateGame();
+        void Initialize(int address);
+        void Update();
         void UpdateGamePad(KeyboardState keyboardState);
         void StopGame();
     }

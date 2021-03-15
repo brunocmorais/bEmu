@@ -17,16 +17,10 @@ namespace bEmu.GameSystems
                 MainGame.Options.Size = 2;
         }
 
-        public override void Initialize() 
+        public override void Initialize(int address) 
         { 
-            System.MMU.LoadProgram();
+            base.Initialize(address);
         }
-
-        public override void Update(GameTime gameTime)
-        {
-            System.ResetCycles();
-        }
-
         
         public override void UpdateGamePad(KeyboardState keyboardState) 
         { 
@@ -67,11 +61,6 @@ namespace bEmu.GameSystems
                 joypad.Column2 |= 0x8;
 
             System.UpdateGamePad(joypad);
-        }
-
-        public override void StopGame()
-        {
-            System.Stop();
         }
     }
 }

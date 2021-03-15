@@ -26,17 +26,24 @@ namespace bEmu.GameSystems
             }
         }
 
-        public virtual void Initialize() { }
-        public virtual void Update(GameTime gameTime) { }
-        public virtual void UpdateGamePad(KeyboardState keyboardState) { }
-
-        public virtual void UpdateGame() 
+        public virtual void Initialize(int address) 
         { 
-            lock (this)
+            if (System.MMU != null)
+                System.MMU.LoadProgram(address);
+        }
+
+        public virtual void Update() 
+        { 
+            if (MainGame.IsRunning && System.PPU.Frame <= MainGame.LastRenderedFrame)
             {
+                if (System.Cycles < 0)
+                    System.ResetCycles();
+
                 System.Update();
             }
         }
+
+        public virtual void UpdateGamePad(KeyboardState keyboardState) { }
         
         public virtual void StopGame() 
         { 

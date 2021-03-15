@@ -93,6 +93,14 @@ namespace bEmu.Systems.Chip8
 
         public override void Update()
         {
+            var state = (Systems.Chip8.State) State;
+
+            if (state.Delay > 0)
+                state.Delay--;
+
+            if (state.Sound > 0)
+                state.Sound--;
+
             while (Cycles >= 0)
             {
                 var opcode = Runner.StepCycle();

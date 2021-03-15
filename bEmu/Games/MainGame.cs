@@ -66,7 +66,7 @@ namespace bEmu
             SetScaler();
             SetScreenSize(); 
 
-            GameSystem.Initialize();
+            GameSystem.Initialize(0);
         }
 
         public void SetScreenSize()
@@ -79,15 +79,6 @@ namespace bEmu
 
             destinationRectangle = new Rectangle(0, 0, width, height);
             graphics.ApplyChanges();
-        }
-
-        private void MainLoop()
-        {
-            while (IsRunning && GameSystem.System.PPU.Frame <= LastRenderedFrame)
-                GameSystem.UpdateGame();
-
-            if (IsRunning)
-                Scaler.Update(GameSystem.System.PPU.Frame);
         }
 
         public void LoadGame(SupportedSystems system, string file)
@@ -105,7 +96,7 @@ namespace bEmu
             LastRenderedFrame = 0;
             DrawCounter = 0;
 
-            Task.Run(MainLoop);
+            Scaler.Update(GameSystem.System.PPU.Frame);
         }
 
         protected override void Update(GameTime gameTime)
@@ -118,7 +109,7 @@ namespace bEmu
             UpdateGamePad(keyboardState);
             UpdateMessages();
 
-            GameSystem.Update(gameTime);
+            GameSystem.Update();
         }
 
         public void Pause()
@@ -138,9 +129,9 @@ namespace bEmu
 
             if (GameSystem.System.PPU.Frame > LastRenderedFrame)
             {
+                Scaler.Update(GameSystem.System.PPU.Frame);
                 BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
                 LastRenderedFrame = GameSystem.System.PPU.Frame;
-                Task.Run(MainLoop);
             }
 
             SpriteBatch.Begin();

@@ -28,23 +28,15 @@ namespace bEmu.GameSystems
             MainGame.Options.Size = 5;
         }
 
-        public override void Initialize()
+        public override void Initialize(int address)
         {
-            System.MMU.LoadProgram(0x200);
+            base.Initialize(0x200);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update()
         {
-            Systems.Chip8.State state = (Systems.Chip8.State) System.State;
-
-            if (state.Delay > 0)
-                state.Delay--;
-
-            if (state.Sound > 0)
-                state.Sound--;
-
+            base.Update();
             UpdateSound();
-            System.ResetCycles();
         }
 
         private void UpdateSound()

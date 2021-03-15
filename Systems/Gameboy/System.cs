@@ -71,15 +71,20 @@ namespace bEmu.Systems.Gameboy
 
                 var opcode = Runner.StepCycle();
 
-                state.Timer.UpdateTimers(opcode.CyclesTaken);
+                int cyclesTaken = opcode.CyclesTaken;
+
+                if (DoubleSpeedMode)
+                    cyclesTaken /= 2;
+
+                state.Timer.UpdateTimers(cyclesTaken);
 
                 if (mmu.MBC is IHasRTC)
-                    (mmu.MBC as IHasRTC).Tick(opcode.CyclesTaken);
+                    (mmu.MBC as IHasRTC).Tick(cyclesTaken);
                 
-                gpu.Cycles += opcode.CyclesTaken;
+                gpu.Cycles += cyclesTaken;
                 gpu.StepCycle();
 
-                Cycles -= opcode.CyclesTaken;
+                Cycles -= cyclesTaken;
             }
         }
 
