@@ -16,6 +16,7 @@ namespace bEmu.Core.VMs.Chip8
         public override IOpcode StepCycle()
         {
             var opcode = new Opcode(MMU[State.PC++], MMU[State.PC++]);
+
             base.StepCycle();
 
             switch (opcode.UShort & 0xF000)
@@ -95,6 +96,8 @@ namespace bEmu.Core.VMs.Chip8
                     }
                     break;
             }
+
+            opcode.CyclesTaken = 1;
 
             return opcode;
         }

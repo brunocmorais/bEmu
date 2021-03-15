@@ -1,6 +1,9 @@
+using bEmu.Core;
+
 namespace bEmu.Systems.Gameboy
 {
-    public class Joypad
+
+    public class Joypad : IGamePad
     {
         private byte activeColumn;
         public byte Column1 { get; set; }
@@ -14,7 +17,7 @@ namespace bEmu.Systems.Gameboy
 
         public void SetJoypadColumn(byte column)
         {
-            activeColumn = (byte) (column & 0x30);
+            activeColumn = (byte)(column & 0x30);
         }
 
         public byte GetJoypadInfo()
@@ -23,7 +26,7 @@ namespace bEmu.Systems.Gameboy
                 return Column1;
             if (activeColumn == 0x20)
                 return Column2;
-            
+
             return 0;
         }
     }

@@ -11,6 +11,11 @@ namespace bEmu.Systems.Generic8080
 {
     public class System : Core.System
     {
+        public override int Width => 224;
+        public override int Height => 256;
+        public override int RefreshRate => 8;
+        public override int CycleCount => 17476;
+
         public System(string fileName) : base(fileName)
         {
         }
@@ -76,6 +81,26 @@ namespace bEmu.Systems.Generic8080
         public override void Reset()
         {
             base.Reset();
+        }
+
+        public override void Update()
+        {
+            while (Cycles >= 0)
+            {
+                var opcode = Runner.StepCycle();
+                Cycles -= opcode.CyclesTaken;
+            }
+        }
+
+        public override void Stop()
+        {
+            
+        }
+
+        public override void UpdateGamePad(IGamePad gamePad)
+        {
+            State state = (State) State;
+            state.UpdatePorts(1, ((GamePad) gamePad).Read1);
         }
     }
 }

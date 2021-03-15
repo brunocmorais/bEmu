@@ -7,6 +7,11 @@ namespace bEmu.Core
         IMMU MMU { get; }
         IPPU PPU { get; }
         IAPU APU { get; }
+        int Width { get; }
+        int Height { get; }
+        int RefreshRate { get; }
+        int CycleCount { get; }
+        int Cycles { get; }
         string FileName { get; set; }
         string SaveFileName { get; }
         string SaveStateName { get; }
@@ -15,5 +20,9 @@ namespace bEmu.Core
         void Reset();
         bool LoadState();
         void SaveState();
+        void Update();
+        void Stop();
+        void UpdateGamePad(IGamePad gamePad);
+        void ResetCycles();
     }
 }

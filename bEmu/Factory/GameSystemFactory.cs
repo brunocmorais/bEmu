@@ -16,13 +16,13 @@ namespace bEmu.Factory
                 case SupportedSystems.GameBoy:
                     return new GameboyGameSystem(game, rom);
                 default:
-                    return new DummyGameSystem(game);
+                    return GetDummyGameSystem(game);
             }
         }
 
-        public static DummyGameSystem GetDummyGameSystem(IMainGame game)
+        public static GameSystem GetDummyGameSystem(IMainGame game)
         {
-            return new DummyGameSystem(game);
+            return new GameSystem(game, string.Empty);
         }
     }
 }

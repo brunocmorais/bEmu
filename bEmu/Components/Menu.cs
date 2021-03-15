@@ -113,8 +113,8 @@ namespace bEmu.Components
 
         protected void UpdateSize()
         {
-            this.width = game.GameSystem.Width * game.Options.Size;
-            this.height = game.GameSystem.Height * game.Options.Size;
+            this.width = game.GameSystem.System.Width * game.Options.Size;
+            this.height = game.GameSystem.System.Height * game.Options.Size;
         }
 
         public void Update(GameTime gameTime)

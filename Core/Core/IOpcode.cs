@@ -4,5 +4,6 @@ namespace bEmu.Core
     {
         byte Byte { get; }
         ushort UShort { get; }
+        int CyclesTaken { get; set; }
     }
 }

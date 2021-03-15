@@ -10,10 +10,15 @@ namespace bEmu.Core
         public IMMU MMU { get; protected set; }
         public IPPU PPU { get; protected set; }
         public IAPU APU { get; protected set; }
+        public abstract int Width { get; }
+        public abstract int Height { get; }
+        public abstract int RefreshRate { get; }
+        public abstract int CycleCount { get; }
         public string FileName { get; set; }
         public string SaveFileName => FileNameWithoutExtension + ".sav";
         public string SaveStateName => FileNameWithoutExtension + ".state";
         private string FileNameWithoutExtension => Path.Combine(Path.GetDirectoryName(FileName), Path.GetFileNameWithoutExtension(FileName));
+        public int Cycles { get; protected set; }
 
         public System(string fileName)
         {
@@ -52,5 +57,13 @@ namespace bEmu.Core
         }
 
         public abstract IState GetInitialState();
+
+        public abstract void Update();
+        public abstract void Stop();
+        public abstract void UpdateGamePad(IGamePad gamePad);
+        public void ResetCycles()
+        {
+            Cycles = CycleCount;
+        }
     }
 }
