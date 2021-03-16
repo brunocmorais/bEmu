@@ -37,34 +37,8 @@ namespace bEmu.GameSystems
         public override void Update()
         {
             base.Update();
-            UpdateSounds();
-        }
-
-        public override void UpdateGamePad(KeyboardState keyboardState)
-        {
-            byte read1 = 0;
             
-            if (Keyboard.GetState().IsKeyDown(Keys.D5))
-                read1 = (byte) (read1 | (1 << 0));
-            
-            if (Keyboard.GetState().IsKeyDown(Keys.D1))
-                read1 = (byte) (read1 | (1 << 2));
-            
-            if (Keyboard.GetState().IsKeyDown(Keys.Space))
-                read1 = (byte) (read1 | (1 << 4));
-
-            if (Keyboard.GetState().IsKeyDown(Keys.Left))
-                read1 = (byte) (read1 | (1 << 5));
-
-            if (Keyboard.GetState().IsKeyDown(Keys.Right))
-                read1 = (byte) (read1 | (1 << 6));
-
-            System.UpdateGamePad(new Systems.Generic8080.GamePad(read1));
-        }
-
-        private void UpdateSounds()
-        {            
-            Systems.Generic8080.State state = (Systems.Generic8080.State) System.State;
+            var state = (Systems.Generic8080.State) System.State;
             byte write3 = state.Ports.Write3;
             byte write5 = state.Ports.Write5;
 

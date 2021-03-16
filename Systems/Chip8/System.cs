@@ -7,6 +7,14 @@ namespace bEmu.Systems.Chip8
 {
     public class System : Core.System
     {
+        private readonly GamePadKey[] keys = new GamePadKey[]
+        {
+            GamePadKey.D1, GamePadKey.D2, GamePadKey.D3, GamePadKey.D4,
+            GamePadKey.Q, GamePadKey.W, GamePadKey.E, GamePadKey.R,
+            GamePadKey.A, GamePadKey.S, GamePadKey.D, GamePadKey.F,
+            GamePadKey.Z, GamePadKey.X, GamePadKey.C, GamePadKey.V
+        };
+
         public override int Width => 128; 
         public override int Height => 64;
         public override int RefreshRate => 16;
@@ -28,7 +36,7 @@ namespace bEmu.Systems.Chip8
             state.PC = 0x200;
             state.V = new byte[16];
             state.Stack = new ushort[16];
-            state.GamePad = new GamePad();
+            state.Keys = new bool[16];
             state.R = new byte[8];
 
             return state;
@@ -113,7 +121,9 @@ namespace bEmu.Systems.Chip8
         public override void UpdateGamePad(IGamePad gamePad)
         {
             var state = (State) State;
-            state.GamePad = (GamePad) gamePad;
+
+            for (int i = 0; i < keys.Length; i++)
+                state.Keys[BIOS.Keyboard[i]] = gamePad.IsKeyDown(keys[i]);
         }
     }
 }

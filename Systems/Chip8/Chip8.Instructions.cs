@@ -81,11 +81,11 @@ namespace bEmu.Core.VMs.Chip8
 
         private void LdVxK(byte x)
         {
-            if (!State.GamePad.Keys.Any(y => y))
+            if (!State.Keys.Any(y => y))
                 State.PC -= 2;
             else
-                for (byte i = 0; i < State.GamePad.Keys.Length; i++)
-                    if (State.GamePad.Keys[i])
+                for (byte i = 0; i < State.Keys.Length; i++)
+                    if (State.Keys[i])
                         State.V[x] = i; 
         }
 
@@ -96,13 +96,13 @@ namespace bEmu.Core.VMs.Chip8
 
         private void Skp(byte x)
         {
-            if (State.GamePad.Keys[State.V[x]])
+            if (State.Keys[State.V[x]])
                 State.PC += 2;
         }
 
         private void Sknp(byte x)
         {
-            if (!State.GamePad.Keys[State.V[x]])
+            if (!State.Keys[State.V[x]])
                 State.PC += 2;
         }
 

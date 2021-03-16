@@ -95,8 +95,6 @@ namespace bEmu
             GameSystem.System.PPU.Frame = 0;
             LastRenderedFrame = 0;
             DrawCounter = 0;
-
-            Scaler.Update(GameSystem.System.PPU.Frame);
         }
 
         protected override void Update(GameTime gameTime)
@@ -110,6 +108,13 @@ namespace bEmu
             UpdateMessages();
 
             GameSystem.Update();
+
+            if (GameSystem.System.PPU.Frame > LastRenderedFrame)
+            {
+                Scaler.Update(GameSystem.System.PPU.Frame);
+                BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
+                LastRenderedFrame = GameSystem.System.PPU.Frame;
+            }
         }
 
         public void Pause()
@@ -127,25 +132,20 @@ namespace bEmu
             if (BackBuffer == null)
                 return;
 
-            if (GameSystem.System.PPU.Frame > LastRenderedFrame)
-            {
-                Scaler.Update(GameSystem.System.PPU.Frame);
-                BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
-                LastRenderedFrame = GameSystem.System.PPU.Frame;
-            }
-
             SpriteBatch.Begin();
-            SpriteBatch.Draw(BackBuffer, destinationRectangle, Color.White);
+
+            if (IsRunning)
+            {
+                DrawCounter++;
+                SpriteBatch.Draw(BackBuffer, destinationRectangle, Color.White);
+            }
 
             if (Menu.IsOpen)
                 Menu.Current.Draw();
 
             Osd.Draw();
-
-            if (IsRunning)
-                DrawCounter++;
-
             SpriteBatch.End();
+
             base.Draw(gameTime);
         }
 
@@ -169,7 +169,9 @@ namespace bEmu
         {
             Scaler = ScalerFactory.Get(Options.Scaler, Options.Size);
             Scaler.Framebuffer = GameSystem.System.PPU.Framebuffer;
+            
             Scaler.Update(GameSystem.System.PPU.Frame);
+            
             BackBuffer = new Texture2D(GraphicsDevice, GameSystem.System.Width * Scaler.ScaleFactor, GameSystem.System.Height * Scaler.ScaleFactor);
             BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
         }

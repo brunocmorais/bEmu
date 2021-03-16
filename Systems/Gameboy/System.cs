@@ -95,13 +95,44 @@ namespace bEmu.Systems.Gameboy
 
         public override void UpdateGamePad(IGamePad gamePad)
         {
-            var joypad = (Joypad) gamePad;
-            var state = (State) State;
-            var mmu = (MMU) MMU;
-            mmu.Joypad = joypad;
+            var joypad = ((Systems.Gameboy.MMU) MMU).Joypad;
+
+            if (gamePad.IsKeyDown(GamePadKey.Z))
+                joypad.Column1 &= 0xE;
+            if (gamePad.IsKeyDown(GamePadKey.X))
+                joypad.Column1 &= 0xD;
+            if (gamePad.IsKeyDown(GamePadKey.RightShift))
+                joypad.Column1 &= 0xB;
+            if (gamePad.IsKeyDown(GamePadKey.Enter))
+                joypad.Column1 &= 0x7;
+            if (gamePad.IsKeyDown(GamePadKey.Right))
+                joypad.Column2 &= 0xE;
+            if (gamePad.IsKeyDown(GamePadKey.Left))
+                joypad.Column2 &= 0xD;
+            if (gamePad.IsKeyDown(GamePadKey.Up))
+                joypad.Column2 &= 0xB;
+            if (gamePad.IsKeyDown(GamePadKey.Down))
+                joypad.Column2 &= 0x7;
+
+            if (gamePad.IsKeyUp(GamePadKey.Z))
+                joypad.Column1 |= 0x1;
+            if (gamePad.IsKeyUp(GamePadKey.X))
+                joypad.Column1 |= 0x2;
+            if (gamePad.IsKeyUp(GamePadKey.RightShift))
+                joypad.Column1 |= 0x4;
+            if (gamePad.IsKeyUp(GamePadKey.Enter))
+                joypad.Column1 |= 0x8;
+            if (gamePad.IsKeyUp(GamePadKey.Right))
+                joypad.Column2 |= 0x1;
+            if (gamePad.IsKeyUp(GamePadKey.Left))
+                joypad.Column2 |= 0x2;
+            if (gamePad.IsKeyUp(GamePadKey.Up))
+                joypad.Column2 |= 0x4;
+            if (gamePad.IsKeyUp(GamePadKey.Down))
+                joypad.Column2 |= 0x8;
 
             if (joypad.Column1 != 0xF || joypad.Column2 != 0xF)
-                state.RequestInterrupt(InterruptType.Joypad);
+                ((State)State).RequestInterrupt(InterruptType.Joypad);
         }
     }
 }

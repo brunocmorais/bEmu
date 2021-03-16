@@ -115,8 +115,24 @@ namespace bEmu.Systems.Generic8080
 
         public override void UpdateGamePad(IGamePad gamePad)
         {
-            State state = (State) State;
-            state.UpdatePorts(1, ((GamePad) gamePad).Read1);
+            byte read1 = 0;
+            
+            if (gamePad.IsKeyDown(GamePadKey.D5))
+                read1 = (byte) (read1 | (1 << 0));
+            
+            if (gamePad.IsKeyDown(GamePadKey.D1))
+                read1 = (byte) (read1 | (1 << 2));
+            
+            if (gamePad.IsKeyDown(GamePadKey.Space))
+                read1 = (byte) (read1 | (1 << 4));
+
+            if (gamePad.IsKeyDown(GamePadKey.Left))
+                read1 = (byte) (read1 | (1 << 5));
+
+            if (gamePad.IsKeyDown(GamePadKey.Right))
+                read1 = (byte) (read1 | (1 << 6));
+
+            ((State)State).UpdatePorts(1, read1);
         }
     }
 }

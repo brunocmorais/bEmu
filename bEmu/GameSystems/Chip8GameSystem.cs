@@ -1,6 +1,7 @@
 using bEmu.Classes;
 using bEmu.Components;
 using bEmu.Core;
+using bEmu.Extensions;
 using bEmu.Systems;
 using bEmu.Systems.Chip8;
 using bEmu.Systems.Factory;
@@ -14,13 +15,6 @@ namespace bEmu.GameSystems
     public class Chip8GameSystem : GameSystem
     {
         public override SupportedSystems Type => SupportedSystems.Chip8;
-        private readonly Keys[] keys = new Keys[]
-        {
-            Keys.D1, Keys.D2, Keys.D3, Keys.D4,
-            Keys.Q, Keys.W, Keys.E, Keys.R,
-            Keys.A, Keys.S, Keys.D, Keys.F,
-            Keys.Z, Keys.X, Keys.C, Keys.V
-        };
         
         public Chip8GameSystem(IMainGame mainGame, string rom) : base(mainGame, rom)
         {
@@ -36,12 +30,7 @@ namespace bEmu.GameSystems
         public override void Update()
         {
             base.Update();
-            UpdateSound();
-        }
-
-        private void UpdateSound()
-        {
-            Systems.Chip8.State state = (Systems.Chip8.State) System.State;
+            var state = (Systems.Chip8.State) System.State;
 
             if (state.Sound == 0)
             {
@@ -53,16 +42,6 @@ namespace bEmu.GameSystems
                 Chip8ContentProvider.SoundEffectInstance.IsLooped = true;
                 Chip8ContentProvider.SoundEffectInstance.Play();
             }
-        }
-
-        public override void UpdateGamePad(KeyboardState keyboardState)
-        {
-            var gamePad = new Systems.Chip8.GamePad();
-
-            for (int i = 0; i < keys.Length; i++)
-                gamePad.Keys[BIOS.Keyboard[i]] = keyboardState.IsKeyDown(keys[i]);
-
-            System.UpdateGamePad(gamePad);
         }
     }
 }

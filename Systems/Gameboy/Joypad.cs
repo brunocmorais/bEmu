@@ -3,7 +3,7 @@ using bEmu.Core;
 namespace bEmu.Systems.Gameboy
 {
 
-    public class Joypad : IGamePad
+    public class Joypad
     {
         private byte activeColumn;
         public byte Column1 { get; set; }

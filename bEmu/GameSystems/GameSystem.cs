@@ -1,5 +1,6 @@
 using bEmu.Components;
 using bEmu.Core;
+using bEmu.Extensions;
 using bEmu.Systems;
 using bEmu.Systems.Factory;
 using Microsoft.Xna.Framework;
@@ -13,11 +14,13 @@ namespace bEmu.GameSystems
         public virtual SupportedSystems Type => 0;
         public virtual IMainGame MainGame { get; }
         public virtual ISystem System { get; }
+        public virtual IGamePad GamePad { get; }
 
         public GameSystem(IMainGame mainGame, string rom)
         {
             System = SystemFactory.Get(Type, rom);
             MainGame = mainGame;
+            GamePad = new Core.GamePad();
 
             if (Type == 0)
             {
@@ -43,7 +46,13 @@ namespace bEmu.GameSystems
             }
         }
 
-        public virtual void UpdateGamePad(KeyboardState keyboardState) { }
+        public virtual void UpdateGamePad(KeyboardState keyboardState) 
+        { 
+            GamePad.Reset();
+            GamePad.AddPressedKeys(KeyboardStateExtensions.GetPressedGamePadKeys());
+
+            System.UpdateGamePad(GamePad);
+        }
         
         public virtual void StopGame() 
         { 
