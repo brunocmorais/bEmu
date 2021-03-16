@@ -50,7 +50,7 @@ namespace bEmu
             SpriteBatch = new SpriteBatch(GraphicsDevice);
             Osd = new OSD(this);
 
-            LoadGameSystem(GameSystemFactory.GetDummyGameSystem(this));
+            LoadGameSystem(GameSystemFactory.GetEmptyGameSystem(this));
             Generic8080ContentProvider.Initialize(this);
             Chip8ContentProvider.Initialize(this);
             
@@ -108,13 +108,6 @@ namespace bEmu
             UpdateMessages();
 
             GameSystem.Update();
-
-            if (GameSystem.System.PPU.Frame > LastRenderedFrame)
-            {
-                Scaler.Update(GameSystem.System.PPU.Frame);
-                BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
-                LastRenderedFrame = GameSystem.System.PPU.Frame;
-            }
         }
 
         public void Pause()
@@ -137,6 +130,14 @@ namespace bEmu
             if (IsRunning)
             {
                 DrawCounter++;
+
+                if (GameSystem.System.PPU.Frame > LastRenderedFrame)
+                {
+                    Scaler.Update(GameSystem.System.PPU.Frame);
+                    BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
+                    LastRenderedFrame = GameSystem.System.PPU.Frame;
+                }
+
                 SpriteBatch.Draw(BackBuffer, destinationRectangle, Color.White);
             }
 
@@ -200,7 +201,7 @@ namespace bEmu
         public virtual void CloseGame()
         {
             Osd.InsertMessage(MessageType.Default, "Jogo fechado");
-            LoadGameSystem(GameSystemFactory.GetDummyGameSystem(this));
+            LoadGameSystem(GameSystemFactory.GetEmptyGameSystem(this));
         }
 
         public void LoadState()

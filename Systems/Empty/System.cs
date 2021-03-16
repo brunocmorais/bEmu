@@ -1,6 +1,6 @@
 using bEmu.Core;
 
-namespace bEmu.Systems.Dummy
+namespace bEmu.Systems.Empty
 {
     public class System : Core.System
     {
@@ -18,27 +18,19 @@ namespace bEmu.Systems.Dummy
 
         public override IState GetInitialState()
         {
-            return null;
+            return default;
         }
 
-        public override void Stop()
-        {
-            
-        }
+        public override void Stop() {}
 
-        public override void Update()
-        {
-            
-        }
+        public override void Update() {}
 
-        public override void UpdateGamePad(IGamePad gamePad)
-        {
-            
-        }
+        public override void UpdateGamePad(IGamePad gamePad) {}
 
         public override void Initialize()
         {
             PPU = new PPU(this, Width, Height);
+            MMU = new MMU(this, 0);
         }
     }
 }

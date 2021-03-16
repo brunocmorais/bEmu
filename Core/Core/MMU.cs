@@ -37,8 +37,11 @@ namespace bEmu.Core
 
         public virtual void LoadProgram(int startAddress = 0)
         {
-            byte[] bytes = File.ReadAllBytes(System.FileName);
-            LoadProgram(bytes, startAddress);
+            if (!string.IsNullOrWhiteSpace(System.FileName))
+            {
+                byte[] bytes = File.ReadAllBytes(System.FileName);
+                LoadProgram(bytes, startAddress);
+            }
         }
 
         public virtual void LoadProgram(byte[] bytes, int startAddress = 0)

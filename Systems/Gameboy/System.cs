@@ -3,6 +3,7 @@ using bEmu.Core;
 using bEmu.Systems.Gameboy.Sound;
 using bEmu.Systems.Gameboy.GPU.Palettes;
 using bEmu.Systems.Gameboy.MBCs;
+using System.Diagnostics;
 
 namespace bEmu.Systems.Gameboy
 {

@@ -1,13 +1,6 @@
 using bEmu.Classes;
 using bEmu.Components;
-using bEmu.Core;
-using bEmu.Extensions;
 using bEmu.Systems;
-using bEmu.Systems.Chip8;
-using bEmu.Systems.Factory;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Input;
 
 namespace bEmu.GameSystems
 {

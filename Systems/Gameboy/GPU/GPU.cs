@@ -184,7 +184,7 @@ namespace bEmu.Systems.Gameboy.GPU
             backgroundMap.TileStartAddress = state.LCD.GetLCDCFlag(LCDC.BGWindowTileDataSelect) ? 0x0000 : 0x0800;
             int wx = state.LCD.WX - 7;
 
-            for (int x = 0; x <= Width / Palette.PaletteSize; x++)
+            for (int x = 0; x <= (Width / Palette.PaletteSize); x++)
             {
                 if (windowEnabled && x * Palette.PaletteSize >= wx)
                 {
@@ -230,7 +230,7 @@ namespace bEmu.Systems.Gameboy.GPU
             else
                 return (ushort) ((mmu.VRAM.Bank1[address + 1] << 8) | mmu.VRAM.Bank1[address]);
         }
-
+        
         private Tile GetTile(int x, int line, int padding)
         {
             int xb = backgroundMap.GetCoordinateFromPadding((8 * x) + padding);
@@ -242,7 +242,7 @@ namespace bEmu.Systems.Gameboy.GPU
         private void RenderOAMScanline()
         {
             foreach (var sprite in spritesCurrentLine)
-            {
+            {                    
                 var type = GBCMode ? sprite.ColorPaletteType : sprite.PaletteType;
                 Palette palette = new Palette(type, sprite.PaletteAddress);
                 ushort tileData;

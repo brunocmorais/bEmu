@@ -31,8 +31,7 @@ namespace bEmu.GameSystems
 
         public virtual void Initialize(int address) 
         { 
-            if (System.MMU != null)
-                System.MMU.LoadProgram(address);
+            System.MMU.LoadProgram(address);
         }
 
         public virtual void Update() 

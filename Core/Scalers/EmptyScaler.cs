@@ -2,11 +2,11 @@ using bEmu.Core;
 
 namespace bEmu.Core.Scalers
 {
-    public class DummyScaler : BaseScaler
+    public class EmptyScaler : BaseScaler
     {
         public override Framebuffer ScaledFramebuffer => Framebuffer;
 
-        public DummyScaler() : base(1)  { }
+        public EmptyScaler() : base(1)  { }
 
         public override void Update(int frame) 
         { 

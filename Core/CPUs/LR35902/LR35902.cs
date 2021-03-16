@@ -7,7 +7,7 @@ namespace bEmu.Core.CPUs.LR35902
         where TState : State
         where TMMU : MMU
     {
-        const int CyclesInHalt = 8;
+        const int CyclesInHalt = 12;
 
         public LR35902(ISystem system) : base(system) { }
 

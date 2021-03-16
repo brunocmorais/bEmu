@@ -1,6 +1,6 @@
 using bEmu.Core;
 
-namespace bEmu.Systems.Dummy
+namespace bEmu.Systems.Empty
 {
     public class PPU : Core.PPU
     {

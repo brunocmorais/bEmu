@@ -64,7 +64,7 @@ namespace bEmu.Systems.Gameboy.GPU
         {
             var oamStartAddress = (value << 8);
 
-            for (int i = 0; i < 0x9F; i++)
+            for (int i = 0; i <= 0x9F; i++)
                 this[i] = MMU[oamStartAddress + i];
         }
     }

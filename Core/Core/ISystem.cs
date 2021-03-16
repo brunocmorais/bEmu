@@ -15,7 +15,6 @@ namespace bEmu.Core
         string FileName { get; set; }
         string SaveFileName { get; }
         string SaveStateName { get; }
-        void Initialize();
         IState GetInitialState();
         void Reset();
         bool LoadState();

@@ -57,7 +57,6 @@ namespace bEmu.Core
         }
 
         public abstract IState GetInitialState();
-
         public abstract void Update();
         public abstract void Stop();
         public abstract void UpdateGamePad(IGamePad gamePad);

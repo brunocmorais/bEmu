@@ -16,10 +16,5 @@ namespace bEmu.GameSystems
             if (MainGame.Options.Size < 2) 
                 MainGame.Options.Size = 2;
         }
-
-        public override void Initialize(int address) 
-        { 
-            base.Initialize(address);
-        }
     }
 }
