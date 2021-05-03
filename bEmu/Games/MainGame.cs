@@ -49,7 +49,11 @@ namespace bEmu
             Fonts.Title = Content.Load<SpriteFont>("Common/Title");
             SpriteBatch = new SpriteBatch(GraphicsDevice);
             Osd = new OSD(this);
-            LoadGameSystem(GameSystemFactory.GetDummyGameSystem(this));
+
+            LoadGameSystem(GameSystemFactory.GetEmptyGameSystem(this));
+            Generic8080ContentProvider.Initialize(this);
+            Chip8ContentProvider.Initialize(this);
+            
             Menu = new GameMenu(this);
             Menu.OpenMainMenu();
         }
@@ -57,34 +61,24 @@ namespace bEmu
         private void LoadGameSystem(IGameSystem gameSystem)
         {
             GameSystem = gameSystem;
-            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, GameSystem.RefreshRate);
+            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, GameSystem.System.RefreshRate);
 
             SetScaler();
             SetScreenSize(); 
 
-            GameSystem.Initialize();
-            GameSystem.LoadContent();
+            GameSystem.Initialize(0);
         }
 
         public void SetScreenSize()
         {
-            int width = GameSystem.Width * Options.Size;
-            int height = GameSystem.Height * Options.Size;
+            int width = GameSystem.System.Width * Options.Size;
+            int height = GameSystem.System.Height * Options.Size;
             
             graphics.PreferredBackBufferWidth = width;
             graphics.PreferredBackBufferHeight = height;
 
             destinationRectangle = new Rectangle(0, 0, width, height);
             graphics.ApplyChanges();
-        }
-
-        private void MainLoop()
-        {
-            while (IsRunning && GameSystem.Frame <= LastRenderedFrame)
-                GameSystem.UpdateGame();
-
-            if (IsRunning)
-                Scaler.Update(GameSystem.Frame);
         }
 
         public void LoadGame(SupportedSystems system, string file)
@@ -98,11 +92,9 @@ namespace bEmu
         {
             IsRunning = true;
             LastStartDate = DateTime.Now;
-            GameSystem.Frame = 0;
+            GameSystem.System.PPU.Frame = 0;
             LastRenderedFrame = 0;
             DrawCounter = 0;
-
-            Task.Run(MainLoop);
         }
 
         protected override void Update(GameTime gameTime)
@@ -115,7 +107,7 @@ namespace bEmu
             UpdateGamePad(keyboardState);
             UpdateMessages();
 
-            GameSystem.Update(gameTime);
+            GameSystem.Update();
         }
 
         public void Pause()
@@ -130,25 +122,31 @@ namespace bEmu
         {
             GraphicsDevice.Clear(Color.Black);
 
-            if (GameSystem.Frame > LastRenderedFrame)
-            {
-                BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
-                LastRenderedFrame = GameSystem.Frame;
-                Task.Run(MainLoop);
-            }
+            if (BackBuffer == null)
+                return;
 
             SpriteBatch.Begin();
-            SpriteBatch.Draw(BackBuffer, destinationRectangle, Color.White);
+
+            if (IsRunning)
+            {
+                DrawCounter++;
+
+                if (GameSystem.System.PPU.Frame > LastRenderedFrame)
+                {
+                    Scaler.Update(GameSystem.System.PPU.Frame);
+                    BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
+                    LastRenderedFrame = GameSystem.System.PPU.Frame;
+                }
+
+                SpriteBatch.Draw(BackBuffer, destinationRectangle, Color.White);
+            }
 
             if (Menu.IsOpen)
                 Menu.Current.Draw();
 
             Osd.Draw();
-
-            if (IsRunning)
-                DrawCounter++;
-
             SpriteBatch.End();
+
             base.Draw(gameTime);
         }
 
@@ -171,9 +169,11 @@ namespace bEmu
         public void SetScaler()
         {
             Scaler = ScalerFactory.Get(Options.Scaler, Options.Size);
-            Scaler.Framebuffer = GameSystem.Framebuffer;
-            Scaler.Update(GameSystem.Frame);
-            BackBuffer = new Texture2D(GraphicsDevice, GameSystem.Width * Scaler.ScaleFactor, GameSystem.Height * Scaler.ScaleFactor);
+            Scaler.Framebuffer = GameSystem.System.PPU.Framebuffer;
+            
+            Scaler.Update(GameSystem.System.PPU.Frame);
+            
+            BackBuffer = new Texture2D(GraphicsDevice, GameSystem.System.Width * Scaler.ScaleFactor, GameSystem.System.Height * Scaler.ScaleFactor);
             BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
         }
 
@@ -183,16 +183,13 @@ namespace bEmu
 
             if (Options.ShowFPS && IsRunning)
             {
-                var fps = Math.Round(GameSystem.Frame / (DateTime.Now - LastStartDate).TotalSeconds, 1);
+                var fps = Math.Round(GameSystem.System.PPU.Frame / (DateTime.Now - LastStartDate).TotalSeconds, 1);
                 Osd.UpdateMessage(MessageType.FPS, $"{fps:0.0} fps");
             }
         }
 
         public virtual void ResetGame()
         {
-            if (GameSystem is DummyGameSystem)
-                return;
-
             IsRunning = false;
 
             Osd.InsertMessage(MessageType.Default, "Jogo reiniciado");
@@ -204,12 +201,12 @@ namespace bEmu
         public virtual void CloseGame()
         {
             Osd.InsertMessage(MessageType.Default, "Jogo fechado");
-            LoadGameSystem(GameSystemFactory.GetDummyGameSystem(this));
+            LoadGameSystem(GameSystemFactory.GetEmptyGameSystem(this));
         }
 
         public void LoadState()
         {
-            if (GameSystem is DummyGameSystem)
+            if (GameSystem is GameSystem)
                 return;
 
             bool success = GameSystem.System.LoadState();
@@ -224,7 +221,7 @@ namespace bEmu
 
         public void SaveState()
         {
-            if (GameSystem is DummyGameSystem)
+            if (GameSystem is GameSystem)
                 return;
 
             GameSystem.System.SaveState();

@@ -91,7 +91,7 @@ namespace bEmu.Components
 
                     break;
                 case "Frameskip":
-                    Game.GameSystem.Frameskip = Frameskip;
+                    Game.GameSystem.System.PPU.Frameskip = Frameskip;
                     break;
                 case "Scaler":
                     Game.SetScaler();

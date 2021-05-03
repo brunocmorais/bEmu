@@ -1,5 +1,6 @@
 using bEmu.Core;
 using bEmu.Core.CPUs.LR35902;
+using bEmu.Systems.Gameboy.MBCs;
 
 namespace bEmu.Systems.Gameboy
 {
@@ -37,6 +38,32 @@ namespace bEmu.Systems.Gameboy
 
             if ((System as System).GBCMode && (MMU[0xFF4D] & 0x1) == 0x1)
                 MMU[0xFF4D] = 0xFE;
+        }
+
+        public override IOpcode StepCycle()
+        {
+            if (MMU.Bios.Running && State.PC == 0x100)
+            {
+                MMU.Bios.Running = false;
+
+                if ((MMU.CartridgeHeader.GBCFlag & 0x80) == 0x80) // set gameboy color mode
+                {
+                    State.A = 0x11;
+                    (System as System).GBCMode = true;
+                }
+            }
+
+            var opcode = base.StepCycle();
+
+            if (((System) System).DoubleSpeedMode)
+                opcode.CyclesTaken /= 2;
+
+            State.Timer.UpdateTimers(opcode.CyclesTaken);
+
+            if (MMU.MBC is IHasRTC)
+                (MMU.MBC as IHasRTC).Tick(opcode.CyclesTaken);
+
+            return opcode;
         }
     }
 }

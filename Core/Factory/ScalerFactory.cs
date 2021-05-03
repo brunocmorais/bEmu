@@ -10,7 +10,7 @@ namespace bEmu.Core.Factory
         {
             switch (scaler)
             {
-                case Scaler.None: return new DummyScaler();
+                case Scaler.None: return new EmptyScaler();
                 case Scaler.Eagle: return new EagleScaler();
                 case Scaler.EPX: return new EPXScaler();
                 case Scaler.NearestNeighbor: return new NearestNeighborScaler(pixelSize);

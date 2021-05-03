@@ -156,6 +156,7 @@ namespace bEmu.Core.CPUs.Intel8080
         {
             var opcode = new Opcode(GetNextByte());
             base.StepCycle();
+            int cycles = State.Cycles; 
 
             switch (opcode.Byte)
             {
@@ -416,6 +417,8 @@ namespace bEmu.Core.CPUs.Intel8080
                 case 0xF9: Sphl(); break;
                 case 0xFB: Ei(); break;
             }
+
+            opcode.CyclesTaken = State.Cycles - cycles;
 
             return opcode;
         }

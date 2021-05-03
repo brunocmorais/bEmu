@@ -18,6 +18,9 @@ namespace bEmu.Systems.Chip8
             Frame++;
         }
 
+        new int Width => ((State) state).SuperChipMode ? base.Width : base.Width / 2;
+        new int Height => ((State) state).SuperChipMode ? base.Height : base.Height / 2;
+
         public void ScrollRight()
         {
             for (int i = Width - 1; i >= 0; i--)
@@ -25,9 +28,9 @@ namespace bEmu.Systems.Chip8
                 for (int j = Height - 1; j >= 0; j--)
                 {
                     if ((i - 4) < 0)
-                        Framebuffer[i, j] = 0x000000FF;
+                        this[i, j] = 0x000000FF;
                     else
-                        Framebuffer[i, j] = Framebuffer[i - 4, j];
+                        this[i, j] = this[i - 4, j];
                 }
             }
 
@@ -41,9 +44,9 @@ namespace bEmu.Systems.Chip8
                 for (int j = 0; j < Height; j++)
                 {
                     if ((i + 4) > Width)
-                        Framebuffer[i, j] = 0x000000FF;
+                        this[i, j] = 0x000000FF;
                     else
-                        Framebuffer[i, j] = Framebuffer[i + 4, j];
+                        this[i, j] = this[i + 4, j];
                 }   
             }
 
@@ -57,9 +60,9 @@ namespace bEmu.Systems.Chip8
                 for (int j = Height - 1; j >= 0; j--)
                 {
                     if ((j - nibble) < 0)
-                        Framebuffer[i, j] = 0x000000FF;
+                        this[i, j] = 0x000000FF;
                     else
-                        Framebuffer[i, j] = Framebuffer[i, j - nibble];
+                        this[i, j] = this[i, j - nibble];
                 }   
             }
 
@@ -73,9 +76,9 @@ namespace bEmu.Systems.Chip8
                 for (int j = 0; j < Height; j++)
                 {
                     if ((j + nibble) > Width)
-                        Framebuffer[i, j] = 0x000000FF;
+                        this[i, j] = 0x000000FF;
                     else
-                        Framebuffer[i, j] = Framebuffer[i, j + nibble];
+                        this[i, j] = this[i, j + nibble];
                 }   
             }
 
@@ -105,7 +108,7 @@ namespace bEmu.Systems.Chip8
 
                 for (int j = 0; j < 8; j++)
                 {
-                    bool pixel = Framebuffer[(coordX + j) % Width, coordY] == 0xFFFFFFFF;
+                    bool pixel = this[(coordX + j) % Width, coordY] == 0xFFFFFFFF;
                     originalSprite |= (byte) ((pixel ? 1 : 0) << (7 - j));
                 }
                 
@@ -117,7 +120,7 @@ namespace bEmu.Systems.Chip8
                 for (int j = 7; j >= 0; j--)
                 {
                     bool pixel = ((resultSprite & (0x1 << j)) >> j) == 1; 
-                    Framebuffer[(byte) ((coordX + (7 - j)) % Width), coordY] = pixel ? 0xFFFFFFFF : 0x000000FF;
+                    this[(byte) ((coordX + (7 - j)) % Width), coordY] = pixel ? 0xFFFFFFFF : 0x000000FF;
                 }
 
                 coordY++;
@@ -145,7 +148,7 @@ namespace bEmu.Systems.Chip8
 
                 for (int j = 0; j < 16; j++)
                 {
-                    bool pixel = Framebuffer[(coordX + j) % Width, coordY] == 0xFFFFFFFF;
+                    bool pixel = this[(coordX + j) % Width, coordY] == 0xFFFFFFFF;
                     originalSprite |= (ushort) ((pixel ? 1 : 0) << (15 - j));
                 }
                 
@@ -157,7 +160,7 @@ namespace bEmu.Systems.Chip8
                 for (int j = 15; j >= 0; j--)
                 {
                     bool pixel = ((resultSprite & (0x1 << j)) >> j) == 1; 
-                    Framebuffer[(byte) ((coordX + (15 - j)) % Width), coordY] = pixel ? 0xFFFFFFFF : 0x000000FF;
+                    this[(byte) ((coordX + (15 - j)) % Width), coordY] = pixel ? 0xFFFFFFFF : 0x000000FF;
                 }
 
                 coordY++;
@@ -172,9 +175,32 @@ namespace bEmu.Systems.Chip8
         {
             for (int i = 0; i < Width; i++)
                 for (int j = 0; j < Height; j++)
-                    Framebuffer[i, j] = 0x000000FF;
+                    this[i, j] = 0x000000FF;
 
             DrawNextTime();
+        }
+
+        private uint this[int x, int y]
+        {
+            get
+            {
+                if (((State) state).SuperChipMode)
+                    return Framebuffer[x, y];
+                else
+                    return Framebuffer[(x * 2) + 1, (y * 2) + 1];
+            }
+            set
+            {
+                if (((State) state).SuperChipMode)
+                    Framebuffer[x, y] = value;
+                else
+                {
+                    Framebuffer[(x * 2) + 0, (y * 2) + 0] = value;
+                    Framebuffer[(x * 2) + 1, (y * 2) + 0] = value;
+                    Framebuffer[(x * 2) + 0, (y * 2) + 1] = value;
+                    Framebuffer[(x * 2) + 1, (y * 2) + 1] = value;
+                }
+            }
         }
 
         public override void StepCycle() { }

@@ -7,6 +7,8 @@ namespace bEmu.Core.CPUs.LR35902
         where TState : State
         where TMMU : MMU
     {
+        const int CyclesInHalt = 12;
+
         public LR35902(ISystem system) : base(system) { }
 
         protected ushort GetNextWord()
@@ -137,15 +139,21 @@ namespace bEmu.Core.CPUs.LR35902
         public override IOpcode StepCycle()
         {
             State.Instructions++;
+            Opcode opcode;
 
             if (State.Halted)
             {
                 HandleInterrupts();
-                IncreaseCycles(8);
-                return default(Opcode);
+                IncreaseCycles(CyclesInHalt);
+                
+                opcode = new Opcode(0x00);
+                opcode.CyclesTaken = CyclesInHalt;
+
+                return opcode;
             }
 
-            var opcode = new Opcode(GetNextByte());
+            opcode = new Opcode(GetNextByte());
+            int cycles = State.Cycles;
 
             switch (opcode.Byte)
             {
@@ -408,6 +416,8 @@ namespace bEmu.Core.CPUs.LR35902
             }
 
             HandleInterrupts();
+        
+            opcode.CyclesTaken = State.Cycles - cycles;
 
             return opcode;
         }

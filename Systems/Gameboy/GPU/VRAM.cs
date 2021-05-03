@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace bEmu.Systems.Gameboy.GPU
 {
     public class VRAM
@@ -53,6 +55,9 @@ namespace bEmu.Systems.Gameboy.GPU
             get { return VBK ? Bank1[index] : Bank0[index]; }
             set 
             {
+                if (value == 4 && VBK && index == 0x1831)
+                    Debugger.Break();
+
                 if (VBK)
                     Bank1[index] = value;
                 else

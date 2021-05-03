@@ -9,7 +9,7 @@ namespace bEmu.Systems.Chip8
     {
         public State(ISystem system) : base(system) { }
         public byte[] V { get; set; }
-        public bool[] Keys { get; set; }
+        public bool[] Keys {get; set; }
         public ushort I { get; set; }
         public ushort[] Stack { get; set; }
         public byte Delay { get; set; }

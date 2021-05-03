@@ -24,8 +24,10 @@ namespace bEmu.Core
             byte2 = (byte) (opcode & 0xFF);
         }
 
-        public byte Byte { get { return byte1; } }
+        public byte Byte => byte1;
 
-        public ushort UShort { get { return BitUtils.GetWordFrom2Bytes(byte2, byte1); } }
+        public ushort UShort => BitUtils.GetWordFrom2Bytes(byte2, byte1);
+
+        public int CyclesTaken { get; set; }
     }
 }

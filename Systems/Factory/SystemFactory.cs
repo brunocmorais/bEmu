@@ -12,7 +12,7 @@ namespace bEmu.Systems.Factory
                 case SupportedSystems.Chip8:       return new Systems.Chip8.System(rom);
                 case SupportedSystems.GameBoy:     return new Systems.Gameboy.System(rom);
                 case SupportedSystems.Generic8080: return new Systems.Generic8080.System(rom);
-                default: throw new ArgumentException("Sistema não suportado.");
+                default:                           return new Systems.Empty.System(rom);
             }
         }
     }

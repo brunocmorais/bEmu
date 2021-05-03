@@ -11,6 +11,12 @@ namespace bEmu.Systems.Generic8080
 {
     public class System : Core.System
     {
+        private int lastInterrupt = 1;
+        public override int Width => 224;
+        public override int Height => 256;
+        public override int RefreshRate => 8;
+        public override int CycleCount => 34952;
+
         public System(string fileName) : base(fileName)
         {
         }
@@ -66,6 +72,9 @@ namespace bEmu.Systems.Generic8080
             MMU = new MMU(this);
             PPU = new PPU(this, 224, 256);
             Runner = new CPU(this);
+
+            ((Systems.Generic8080.State) State).UpdatePorts(1, 0x01);
+            ((Systems.Generic8080.State) State).UpdatePorts(2, 0x00);
         }
 
         public void SetStartPoint(ushort pc)
@@ -76,6 +85,54 @@ namespace bEmu.Systems.Generic8080
         public override void Reset()
         {
             base.Reset();
+        }
+
+        public override void Update()
+        {
+            var state = (Systems.Generic8080.State) State;
+
+            if (state.EnableInterrupts)
+            {
+                lastInterrupt = lastInterrupt == 1 ? 2 : 1;
+
+                if (lastInterrupt == 1)
+                    PPU.Frame++;
+
+                (Runner as CPU).GenerateInterrupt(lastInterrupt);
+            }
+
+            while (Cycles >= 0)
+            {
+                var opcode = Runner.StepCycle();
+                Cycles -= opcode.CyclesTaken;
+            }
+        }
+
+        public override void Stop()
+        {
+            
+        }
+
+        public override void UpdateGamePad(IGamePad gamePad)
+        {
+            byte read1 = 0;
+            
+            if (gamePad.IsKeyDown(GamePadKey.D5))
+                read1 = (byte) (read1 | (1 << 0));
+            
+            if (gamePad.IsKeyDown(GamePadKey.D1))
+                read1 = (byte) (read1 | (1 << 2));
+            
+            if (gamePad.IsKeyDown(GamePadKey.Space))
+                read1 = (byte) (read1 | (1 << 4));
+
+            if (gamePad.IsKeyDown(GamePadKey.Left))
+                read1 = (byte) (read1 | (1 << 5));
+
+            if (gamePad.IsKeyDown(GamePadKey.Right))
+                read1 = (byte) (read1 | (1 << 6));
+
+            ((State)State).UpdatePorts(1, read1);
         }
     }
 }
