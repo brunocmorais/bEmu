@@ -53,39 +53,14 @@ namespace bEmu.Systems.Gameboy
 
         public override void Update()
         {
-            MMU mmu = (MMU) MMU;
-            State state = (State) State;
-            GPU.GPU gpu = (GPU.GPU) PPU;
-
             while (Cycles >= 0)
             {
-                if (mmu.Bios.Running && state.PC == 0x100)
-                {
-                    mmu.Bios.Running = false;
-
-                    if ((mmu.CartridgeHeader.GBCFlag & 0x80) == 0x80) // set gameboy color mode
-                    {
-                        state.A = 0x11;
-                        GBCMode = true;
-                    }
-                }
-
                 var opcode = Runner.StepCycle();
-
-                int cyclesTaken = opcode.CyclesTaken;
-
-                if (DoubleSpeedMode)
-                    cyclesTaken /= 2;
-
-                state.Timer.UpdateTimers(cyclesTaken);
-
-                if (mmu.MBC is IHasRTC)
-                    (mmu.MBC as IHasRTC).Tick(cyclesTaken);
                 
-                gpu.Cycles += cyclesTaken;
-                gpu.StepCycle();
+                PPU.Cycles += opcode.CyclesTaken;
+                PPU.StepCycle();
 
-                Cycles -= cyclesTaken;
+                Cycles -= opcode.CyclesTaken;
             }
         }
 
