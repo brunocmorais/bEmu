@@ -48,6 +48,7 @@ namespace bEmu.Components
                 yield return new MenuOption(text, name, propType, (inc) => game.Options.SetOption(name, inc.Value));
             }
 
+            yield return new MenuOption("Debugger", (_) => game.Menu.OpenDebugger());
             yield return new MenuOption("Sobre", (_) => game.Menu.ShowAbout());
             yield return new MenuOption("Sair", (_) => game.StopGame());
         }

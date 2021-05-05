@@ -6,6 +6,8 @@ namespace bEmu.Components
 {
     public class AboutMenu : Menu
     {
+        const string Space = " ";
+        
         public AboutMenu(IMainGame game) : base(game)
         {
             IsSelectable = false;
@@ -15,12 +17,11 @@ namespace bEmu.Components
 
         public override IEnumerable<MenuOption> GetMenuOptions()
         {
-            const string space = " ";
-            yield return new MenuOption(space);
+            yield return new MenuOption(Space);
             yield return new MenuOption("Desenvolvido por");
-            yield return new MenuOption(space);
+            yield return new MenuOption(Space);
             yield return new MenuOption("Bruno Costa de Morais");
-            yield return new MenuOption(space);
+            yield return new MenuOption(Space);
             yield return new MenuOption("v1.0");
         }
     }

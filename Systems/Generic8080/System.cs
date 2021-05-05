@@ -87,8 +87,11 @@ namespace bEmu.Systems.Generic8080
             base.Reset();
         }
 
-        public override void Update()
+        public override bool Update()
         {
+            if (!base.Update())
+                return false;
+                
             var state = (Systems.Generic8080.State) State;
 
             if (state.EnableInterrupts)
@@ -103,9 +106,14 @@ namespace bEmu.Systems.Generic8080
 
             while (Cycles >= 0)
             {
+                if (!base.Update())
+                    return false;
+
                 var opcode = Runner.StepCycle();
                 Cycles -= opcode.CyclesTaken;
             }
+
+            return true;
         }
 
         public override void Stop()

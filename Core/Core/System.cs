@@ -10,6 +10,7 @@ namespace bEmu.Core
         public IMMU MMU { get; protected set; }
         public IPPU PPU { get; protected set; }
         public IAPU APU { get; protected set; }
+        public IDebugger Debugger { get; set; }
         public abstract int Width { get; }
         public abstract int Height { get; }
         public abstract int RefreshRate { get; }
@@ -57,7 +58,11 @@ namespace bEmu.Core
         }
 
         public abstract IState GetInitialState();
-        public abstract void Update();
+        public virtual bool Update()
+        {
+            return !(Debugger != null && (Debugger.IsStopped || (Debugger.BreakpointAddress > 0 && Debugger.BreakpointAddress == State.PC)));
+        }
+
         public abstract void Stop();
         public abstract void UpdateGamePad(IGamePad gamePad);
         public void ResetCycles()

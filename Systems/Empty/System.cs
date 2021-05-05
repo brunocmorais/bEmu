@@ -23,7 +23,10 @@ namespace bEmu.Systems.Empty
 
         public override void Stop() {}
 
-        public override void Update() {}
+        public override bool Update() 
+        {
+            return true;
+        }
 
         public override void UpdateGamePad(IGamePad gamePad) {}
 

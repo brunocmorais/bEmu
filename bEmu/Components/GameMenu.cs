@@ -49,6 +49,11 @@ namespace bEmu.Components
             Menus.Push(new AboutMenu(game));
         }
 
+        public void OpenDebugger()
+        {
+            Menus.Push(new DebuggerMenu(game));
+        }
+
         public void Update(GameTime gameTime)
         {
             bool menuRelatedKeyPressed = false;
@@ -57,26 +62,18 @@ namespace bEmu.Components
                 Current.Update(gameTime);
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.Escape)) // sair
-                game.StopGame();
-
-            if (KeyboardStateExtensions.HasBeenPressed(Keys.F3)) // reiniciar jogo
-                game.ResetGame();
-
-            if (KeyboardStateExtensions.HasBeenPressed(Keys.Back)) // voltar
-            {
-                menuRelatedKeyPressed = true;
-                game.Menu.CloseCurrentMenu();
-            }
-
-            if (KeyboardStateExtensions.HasBeenPressed(Keys.F1)) // abrir menu
             {
                 menuRelatedKeyPressed = true;
 
                 if (!game.Menu.IsOpen)
                     OpenMainMenu();
                 else
-                    game.Menu.CloseAll();
+                    game.Menu.CloseCurrentMenu();
             }
+
+            if (KeyboardStateExtensions.HasBeenPressed(Keys.F3)) // reiniciar jogo
+                game.ResetGame();
+
 
             if (menuRelatedKeyPressed && ((game.Menu.IsOpen && game.IsRunning) || (!game.Menu.IsOpen && !game.IsRunning)))
                 game.Pause();
