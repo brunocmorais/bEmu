@@ -27,9 +27,9 @@ namespace bEmu.Components
         {
             this.game = game;
             black = new Texture2D(game.GraphicsDevice, 1, 1);
-            black.SetData(new[] { Color.FromNonPremultiplied(0, 0, 0, 0xE0) });
+            black.SetData(new[] { Color.FromNonPremultiplied(0, 0, 0, 0xB0) });
             white = new Texture2D(game.GraphicsDevice, 1, 1);
-            white.SetData(new[] { Color.FromNonPremultiplied(0xFF, 0xFF, 0xFF, 0xE0) });
+            white.SetData(new[] { Color.FromNonPremultiplied(0xFF, 0xFF, 0xFF, 0xB0) });
             UpdateMenuOptions();
         }
 
@@ -45,7 +45,7 @@ namespace bEmu.Components
             Rectangle border = new Rectangle(10, 10, width - 20, height - 20);
             int screenHeight = border.Height - border.Y;
 
-            game.SpriteBatch.Draw(black, new Rectangle(0, 0, width, height), Color.Black);
+            game.SpriteBatch.Draw(black, new Rectangle(0, 0, width, height), Color.White);
             game.SpriteBatch.Draw(white, new Rectangle(border.Left, border.Top, 1, border.Height), Color.White);
             game.SpriteBatch.Draw(white, new Rectangle(border.Right, border.Top, 1, border.Height), Color.White);
             game.SpriteBatch.Draw(white, new Rectangle(border.Left, border.Top, border.Width, 1), Color.White);
@@ -77,8 +77,8 @@ namespace bEmu.Components
 
             for (int i = startItem; i < endItem; i++)
             {
-                var text = menuOptions.ElementAt(i).Description;
-                var textSize = game.Fonts.Regular.MeasureString(text);
+                var menuOption = menuOptions.ElementAt(i);
+                var textSize = game.Fonts.Regular.MeasureString(menuOption.Description);
                 y += textSize.Y + 2;
 
                 Color textColor = Color.White;
@@ -89,8 +89,20 @@ namespace bEmu.Components
                     textColor = Color.Black;
                 }
 
-                float x = (float)(width * 0.5 - (textSize.X / 2));
-                game.SpriteBatch.DrawString(game.Fonts.Regular, text, new Vector2(x, y), textColor);
+                float x;
+
+                switch (menuOption.MenuOptionAlignment)
+                {
+                    case MenuOptionAlignment.Center:
+                        x = (float)(width * 0.5 - (textSize.X / 2));
+                        break;
+                    case MenuOptionAlignment.Left:
+                    default:
+                        x = 20;
+                        break;
+                }
+
+                game.SpriteBatch.DrawString(game.Fonts.Regular, menuOption.Description, new Vector2(x, y), textColor);
             }
         }
 
@@ -117,7 +129,7 @@ namespace bEmu.Components
             this.height = game.GameSystem.System.Height * game.Options.Size;
         }
 
-        public void Update(GameTime gameTime)
+        public virtual void Update(GameTime gameTime)
         {
             var pressedKeys = KeyboardStateExtensions.GetPressedKeys();
             var option = menuOptions[selectedOption];

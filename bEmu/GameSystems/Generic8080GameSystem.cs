@@ -34,9 +34,9 @@ namespace bEmu.GameSystems
             (System as Systems.Generic8080.System).LoadZipFile(games);
         }
 
-        public override void Update()
+        public override void Update(GameTime gameTime)
         {
-            base.Update();
+            base.Update(gameTime);
             
             var state = (Systems.Generic8080.State) System.State;
             byte write3 = state.Ports.Write3;

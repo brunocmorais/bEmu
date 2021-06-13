@@ -95,12 +95,12 @@ namespace bEmu.Core.CPUs.LR35902
 
         public override string ToString()
         {
-            return " AF = " + AF.ToString("x").PadLeft(4, '0').ToUpper() +
-                   " BC = " + BC.ToString("x").PadLeft(4, '0').ToUpper() +
-                   " DE = " + DE.ToString("x").PadLeft(4, '0').ToUpper() +
-                   " HL = " + HL.ToString("x").PadLeft(4, '0').ToUpper() +
-                   " SP = " + SP.ToString("x").PadLeft(4, '0').ToUpper() +
-                   " PC = " + PC.ToString("x").PadLeft(4, '0').ToUpper();
+            return "\n AF = " + AF.ToString("x").PadLeft(4, '0').ToUpper() +
+                   "\n BC = " + BC.ToString("x").PadLeft(4, '0').ToUpper() +
+                   "\n DE = " + DE.ToString("x").PadLeft(4, '0').ToUpper() +
+                   "\n HL = " + HL.ToString("x").PadLeft(4, '0').ToUpper() +
+                   "\n SP = " + SP.ToString("x").PadLeft(4, '0').ToUpper() +
+                   "\n PC = " + PC.ToString("x").PadLeft(4, '0').ToUpper();
         }
 
         public override void Reset()

@@ -99,8 +99,11 @@ namespace bEmu.Systems.Chip8
             File.WriteAllBytes(SaveStateName, Enumerable.Concat(state, mmu).Concat(ppu).ToArray());
         }
 
-        public override void Update()
+        public override bool Update()
         {
+            if (!base.Update())
+                return false;
+                
             var state = (Systems.Chip8.State) State;
 
             if (state.Delay > 0)
@@ -114,6 +117,8 @@ namespace bEmu.Systems.Chip8
                 var opcode = Runner.StepCycle();
                 Cycles -= opcode.CyclesTaken;
             }
+
+            return true;
         }
 
         public override void Stop() { }

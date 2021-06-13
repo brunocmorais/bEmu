@@ -22,6 +22,11 @@ namespace bEmu.Extensions
             return currentKeyState.IsKeyDown(key) && !previousKeyState.IsKeyDown(key);
         }
 
+        public static bool HasBeenReleased(Keys key)
+        {
+            return !currentKeyState.IsKeyDown(key) && previousKeyState.IsKeyDown(key);
+        }
+
         public static Keys[] GetPressedKeys()
         {
             return currentKeyState.GetPressedKeys();

@@ -34,7 +34,7 @@ namespace bEmu.GameSystems
             System.MMU.LoadProgram(address);
         }
 
-        public virtual void Update() 
+        public virtual void Update(GameTime gameTime) 
         { 
             if (MainGame.IsRunning && System.PPU.Frame <= MainGame.LastRenderedFrame)
             {

@@ -51,17 +51,22 @@ namespace bEmu.Systems.Gameboy
             GBCMode = false;
         }
 
-        public override void Update()
-        {
+        public override bool Update()
+        {            
             while (Cycles >= 0)
             {
+                if (!base.Update())
+                    return false;
+                    
                 var opcode = Runner.StepCycle();
-                
+
                 PPU.Cycles += opcode.CyclesTaken;
                 PPU.StepCycle();
 
                 Cycles -= opcode.CyclesTaken;
             }
+
+            return true;
         }
 
         public override void Stop()

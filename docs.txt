@@ -9,6 +9,7 @@ https://gekkio.fi/files/gb-docs/gbctr.pdf
 https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf
 https://github.com/geaz/emu-gameboy/blob/master/src/hardware/audio/apu.cpp
 https://gist.github.com/drhelius/3398793
+https://github.com/frestr/gbs_player/blob/master/src/gbs_reader.cpp
 
 LCDC bit 7: habilita ou desabilita LCD
 

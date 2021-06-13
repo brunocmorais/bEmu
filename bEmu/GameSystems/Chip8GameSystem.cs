@@ -1,6 +1,7 @@
 using bEmu.Classes;
 using bEmu.Components;
 using bEmu.Systems;
+using Microsoft.Xna.Framework;
 
 namespace bEmu.GameSystems
 {
@@ -20,9 +21,9 @@ namespace bEmu.GameSystems
             base.Initialize(0x200);
         }
 
-        public override void Update()
+        public override void Update(GameTime gameTime)
         {
-            base.Update();
+            base.Update(gameTime);
             var state = (Systems.Chip8.State) System.State;
 
             if (state.Sound == 0)
