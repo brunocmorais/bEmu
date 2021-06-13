@@ -5,6 +5,7 @@ using bEmu.Core;
 using bEmu.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System.Globalization;
 
 namespace bEmu.Components
 {
@@ -38,6 +39,7 @@ namespace bEmu.Components
         {
             base.Update(gameTime);
             string lastCommand = command;
+            bool executedCommand = false;
             
             foreach (var key in validKeys)
             {
@@ -54,6 +56,7 @@ namespace bEmu.Components
                             break;
                         case Keys.Enter:
                             ExecuteCommand();
+                            executedCommand = true;
                             break;
                         default: 
                             string text = key.ToString().ToLower();
@@ -63,7 +66,7 @@ namespace bEmu.Components
                 }
             }
 
-            if (lastCommand != command)
+            if (lastCommand != command || executedCommand)
                 UpdateMenuOptions();
         }
 
@@ -79,22 +82,68 @@ namespace bEmu.Components
             switch (commandParts[0])
             {
                 case "reg":
-                    AddLine(Debugger.PrintRegisters());
+                    if (game.IsRunning)
+                        GameIsRunning();
+                    else
+                        AddLine(Debugger.PrintRegisters());
                     break;
                 case "print":
-                    AddLine(Debugger.GetRegisterValue(commandParts[1]));
+                    if (game.IsRunning)
+                        GameIsRunning();
+                    else
+                        AddLine(Debugger.GetRegisterValue(commandParts[1]));
                     break;
                 case "cls":
                     items.Clear();
                     break;
                 case "listreg":
-                    AddLine(string.Join('\n', Debugger.GetRegisters().Select(x => x.Name)));
+                    if (game.IsRunning)
+                        GameIsRunning();
+                    else
+                        AddLine(string.Join('\n', Debugger.GetRegisters().Select(x => x.Name)));
                     break;
                 case "help":
                     AddLine(PrintHelp());
                     break;
                 case "quit":
                     game.Menu.CloseCurrentMenu();
+                    break;
+                case "go":
+                    if (!game.IsRunning)
+                        game.Pause();
+                    break;
+                case "stop":
+                    if (game.IsRunning)
+                        game.Pause();
+                    break;
+                case "m1":
+                    if (game.IsRunning)
+                        GameIsRunning();
+                    else
+                    {
+                        byte value = Debugger.GetByteFromMemoryAddress(int.Parse(commandParts[1], NumberStyles.HexNumber));
+                        AddLine(value.ToString("x"));
+                    }
+                    break;
+                case "m2":
+                    if (game.IsRunning)
+                        GameIsRunning();
+                    else
+                    {
+                        ushort value = Debugger.GetWordFromMemoryAddress(int.Parse(commandParts[1], NumberStyles.HexNumber));
+                        AddLine(value.ToString("x"));
+                    }
+                    break;
+                case "sm1":
+                    if (game.IsRunning)
+                        GameIsRunning();
+                    else
+                    {
+                        int address = int.Parse(commandParts[1], NumberStyles.HexNumber);
+                        byte value = byte.Parse(commandParts[2], NumberStyles.HexNumber);
+                        Debugger.SetByteToMemoryAddress(address, value);
+                        AddLine("Endereço " + address.ToString("x") + " definido com o valor " + value.ToString("x"));
+                    }
                     break;
                 default:
                     AddLine("Comando inválido: " + commandParts[0]);
@@ -103,6 +152,11 @@ namespace bEmu.Components
 
             command = string.Empty;
             selectedOption = items.Count;
+        }
+
+        private void GameIsRunning()
+        {
+            AddLine("Jogo está rodando.");
         }
 
         public string PrintHelp()
@@ -121,6 +175,7 @@ cbr - limpar breakpoint
 abr <xxxx> - setar breakpoint de acesso em <xxxx>
 cabr - limpar breakpoint de acesso
 go - continuar execução
+stop - parar execução
 m1 <xxxx> - obter byte da memória em <xxxx>
 sm1 <xxxx> <yy> - setar endereço <xxxx> com o byte <yy>
 m2 <xxxx> - obter word da memória em <xxxx>
@@ -130,7 +185,7 @@ sm2 <xxxx> <yyyy> - setar endereço <xxxx> com a word <yyyy>";
         public void AddLine(string text)
         {
             foreach (var line in text.Split("\n"))
-                items.Add(new MenuOption(line, MenuOptionAlignment.Left));
+                items.Add(new MenuOption(line, line, typeof(int), (x) => {}, MenuOptionAlignment.Left));
         }
 
         public override IEnumerable<MenuOption> GetMenuOptions()
@@ -138,7 +193,7 @@ sm2 <xxxx> <yyyy> - setar endereço <xxxx> com a word <yyyy>";
             foreach (var item in items)
                 yield return item;
 
-            yield return new MenuOption(CommandMarker + command, MenuOptionAlignment.Left);
+            yield return new MenuOption(CommandMarker + command, CommandMarker + command, typeof(int), (x) => {}, MenuOptionAlignment.Left);
         }
     }
 }

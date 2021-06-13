@@ -27,9 +27,9 @@ namespace bEmu.Components
         {
             this.game = game;
             black = new Texture2D(game.GraphicsDevice, 1, 1);
-            black.SetData(new[] { Color.FromNonPremultiplied(0, 0, 0, 0xE0) });
+            black.SetData(new[] { Color.FromNonPremultiplied(0, 0, 0, 0xB0) });
             white = new Texture2D(game.GraphicsDevice, 1, 1);
-            white.SetData(new[] { Color.FromNonPremultiplied(0xFF, 0xFF, 0xFF, 0xE0) });
+            white.SetData(new[] { Color.FromNonPremultiplied(0xFF, 0xFF, 0xFF, 0xB0) });
             UpdateMenuOptions();
         }
 
@@ -45,7 +45,7 @@ namespace bEmu.Components
             Rectangle border = new Rectangle(10, 10, width - 20, height - 20);
             int screenHeight = border.Height - border.Y;
 
-            game.SpriteBatch.Draw(black, new Rectangle(0, 0, width, height), Color.Black);
+            game.SpriteBatch.Draw(black, new Rectangle(0, 0, width, height), Color.White);
             game.SpriteBatch.Draw(white, new Rectangle(border.Left, border.Top, 1, border.Height), Color.White);
             game.SpriteBatch.Draw(white, new Rectangle(border.Right, border.Top, 1, border.Height), Color.White);
             game.SpriteBatch.Draw(white, new Rectangle(border.Left, border.Top, border.Width, 1), Color.White);

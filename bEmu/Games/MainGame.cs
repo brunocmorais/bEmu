@@ -104,10 +104,12 @@ namespace bEmu
 
             Menu.Update(gameTime);
 
-            UpdateGamePad(keyboardState);
+            if (!Menu.IsOpen)
+                UpdateGamePad(keyboardState);
+                
             UpdateMessages();
 
-            GameSystem.Update();
+            GameSystem.Update(gameTime);
         }
 
         public void Pause()
@@ -137,9 +139,9 @@ namespace bEmu
                     BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
                     LastRenderedFrame = GameSystem.System.PPU.Frame;
                 }
-
-                SpriteBatch.Draw(BackBuffer, destinationRectangle, Color.White);
             }
+
+            SpriteBatch.Draw(BackBuffer, destinationRectangle, Color.White);
 
             if (Menu.IsOpen)
                 Menu.Current.Draw();

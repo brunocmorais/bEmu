@@ -12,7 +12,7 @@ namespace bEmu.GameSystems
         ISystem System { get; }
         SupportedSystems Type { get; }
         void Initialize(int address);
-        void Update();
+        void Update(GameTime gameTime);
         void UpdateGamePad(KeyboardState keyboardState);
         void StopGame();
     }
