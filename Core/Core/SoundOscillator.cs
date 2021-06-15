@@ -24,7 +24,7 @@ namespace bEmu.Core
         public double GenerateCustomWave(byte[] bytes, double time, double frequency, double amplitude)
         {
             var angle = frequency * time;
-            return ((float) bytes[(int)((angle - (int) angle) * bytes.Length)] / (0xF)) * amplitude;
+            return ((float) bytes[(int)((angle - (int) angle) * bytes.Length)] / (0xF)) * amplitude * 2;
         }
     }
 }

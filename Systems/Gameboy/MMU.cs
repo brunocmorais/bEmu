@@ -97,6 +97,14 @@ namespace bEmu.Systems.Gameboy
         {
             if (addr == 0xFF00) // joypad
                 Joypad.SetJoypadColumn(value);
+            else if (addr == 0xFF11) // sound length Channel1
+                (System.APU as Gameboy.Sound.APU).Channel1.StartSound();
+            else if (addr == 0xFF16) // sound length Channel2
+                (System.APU as Gameboy.Sound.APU).Channel2.StartSound();
+            else if (addr == 0xFF1B) // sound length Channel3
+                (System.APU as Gameboy.Sound.APU).Channel3.StartSound();
+            else if (addr == 0xFF20)
+                (System.APU as Gameboy.Sound.APU).Channel4.StartSound();
             else if (addr == 0xFF04) // DIV timer
                 IO[addr - 0xFF00] = 0;
             else if (addr == 0xFF44) // registrador LY 
