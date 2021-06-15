@@ -12,6 +12,7 @@ using bEmu.Core.Factory;
 using bEmu.Systems;
 using bEmu.GameSystems;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework.Audio;
 
 namespace bEmu
 {
@@ -30,6 +31,7 @@ namespace bEmu
         public IScaler Scaler { get; private set; }
         public IGameSystem GameSystem { get; private set; }
         public int LastRenderedFrame { get; private set; }
+        public DynamicSoundEffectInstance Sound { get; private set; }
         private GraphicsDeviceManager graphics;
         private Rectangle destinationRectangle;
 
@@ -40,6 +42,7 @@ namespace bEmu
             IsMouseVisible = true;
             IsRunning = false;
             DrawCounter = 0;
+            Sound = new DynamicSoundEffectInstance(22050, AudioChannels.Stereo);
         }
 
         protected override void LoadContent()
@@ -95,6 +98,7 @@ namespace bEmu
             GameSystem.System.PPU.Frame = 0;
             LastRenderedFrame = 0;
             DrawCounter = 0;
+            Sound.Play();
         }
 
         protected override void Update(GameTime gameTime)

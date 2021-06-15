@@ -42,6 +42,9 @@ namespace bEmu.GameSystems
                     System.ResetCycles();
 
                 System.Update();
+                
+                while (MainGame.Sound.PendingBufferCount < 3)
+                    MainGame.Sound.SubmitBuffer(System.APU.UpdateBuffer());
             }
         }
 

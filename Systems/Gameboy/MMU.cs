@@ -22,6 +22,7 @@ namespace bEmu.Systems.Gameboy
         public ColorPaletteData ColorPaletteData { get; private set; }
         public MonochromePaletteData MonochromePaletteData { get; private set; }
         public Joypad Joypad { get; set; }
+        private Sound.APU APU => (System.APU as Gameboy.Sound.APU);
 
         public MMU(ISystem system) : base(system, 0x10000)
         {
@@ -98,13 +99,13 @@ namespace bEmu.Systems.Gameboy
             if (addr == 0xFF00) // joypad
                 Joypad.SetJoypadColumn(value);
             else if (addr == 0xFF11) // sound length Channel1
-                (System.APU as Gameboy.Sound.APU).Channel1.StartSound();
+                APU.StartSound(Sound.GbSoundChannels.Channel1);
             else if (addr == 0xFF16) // sound length Channel2
-                (System.APU as Gameboy.Sound.APU).Channel2.StartSound();
+                APU.StartSound(Sound.GbSoundChannels.Channel2);
             else if (addr == 0xFF1B) // sound length Channel3
-                (System.APU as Gameboy.Sound.APU).Channel3.StartSound();
-            else if (addr == 0xFF20)
-                (System.APU as Gameboy.Sound.APU).Channel4.StartSound();
+                APU.StartSound(Sound.GbSoundChannels.Channel3);
+            else if (addr == 0xFF20) // sound length Channel4
+                APU.StartSound(Sound.GbSoundChannels.Channel4);
             else if (addr == 0xFF04) // DIV timer
                 IO[addr - 0xFF00] = 0;
             else if (addr == 0xFF44) // registrador LY 
