@@ -8,7 +8,7 @@ namespace bEmu.Systems.Gameboy.Sound
         public MMU MMU { get; }
         public SoundOscillator Oscillator { get; }
         private byte[] wavePattern = new byte[32];
-        private double timeToEnd = 0;
+        private int cycleToEnd = 0;
 
         public Channel3(APU apu)
         {
@@ -61,15 +61,12 @@ namespace bEmu.Systems.Gameboy.Sound
 
         public void StartSound()
         {
-            timeToEnd = APU.Time + SoundLength;
+            cycleToEnd = (int) (APU.Cycles + (SoundLength * APU.CycleCount));
         }
 
-        public float GenerateWave(double time)
+        public float GenerateWave(int currentCycle)
         {
-            // if (time > timeToEnd)
-            //     amplitude = 0f;
-
-            return (float) Oscillator.GenerateCustomWave(WavePattern, time, Frequency, 0.25f);
+            return (float) Oscillator.GenerateCustomWave(WavePattern, APU.Time, Frequency, 0.25f);
         }
     }
 }

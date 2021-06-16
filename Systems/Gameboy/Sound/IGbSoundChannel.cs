@@ -5,7 +5,7 @@ namespace bEmu.Systems.Gameboy.Sound
     public interface IGBSoundChannel
     {
         void StartSound();
-        float GenerateWave(double time);
+        float GenerateWave(int currentCycle);
         float SoundLength { get; }
         byte Volume { get; }
         APU APU { get; }

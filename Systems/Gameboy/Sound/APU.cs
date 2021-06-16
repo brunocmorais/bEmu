@@ -6,10 +6,15 @@ namespace bEmu.Systems.Gameboy.Sound
     public class APU : Core.APU
     {
         private byte[] buffer;
-        public override int BufferSize => 3172;
+        public override int BufferSize => 2048;
         public override int SampleRate => 22050;
         public double Time { get; private set; }
         public IGBSoundChannel[] Channels { get; }
+        public int CycleCount => System.CycleCount * 60;
+        public int Cycles { get; private set; }
+        public int VolumeSO1 => System.MMU[0xFF24] & 0x7;
+        public int VolumeSO2 => (System.MMU[0xFF24] & 0x70) >> 4;
+        public bool SoundOn => (System.MMU[0xFF26] & 0x80) == 0x80;
 
         public APU(ISystem system) : base(system)
         {
@@ -24,21 +29,38 @@ namespace bEmu.Systems.Gameboy.Sound
             Time = 0;
         }
 
+        public override void Update(int lastCycleCount)
+        {
+            Cycles += lastCycleCount;
+        }
+
         public override byte[] UpdateBuffer()
         {
             for (int i = 0; i < BufferSize; i += 4)
             {
-                float channelSum = 0;
+                float leftChannel = 0, rightChannel = 0;
 
-                foreach (var channel in Channels)
-                    channelSum += channel.GenerateWave(Time);
+                if (SoundOn)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        float wave = Channels[j].GenerateWave(Cycles);
+
+                        if (OutputChannelTo(1, j + 1))
+                            rightChannel += wave * (VolumeSO1 / 7f);
+                        
+                        if (OutputChannelTo(2, j + 1))
+                            leftChannel += wave * (VolumeSO2 / 7f);
+                    }
+                }
                 
-                byte value = (byte)(channelSum * sbyte.MaxValue);
+                byte leftValue = (byte)(leftChannel * sbyte.MaxValue);
+                byte rightValue = (byte)(rightChannel * sbyte.MaxValue);
                 
-                buffer[i] = value;
-                buffer[i + 1] = value;
-                buffer[i + 2] = value;
-                buffer[i + 3] = value;
+                buffer[i] = leftValue;
+                buffer[i + 1] = leftValue;
+                buffer[i + 2] = rightValue;
+                buffer[i + 3] = rightValue;
                 
                 Time += 1.0f / SampleRate;
             }
@@ -54,6 +76,20 @@ namespace bEmu.Systems.Gameboy.Sound
                 case GbSoundChannels.Channel2: Channels[1].StartSound(); break;
                 case GbSoundChannels.Channel3: Channels[2].StartSound(); break;
                 case GbSoundChannels.Channel4: Channels[3].StartSound(); break;
+            }
+        }
+
+        public bool OutputChannelTo(int terminal, int channel)
+        {
+            int mask = terminal == 1 ? 0x1 : 0x10;
+
+            switch (channel)
+            {
+                case 1: return (System.MMU[0xFF25] & mask) == (mask);
+                case 2: return (System.MMU[0xFF25] & mask << 1) == (mask << 1);
+                case 3: return (System.MMU[0xFF25] & mask << 2) == (mask << 2);
+                case 4: return (System.MMU[0xFF25] & mask << 3) == (mask << 3);
+                default: return false;
             }
         }
     }

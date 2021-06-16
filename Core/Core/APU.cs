@@ -7,6 +7,7 @@ namespace bEmu.Core
         public ISystem System { get; }
 
         public abstract byte[] UpdateBuffer();
+        public abstract void Update(int cycles);
 
         public APU(ISystem system)
         {

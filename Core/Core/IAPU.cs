@@ -6,5 +6,6 @@ namespace bEmu.Core
         int SampleRate { get; }
         ISystem System { get; }
         byte[] UpdateBuffer();
+        void Update(int cycles);
     }
 }
