@@ -15,8 +15,6 @@ namespace bEmu.Factory
                     return new Generic8080GameSystem(game, rom);
                 case SupportedSystems.GameBoy:
                     return new GameboyGameSystem(game, rom);
-                case SupportedSystems.Test:
-                    return new TestGameSystem(game, rom);
                 default:
                     return GetEmptyGameSystem(game);
             }

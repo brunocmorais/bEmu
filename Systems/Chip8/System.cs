@@ -49,6 +49,7 @@ namespace bEmu.Systems.Chip8
             SetChip8Mode();
             PPU = new PPU((State) State, Width, Height);
             Runner = new Core.VMs.Chip8.Chip8(this);
+            APU = new APU(this);
             InitializeBIOS();
         }
 

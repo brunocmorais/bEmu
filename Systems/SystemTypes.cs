@@ -9,7 +9,6 @@ namespace bEmu.Systems
         [Description("CHIP-8")]
         Chip8 = 2,
         [Description("GameBoy / GameBoy Color")]
-        GameBoy = 3,
-        Test = 4
+        GameBoy = 3
     }
 }

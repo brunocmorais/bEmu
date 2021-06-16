@@ -64,6 +64,7 @@ namespace bEmu.Systems.Gameboy
                 PPU.StepCycle();
 
                 Cycles -= opcode.CyclesTaken;
+                APU.Update(opcode.CyclesTaken);
             }
 
             return true;

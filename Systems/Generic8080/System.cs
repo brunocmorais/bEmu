@@ -72,6 +72,7 @@ namespace bEmu.Systems.Generic8080
             MMU = new MMU(this);
             PPU = new PPU(this, 224, 256);
             Runner = new CPU(this);
+            APU = new APU(this);
 
             ((Systems.Generic8080.State) State).UpdatePorts(1, 0x01);
             ((Systems.Generic8080.State) State).UpdatePorts(2, 0x00);
