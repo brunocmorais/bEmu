@@ -15,6 +15,7 @@ namespace bEmu.Core
         public abstract int Height { get; }
         public abstract int RefreshRate { get; }
         public abstract int CycleCount { get; }
+        public abstract int StartAddress { get; }
         public string FileName { get; set; }
         public string SaveFileName => FileNameWithoutExtension + ".sav";
         public string SaveStateName => FileNameWithoutExtension + ".state";

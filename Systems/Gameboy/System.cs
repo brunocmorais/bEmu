@@ -16,6 +16,7 @@ namespace bEmu.Systems.Gameboy
         public override int Height => 144;
         public override int RefreshRate => 16;
         public override int CycleCount => 69905;
+        public override int StartAddress => 0;
 
         public System(string fileName) : base(fileName)
         {

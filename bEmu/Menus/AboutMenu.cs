@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using bEmu.Components;
 
-namespace bEmu.Components
+namespace bEmu.Menus
 {
     public class AboutMenu : Menu
     {

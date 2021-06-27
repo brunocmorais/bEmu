@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using bEmu.Components;
 using Microsoft.Xna.Framework;
 
-namespace bEmu.Components
+namespace bEmu.Menus
 {
-    public interface IMenu : IDrawable
+    public interface IMenu : Components.IDrawable
     {
         string Title { get; }
         IEnumerable<MenuOption> GetMenuOptions();

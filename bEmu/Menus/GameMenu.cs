@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using bEmu.Components;
 using bEmu.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace bEmu.Components
+namespace bEmu.Menus
 {
     public class GameMenu
     {

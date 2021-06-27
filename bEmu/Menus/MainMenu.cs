@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using bEmu.Classes;
+using bEmu.Components;
 using bEmu.Core.Extensions;
 using bEmu.Systems;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
-namespace bEmu.Components
+namespace bEmu.Menus
 {
     public class MainMenu : Menu
     {
@@ -72,7 +69,7 @@ namespace bEmu.Components
 
         private void SelectSystem(string file)
         {
-            game.Menu.OpenMenu(new EnumSelectorMenu<SupportedSystems>(game, (system) => game.LoadGame(system, file)));
+            game.Menu.OpenMenu(new EnumSelectorMenu<SupportedSystems>(game, (system) => game.LoadSystem(system, file)));
         }
     }
 }

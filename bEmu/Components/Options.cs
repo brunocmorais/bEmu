@@ -73,15 +73,7 @@ namespace bEmu.Components
                     property.SetValue(this, currentValue + (increment ? 1 : -1));
             }
 
-            OnOptionChanged(new OnOptionChangedEventArgs() { Property = property.Name });
-        }
-
-        protected virtual void OnOptionChanged(OnOptionChangedEventArgs e)
-        {
-            EventHandler<OnOptionChangedEventArgs> handler = OptionChanged;
-
-            if (handler != null)
-                handler(this, e);
+            OptionChanged(this, new OnOptionChangedEventArgs() { Property = property.Name });
         }
 
         public virtual void OptionChangedEvent(object sender, OnOptionChangedEventArgs e)
@@ -96,7 +88,7 @@ namespace bEmu.Components
 
                     break;
                 case "Frameskip":
-                    Game.GameSystem.System.PPU.Frameskip = Frameskip;
+                    Game.System.PPU.Frameskip = Frameskip;
                     break;
                 case "Scaler":
                     Game.SetScaler();

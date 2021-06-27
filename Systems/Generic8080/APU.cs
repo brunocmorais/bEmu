@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using bEmu.Core;
+using bEmu.Core.Util;
 
 namespace bEmu.Systems.Generic8080
 {
@@ -21,8 +22,7 @@ namespace bEmu.Systems.Generic8080
 
         public APU(ISystem system) : base(system)
         {
-            string assetFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), 
-                Generic8080.System.AssetFolder);
+            string assetFolder = Path.Combine(Infrastructure.GetProgramLocation(), Generic8080.System.AssetFolder);
             shot = new Sound(Path.Combine(assetFolder, "shot.wav"));
             invaderDie = new Sound(Path.Combine(assetFolder, "invader_die.wav"));
             explosion = new Sound(Path.Combine(assetFolder, "explosion.wav"));

@@ -23,7 +23,7 @@ namespace bEmu.Classes
             switch (e.Property)
             {
                 case "PaletteType":
-                    var system = (Game.GameSystem.System as Systems.Gameboy.System);
+                    var system = (Game.System as Systems.Gameboy.System);
                     system.ColorPalette = ColorPaletteFactory.Get(PaletteType);
                     break;
             }

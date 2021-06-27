@@ -35,12 +35,12 @@ namespace bEmu.Core
                 throw new ArgumentException($"Tentativa de acessar endereço 0x{index.ToString("x")} em uma memória de tamanho 0x{ram.LongLength.ToString("x")}.");
         }
 
-        public virtual void LoadProgram(int startAddress = 0)
+        public virtual void LoadProgram()
         {
             if (!string.IsNullOrWhiteSpace(System.FileName))
             {
                 byte[] bytes = File.ReadAllBytes(System.FileName);
-                LoadProgram(bytes, startAddress);
+                LoadProgram(bytes, System.StartAddress);
             }
         }
 

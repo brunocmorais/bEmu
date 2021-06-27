@@ -1,15 +1,9 @@
 using System;
-using System.Collections.Generic;
-using bEmu.Classes;
 using bEmu.Components;
-using bEmu.Core;
-using bEmu.GameSystems;
 using bEmu.Systems;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Audio;
+using bEmu.Core;
+using bEmu.Menus;
 
 namespace bEmu
 {
@@ -18,18 +12,13 @@ namespace bEmu
         Options Options { get; set; }
         GameMenu Menu { get; }
         GraphicsDevice GraphicsDevice { get; }
-        ContentManager Content { get; }
-        int DrawCounter { get; }
-        IGameSystem GameSystem { get; }
-        Texture2D BackBuffer { get; set; }
         OSD Osd { get; }
         SpriteBatch SpriteBatch { get; }
         Fonts Fonts { get; }
         bool IsRunning { get; set; }
-        int LastRenderedFrame { get; }
-        DynamicSoundEffectInstance Sound { get; }
+        ISystem System { get; }
 
-        void LoadGame(SupportedSystems system, string file);
+        void LoadSystem(SupportedSystems system, string file);
         void StopGame();
         void ResetGame();
         void LoadState();

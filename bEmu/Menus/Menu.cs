@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using bEmu.Classes;
+using bEmu.Components;
 using bEmu.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace bEmu.Components
+namespace bEmu.Menus
 {
 
     public abstract class Menu : IMenu
@@ -125,8 +126,8 @@ namespace bEmu.Components
 
         protected void UpdateSize()
         {
-            this.width = game.GameSystem.System.Width * game.Options.Size;
-            this.height = game.GameSystem.System.Height * game.Options.Size;
+            this.width = game.System.Width * game.Options.Size;
+            this.height = game.System.Height * game.Options.Size;
         }
 
         public virtual void Update(GameTime gameTime)

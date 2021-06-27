@@ -6,7 +6,7 @@ namespace bEmu.Core
     {
         ISystem System { get; }
         byte this[int addr] { get; set; }
-        void LoadProgram(int startAddress = 0);
+        void LoadProgram();
         void LoadProgram(byte[] bytes, int startAddress = 0);
         int Length { get; }
     }

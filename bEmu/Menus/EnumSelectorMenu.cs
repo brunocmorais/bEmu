@@ -5,8 +5,9 @@ using bEmu.Systems;
 using Microsoft.Xna.Framework.Graphics;
 using System.Linq;
 using bEmu.Core.Extensions;
+using bEmu.Components;
 
-namespace bEmu.Components
+namespace bEmu.Menus
 {
     public class EnumSelectorMenu<T> : Menu where T : Enum
     {

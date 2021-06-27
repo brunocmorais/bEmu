@@ -1,39 +1,40 @@
 using System;
-using System.Threading;
 using bEmu.Classes;
 using bEmu.Components;
 using bEmu.Extensions;
-using bEmu.Factory;
 using bEmu.Core.Scalers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using bEmu.Core.Factory;
 using bEmu.Systems;
-using bEmu.GameSystems;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Audio;
+using bEmu.Core;
+using bEmu.Systems.Factory;
+using bEmu.Menus;
 
 namespace bEmu
 {
 
     public class MainGame : Game, IMainGame
     {
-        public SpriteBatch SpriteBatch { get; private set; }
-        public Fonts Fonts { get; private set; }
-        public OSD Osd { get; private set; }
-        public GameMenu Menu { get; private set; }
-        public Texture2D BackBuffer { get; set; }
-        public int DrawCounter { get; private set; }
-        public bool IsRunning { get; set; }
-        public Options Options { get; set; }
-        public DateTime LastStartDate { get; private set; }
-        public IScaler Scaler { get; private set; }
-        public IGameSystem GameSystem { get; private set; }
-        public int LastRenderedFrame { get; private set; }
-        public DynamicSoundEffectInstance Sound { get; private set; }
         private GraphicsDeviceManager graphics;
         private Rectangle destinationRectangle;
+        private IGamePad gamePad;
+        private DateTime lastStartDate;
+        private IScaler scaler;
+        private int lastRenderedFrame;
+        private DynamicSoundEffectInstance sound;
+        private Texture2D backBuffer;
+        private int drawCounter;
+        private SupportedSystems type;
+        public SpriteBatch SpriteBatch { get; set; }
+        public Fonts Fonts { get; set; }
+        public OSD Osd { get; set; }
+        public GameMenu Menu { get; set; }
+        public bool IsRunning { get; set; }
+        public Options Options { get; set; }
+        public ISystem System { get; set; }
 
         public MainGame()
         {
@@ -41,8 +42,9 @@ namespace bEmu
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             IsRunning = false;
-            DrawCounter = 0;
-            Sound = new DynamicSoundEffectInstance(22050, AudioChannels.Stereo);
+            drawCounter = 0;
+            sound = new DynamicSoundEffectInstance(22050, AudioChannels.Stereo);
+            gamePad = new Core.GamePad();
         }
 
         protected override void LoadContent()
@@ -53,27 +55,58 @@ namespace bEmu
             SpriteBatch = new SpriteBatch(GraphicsDevice);
             Osd = new OSD(this);
 
-            LoadGameSystem(GameSystemFactory.GetEmptyGameSystem(this));
+            LoadSystem(0, string.Empty);
             
             Menu = new GameMenu(this);
             Menu.OpenMainMenu();
         }
 
-        private void LoadGameSystem(IGameSystem gameSystem)
+        public void LoadSystem(SupportedSystems system, string file)
         {
-            GameSystem = gameSystem;
-            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, GameSystem.System.RefreshRate);
+            this.type = system;
+            Options options = new Options(this);
+
+            switch (system)
+            {
+                case SupportedSystems.Chip8:
+                    options.Size = 5;
+                    break;
+                case SupportedSystems.Generic8080:
+                    options.Size = 2;
+                    break;
+                case SupportedSystems.GameBoy:
+                    options = new GameboyOptions(this, options);
+
+                    if (options.Size < 2) 
+                        options.Size = 2;
+                    
+                    break;
+                default:
+                    options.Size = 1;
+                    break;
+            }
+
+            System = SystemFactory.Get(type, file);
+            Options = options;
+
+            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, System.RefreshRate);
 
             SetScaler();
             SetScreenSize(); 
 
-            GameSystem.Initialize(0);
+            System.MMU.LoadProgram();
+
+            if (type != 0)
+            {
+                Menu.CloseAll();
+                Start();
+            }
         }
 
         public void SetScreenSize()
         {
-            int width = GameSystem.System.Width * Options.Size;
-            int height = GameSystem.System.Height * Options.Size;
+            int width = System.Width * Options.Size;
+            int height = System.Height * Options.Size;
             
             graphics.PreferredBackBufferWidth = width;
             graphics.PreferredBackBufferHeight = height;
@@ -82,23 +115,16 @@ namespace bEmu
             graphics.ApplyChanges();
         }
 
-        public void LoadGame(SupportedSystems system, string file)
-        {
-            LoadGameSystem(GameSystemFactory.Get(system, this, file));
-            Menu.CloseAll();
-            Start();
-        }
-
         private void Start()
         {
             IsRunning = true;
-            LastStartDate = DateTime.Now;
-            GameSystem.System.PPU.Frame = 0;
-            LastRenderedFrame = 0;
-            DrawCounter = 0;
+            lastStartDate = DateTime.Now;
+            System.PPU.Frame = 0;
+            lastRenderedFrame = 0;
+            drawCounter = 0;
 
             if (Options.EnableSound)
-                Sound.Play();
+                sound.Play();
         }
 
         protected override void Update(GameTime gameTime)
@@ -109,11 +135,34 @@ namespace bEmu
             Menu.Update(gameTime);
 
             if (!Menu.IsOpen)
-                UpdateGamePad(keyboardState);
-                
-            UpdateMessages();
+            {
+                gamePad.Reset();
+                gamePad.AddPressedKeys(KeyboardStateExtensions.GetPressedGamePadKeys());
 
-            GameSystem.Update(gameTime);
+                System.UpdateGamePad(gamePad);
+            }
+                
+            Osd.Update();
+
+            if (Options.ShowFPS && IsRunning)
+            {
+                var fps = Math.Round(System.PPU.Frame / (DateTime.Now - lastStartDate).TotalSeconds, 1);
+                Osd.UpdateMessage(MessageType.FPS, $"{fps:0.0} fps");
+            }
+
+            if (IsRunning && System.PPU.Frame <= lastRenderedFrame)
+            {
+                if (System.Cycles < 0)
+                    System.ResetCycles();
+
+                System.Update();
+                
+                while (sound.PendingBufferCount < 3)
+                {
+                    System.APU.UpdateBuffer();
+                    sound.SubmitBuffer(System.APU.Buffer);
+                }
+            }
         }
 
         public void Pause()
@@ -128,24 +177,24 @@ namespace bEmu
         {
             GraphicsDevice.Clear(Color.Black);
 
-            if (BackBuffer == null)
+            if (backBuffer == null)
                 return;
 
             SpriteBatch.Begin();
 
             if (IsRunning)
             {
-                DrawCounter++;
+                drawCounter++;
 
-                if (GameSystem.System.PPU.Frame > LastRenderedFrame)
+                if (System.PPU.Frame > lastRenderedFrame)
                 {
-                    Scaler.Update(GameSystem.System.PPU.Frame);
-                    BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
-                    LastRenderedFrame = GameSystem.System.PPU.Frame;
+                    scaler.Update(System.PPU.Frame);
+                    backBuffer.SetData(scaler.ScaledFramebuffer.Data);
+                    lastRenderedFrame = System.PPU.Frame;
                 }
             }
 
-            SpriteBatch.Draw(BackBuffer, destinationRectangle, Color.White);
+            SpriteBatch.Draw(backBuffer, destinationRectangle, Color.White);
 
             if (Menu.IsOpen)
                 Menu.Current.Draw();
@@ -163,35 +212,19 @@ namespace bEmu
 
         public virtual void StopGame()
         {
-            GameSystem.StopGame();
+            System.Stop();
             Exit();
-        }
-
-        public virtual void UpdateGamePad(KeyboardState keyboardState)
-        {
-            GameSystem.UpdateGamePad(keyboardState);
         }
 
         public void SetScaler()
         {
-            Scaler = ScalerFactory.Get(Options.Scaler, Options.Size);
-            Scaler.Framebuffer = GameSystem.System.PPU.Framebuffer;
+            scaler = ScalerFactory.Get(Options.Scaler, Options.Size);
+            scaler.Framebuffer = System.PPU.Framebuffer;
             
-            Scaler.Update(GameSystem.System.PPU.Frame);
+            scaler.Update(System.PPU.Frame);
             
-            BackBuffer = new Texture2D(GraphicsDevice, GameSystem.System.Width * Scaler.ScaleFactor, GameSystem.System.Height * Scaler.ScaleFactor);
-            BackBuffer.SetData(Scaler.ScaledFramebuffer.Data);
-        }
-
-        private void UpdateMessages()
-        {
-            Osd.Update();
-
-            if (Options.ShowFPS && IsRunning)
-            {
-                var fps = Math.Round(GameSystem.System.PPU.Frame / (DateTime.Now - LastStartDate).TotalSeconds, 1);
-                Osd.UpdateMessage(MessageType.FPS, $"{fps:0.0} fps");
-            }
+            backBuffer = new Texture2D(GraphicsDevice, System.Width * scaler.ScaleFactor, System.Height * scaler.ScaleFactor);
+            backBuffer.SetData(scaler.ScaledFramebuffer.Data);
         }
 
         public virtual void ResetGame()
@@ -199,7 +232,7 @@ namespace bEmu
             IsRunning = false;
 
             Osd.InsertMessage(MessageType.Default, "Jogo reiniciado");
-            LoadGame(GameSystem.Type, GameSystem.System.FileName);
+            LoadSystem(type, System.FileName);
 
             Menu.CloseAll();
         }
@@ -207,15 +240,15 @@ namespace bEmu
         public virtual void CloseGame()
         {
             Osd.InsertMessage(MessageType.Default, "Jogo fechado");
-            LoadGameSystem(GameSystemFactory.GetEmptyGameSystem(this));
+            LoadSystem(0, string.Empty);
         }
 
         public void LoadState()
         {
-            if (GameSystem is GameSystem)
+            if (type == 0) // nenhum sistema carregado
                 return;
 
-            bool success = GameSystem.System.LoadState();
+            bool success = System.LoadState();
 
             if (success)
                 Osd.InsertMessage(MessageType.Default, "Estado carregado");
@@ -227,10 +260,10 @@ namespace bEmu
 
         public void SaveState()
         {
-            if (GameSystem is GameSystem)
+            if (type == 0)
                 return;
 
-            GameSystem.System.SaveState();
+            System.SaveState();
             Osd.InsertMessage(MessageType.Default, "Estado salvo");
 
             Menu.CloseAll();
@@ -239,9 +272,9 @@ namespace bEmu
         public void SetSound(bool enable)
         {
             if (enable)
-                Sound.Play();
+                sound.Play();
             else
-                Sound.Pause();
+                sound.Pause();
         }
     }
 }

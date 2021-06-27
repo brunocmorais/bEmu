@@ -19,6 +19,7 @@ namespace bEmu.Systems.Chip8
         public override int Height => 64;
         public override int RefreshRate => 16;
         public override int CycleCount => 8;
+        public override int StartAddress => 0x200;
 
         public void SetSuperChipMode()
         {

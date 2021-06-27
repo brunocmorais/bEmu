@@ -6,8 +6,9 @@ using bEmu.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System.Globalization;
+using bEmu.Components;
 
-namespace bEmu.Components
+namespace bEmu.Menus
 {
     public class DebuggerMenu : Menu
     {
@@ -24,12 +25,12 @@ namespace bEmu.Components
             Keys.D7, Keys.D8, Keys.D9, Keys.Space,
             Keys.Back, Keys.Enter
         };
-        private IDebugger Debugger => game.GameSystem.System.Debugger;
+        private IDebugger Debugger => game.System.Debugger;
         private List<MenuOption> items = new List<MenuOption>();
 
         public DebuggerMenu(IMainGame game) : base(game)
         {
-            game.GameSystem.System.Debugger = new Debugger(game.GameSystem.System);
+            game.System.Debugger = new Debugger(game.System);
             UpdateMenuOptions();
         }
 

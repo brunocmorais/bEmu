@@ -120,7 +120,7 @@ namespace bEmu.Systems.Gameboy
                 IO[addr - 0xFF00] = value;
         }
 
-        public override void LoadProgram(int startAddress = 0)
+        public override void LoadProgram()
         {
             byte[] bytes = File.ReadAllBytes(System.FileName);
             CartridgeHeader = new CartridgeHeader(bytes);

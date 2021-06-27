@@ -4,12 +4,13 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using bEmu.Classes;
+using bEmu.Components;
 using bEmu.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace bEmu.Components
+namespace bEmu.Menus
 {
     public class FileSelectorMenu : Menu
     {

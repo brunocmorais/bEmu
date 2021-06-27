@@ -13,6 +13,7 @@ namespace bEmu.Core
         int RefreshRate { get; }
         int CycleCount { get; }
         int Cycles { get; }
+        int StartAddress { get; }
         string FileName { get; set; }
         string SaveFileName { get; }
         string SaveStateName { get; }

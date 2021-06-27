@@ -16,6 +16,9 @@ namespace bEmu.Systems.Generic8080
         public override int Height => 256;
         public override int RefreshRate => 8;
         public override int CycleCount => 34952;
+
+        public override int StartAddress => 0;
+
         public const string AssetFolder = "Assets/Generic8080";
 
         public System(string fileName) : base(fileName)

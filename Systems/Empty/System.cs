@@ -16,6 +16,8 @@ namespace bEmu.Systems.Empty
 
         public override int CycleCount => 0;
 
+        public override int StartAddress => 0;
+
         public override IState GetInitialState()
         {
             return default;
