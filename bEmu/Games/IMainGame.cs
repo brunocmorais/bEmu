@@ -38,5 +38,6 @@ namespace bEmu
         void SetScreenSize();
         void CloseGame();
         void Pause();
+        void SetSound(bool enable);
     }
 }

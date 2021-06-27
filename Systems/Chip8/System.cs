@@ -117,6 +117,7 @@ namespace bEmu.Systems.Chip8
             {
                 var opcode = Runner.StepCycle();
                 Cycles -= opcode.CyclesTaken;
+                APU.Update(opcode.CyclesTaken);
             }
 
             return true;

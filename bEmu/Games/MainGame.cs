@@ -54,8 +54,6 @@ namespace bEmu
             Osd = new OSD(this);
 
             LoadGameSystem(GameSystemFactory.GetEmptyGameSystem(this));
-            Generic8080ContentProvider.Initialize(this);
-            Chip8ContentProvider.Initialize(this);
             
             Menu = new GameMenu(this);
             Menu.OpenMainMenu();
@@ -98,7 +96,9 @@ namespace bEmu
             GameSystem.System.PPU.Frame = 0;
             LastRenderedFrame = 0;
             DrawCounter = 0;
-            Sound.Play();
+
+            if (Options.EnableSound)
+                Sound.Play();
         }
 
         protected override void Update(GameTime gameTime)
@@ -234,6 +234,14 @@ namespace bEmu
             Osd.InsertMessage(MessageType.Default, "Estado salvo");
 
             Menu.CloseAll();
+        }
+
+        public void SetSound(bool enable)
+        {
+            if (enable)
+                Sound.Play();
+            else
+                Sound.Pause();
         }
     }
 }

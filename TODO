@@ -1,8 +1,11 @@
+- Colocar no readme as features de load/save state, de scalers, de paletas customizadas
 - Converter todas as referências de ciclo de int para long
 - Entender porque o Channel 4 não está obedecendo o SoundLength
 - Implementar sweep e envelope no Channel 1
 - Implementar envelope no Channel 2
+- Adicionar opções de áudio no menu (desabilitar áudio, sample rate, etc)
 - Começar a implementar as APUs dos outros sistemas
 - Remover todas as referências de content do projeto, utilizar leitura manual de wave se necessários
 - Resolver bugs do GB/GBC
+- Continuar implementação do Z80
 - Iniciar implementação de outros sistemas

@@ -20,22 +20,5 @@ namespace bEmu.GameSystems
         {
             base.Initialize(0x200);
         }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-            var state = (Systems.Chip8.State) System.State;
-
-            if (state.Sound == 0)
-            {
-                Chip8ContentProvider.SoundEffectInstance.IsLooped = false;
-                Chip8ContentProvider.SoundEffectInstance.Stop();
-            }
-            else if (state.Sound > 0 && !Chip8ContentProvider.SoundEffectInstance.IsLooped)
-            {
-                Chip8ContentProvider.SoundEffectInstance.IsLooped = true;
-                Chip8ContentProvider.SoundEffectInstance.Play();
-            }
-        }
     }
 }

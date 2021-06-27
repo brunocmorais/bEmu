@@ -5,10 +5,6 @@ namespace bEmu.Systems.Gameboy.Sound
 {
     public class APU : Core.APU
     {
-        private byte[] buffer;
-        public override int BufferSize => 2048;
-        public override int SampleRate => 22050;
-        public double Time { get; private set; }
         public IGBSoundChannel[] Channels { get; }
         public int CycleCount => System.CycleCount * 60;
         public int Cycles { get; private set; }
@@ -25,7 +21,6 @@ namespace bEmu.Systems.Gameboy.Sound
                 new Channel3(this),
                 new Channel4(this)
             };
-            buffer = new byte[BufferSize];
             Time = 0;
         }
 
@@ -34,7 +29,7 @@ namespace bEmu.Systems.Gameboy.Sound
             Cycles += lastCycleCount;
         }
 
-        public override byte[] UpdateBuffer()
+        public override void UpdateBuffer()
         {
             for (int i = 0; i < BufferSize; i += 4)
             {
@@ -57,15 +52,13 @@ namespace bEmu.Systems.Gameboy.Sound
                 byte leftValue = (byte)(leftChannel * sbyte.MaxValue);
                 byte rightValue = (byte)(rightChannel * sbyte.MaxValue);
                 
-                buffer[i] = leftValue;
-                buffer[i + 1] = leftValue;
-                buffer[i + 2] = rightValue;
-                buffer[i + 3] = rightValue;
+                Buffer[i] = leftValue;
+                Buffer[i + 1] = leftValue;
+                Buffer[i + 2] = rightValue;
+                Buffer[i + 3] = rightValue;
                 
                 Time += 1.0f / SampleRate;
             }
-
-            return buffer;
         }
 
         public void StartSound(GbSoundChannels channel)

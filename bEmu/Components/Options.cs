@@ -23,6 +23,9 @@ namespace bEmu.Components
         [Range(1, 10)]
         public int Size { get; set; }
 
+        [Description("Ativar Som")]
+        public bool EnableSound { get; set; }
+
         public event EventHandler<OnOptionChangedEventArgs> OptionChanged;
 
         public Options(IMainGame game)
@@ -32,6 +35,8 @@ namespace bEmu.Components
             if (game.Options != null)
                 foreach (var property in typeof(Options).GetProperties())
                     property.SetValue(this, property.GetValue(game.Options));
+
+            EnableSound = true;
 
             OptionChanged += OptionChangedEvent;
         }
@@ -98,6 +103,9 @@ namespace bEmu.Components
                     break;
                 case "Size":
                     Game.SetScreenSize();
+                    break;
+                case "EnableSound":
+                    Game.SetSound(EnableSound);
                     break;
             }
         }

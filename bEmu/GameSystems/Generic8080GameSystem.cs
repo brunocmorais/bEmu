@@ -18,8 +18,8 @@ namespace bEmu.GameSystems
     public class Generic8080GameSystem : GameSystem
     {
         public override SupportedSystems Type => SupportedSystems.Generic8080;
-        private byte lastWrite3;
-        private byte lastWrite5;
+        // private byte lastWrite3;
+        // private byte lastWrite5;
         
         public Generic8080GameSystem(IMainGame mainGame, string rom) : base(mainGame, rom)
         {
@@ -36,7 +36,7 @@ namespace bEmu.GameSystems
 
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
+            base.Update(gameTime);/*
             
             var state = (Systems.Generic8080.State) System.State;
             byte write3 = state.Ports.Write3;
@@ -87,6 +87,7 @@ namespace bEmu.GameSystems
 
             lastWrite3 = write3;
             lastWrite5 = write5;
+            */
         }
     }
 }

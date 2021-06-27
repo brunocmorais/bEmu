@@ -5,7 +5,10 @@ namespace bEmu.Core
         int BufferSize { get; }
         int SampleRate { get; }
         ISystem System { get; }
-        byte[] UpdateBuffer();
+        byte[] Buffer { get; }
+        double Time { get; }
+
+        void UpdateBuffer();
         void Update(int cycles);
     }
 }

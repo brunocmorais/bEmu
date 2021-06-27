@@ -173,7 +173,10 @@ namespace bEmu.Components
             if (number >= 0)
                 selectedOption = (selectedOption + number) % menuOptions.Length;
             else
-                selectedOption = selectedOption < -number? menuOptions.Length + number - selectedOption : selectedOption + number;
+                selectedOption = (selectedOption < -number ? menuOptions.Length + number - selectedOption : selectedOption + number) % menuOptions.Length;
+
+            if (selectedOption < 0)
+                selectedOption += menuOptions.Length;
 
             lastSelectionUpdate = gameTime.TotalGameTime.TotalMilliseconds;
         }

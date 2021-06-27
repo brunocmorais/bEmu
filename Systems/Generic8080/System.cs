@@ -16,6 +16,7 @@ namespace bEmu.Systems.Generic8080
         public override int Height => 256;
         public override int RefreshRate => 8;
         public override int CycleCount => 34952;
+        public const string AssetFolder = "Assets/Generic8080";
 
         public System(string fileName) : base(fileName)
         {
@@ -112,6 +113,7 @@ namespace bEmu.Systems.Generic8080
 
                 var opcode = Runner.StepCycle();
                 Cycles -= opcode.CyclesTaken;
+                APU.Update(Cycles);
             }
 
             return true;

@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework.Graphics;
 
-namespace bEmu.Classes
+namespace bEmu.Components
 {
     public class Fonts
     {
