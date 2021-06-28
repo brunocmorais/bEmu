@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using bEmu.Classes;
-using bEmu.Systems;
-using Microsoft.Xna.Framework.Graphics;
 using System.Linq;
 using bEmu.Core.Extensions;
 using bEmu.Components;

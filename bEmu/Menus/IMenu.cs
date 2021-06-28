@@ -4,13 +4,13 @@ using Microsoft.Xna.Framework;
 
 namespace bEmu.Menus
 {
-    public interface IMenu : Components.IDrawable
+    public interface IMenu
     {
         string Title { get; }
         IEnumerable<MenuOption> GetMenuOptions();
         void Update(GameTime gameTime);
         void UpdateMenuOptions();
-
+        void Draw();
         bool IsSelectable { get; set; }
     }
 }

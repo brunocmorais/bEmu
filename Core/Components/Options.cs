@@ -1,13 +1,11 @@
 using System;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using bEmu.Core.Scalers;
 
-namespace bEmu.Components
+namespace bEmu.Core.Components
 {
     public class Options
     {
-        protected IMainGame Game { get; }
 
         [Description("Pular quadros")]
         [Range(0, 9)]
@@ -28,17 +26,14 @@ namespace bEmu.Components
 
         public event EventHandler<OnOptionChangedEventArgs> OptionChanged;
 
-        public Options(IMainGame game)
+        public Options(EventHandler<OnOptionChangedEventArgs> eventHandler, Options options)
         {
-            Game = game;
-
-            if (game.Options != null)
+            if (options != null)
                 foreach (var property in typeof(Options).GetProperties())
-                    property.SetValue(this, property.GetValue(game.Options));
+                    property.SetValue(this, property.GetValue(options));
 
             EnableSound = true;
-
-            OptionChanged += OptionChangedEvent;
+            OptionChanged += eventHandler;
         }
 
         public void SetOption(string optionName, bool increment)
@@ -74,32 +69,6 @@ namespace bEmu.Components
             }
 
             OptionChanged(this, new OnOptionChangedEventArgs() { Property = property.Name });
-        }
-
-        public virtual void OptionChangedEvent(object sender, OnOptionChangedEventArgs e)
-        {
-            switch (e.Property)
-            {
-                case "ShowFPS":
-                    Game.Osd.RemoveMessage(MessageType.FPS);
-
-                    if (ShowFPS)
-                        Game.Osd.InsertMessage(MessageType.FPS, string.Empty);
-
-                    break;
-                case "Frameskip":
-                    Game.System.PPU.Frameskip = Frameskip;
-                    break;
-                case "Scaler":
-                    Game.SetScaler();
-                    break;
-                case "Size":
-                    Game.SetScreenSize();
-                    break;
-                case "EnableSound":
-                    Game.SetSound(EnableSound);
-                    break;
-            }
         }
     }
 

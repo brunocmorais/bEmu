@@ -16,7 +16,7 @@ namespace bEmu.Systems.Factory
                 case SupportedSystems.Generic8080:
                     return new Systems.Generic8080.System(rom);
                 default:
-                    return new Systems.Empty.System(rom);
+                    return new Systems.Empty.System();
             }
         }
     }

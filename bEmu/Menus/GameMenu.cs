@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using bEmu.Components;
+using bEmu.Core.Components;
 using bEmu.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -95,7 +96,7 @@ namespace bEmu.Menus
             if (KeyboardStateExtensions.HasBeenPressed(Keys.F2)) // mostrar informações
             {
                 game.Options.ShowFPS = !game.Options.ShowFPS;
-                game.Options.OptionChangedEvent(this, new OnOptionChangedEventArgs() { Property = "ShowFPS" });
+                game.OptionChangedEvent(this, new OnOptionChangedEventArgs() { Property = "ShowFPS" });
             }
         }
     }

@@ -1,14 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using bEmu.Classes;
 using bEmu.Components;
-using bEmu.Extensions;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace bEmu.Menus
 {

@@ -1,5 +1,4 @@
 using System;
-using bEmu.Classes;
 using bEmu.Components;
 using bEmu.Extensions;
 using bEmu.Core.Scalers;
@@ -12,6 +11,8 @@ using Microsoft.Xna.Framework.Audio;
 using bEmu.Core;
 using bEmu.Systems.Factory;
 using bEmu.Menus;
+using bEmu.Systems.Gameboy.GPU.Palettes;
+using bEmu.Core.Components;
 
 namespace bEmu
 {
@@ -33,7 +34,7 @@ namespace bEmu
         public OSD Osd { get; set; }
         public GameMenu Menu { get; set; }
         public bool IsRunning { get; set; }
-        public Options Options { get; set; }
+        public Core.Components.Options Options { get; set; }
         public ISystem System { get; set; }
 
         public MainGame()
@@ -64,7 +65,7 @@ namespace bEmu
         public void LoadSystem(SupportedSystems system, string file)
         {
             this.type = system;
-            Options options = new Options(this);
+            Core.Components.Options options = new Core.Components.Options(this.OptionChangedEvent, this.Options);
 
             switch (system)
             {
@@ -75,7 +76,7 @@ namespace bEmu
                     options.Size = 2;
                     break;
                 case SupportedSystems.GameBoy:
-                    options = new GameboyOptions(this, options);
+                    options = new Systems.Gameboy.Options(this.OptionChangedEvent, options);
 
                     if (options.Size < 2) 
                         options.Size = 2;
@@ -91,13 +92,12 @@ namespace bEmu
 
             TargetElapsedTime = new TimeSpan(0, 0, 0, 0, System.RefreshRate);
 
-            SetScaler();
             SetScreenSize(); 
-
-            System.MMU.LoadProgram();
+            SetScaler();
 
             if (type != 0)
             {
+                System.LoadProgram();
                 Menu.CloseAll();
                 Start();
             }
@@ -105,13 +105,10 @@ namespace bEmu
 
         public void SetScreenSize()
         {
-            int width = System.Width * Options.Size;
-            int height = System.Height * Options.Size;
-            
-            graphics.PreferredBackBufferWidth = width;
-            graphics.PreferredBackBufferHeight = height;
+            graphics.PreferredBackBufferWidth = System.Width * Options.Size;
+            graphics.PreferredBackBufferHeight = System.Height * Options.Size;
 
-            destinationRectangle = new Rectangle(0, 0, width, height);
+            destinationRectangle = new Rectangle(0, 0, System.Width * Options.Size, System.Height * Options.Size);
             graphics.ApplyChanges();
         }
 
@@ -119,7 +116,7 @@ namespace bEmu
         {
             IsRunning = true;
             lastStartDate = DateTime.Now;
-            System.PPU.Frame = 0;
+            System.Frame = 0;
             lastRenderedFrame = 0;
             drawCounter = 0;
 
@@ -146,22 +143,19 @@ namespace bEmu
 
             if (Options.ShowFPS && IsRunning)
             {
-                var fps = Math.Round(System.PPU.Frame / (DateTime.Now - lastStartDate).TotalSeconds, 1);
+                var fps = Math.Round(System.Frame / (DateTime.Now - lastStartDate).TotalSeconds, 1);
                 Osd.UpdateMessage(MessageType.FPS, $"{fps:0.0} fps");
             }
 
-            if (IsRunning && System.PPU.Frame <= lastRenderedFrame)
+            if (IsRunning && System.Frame <= lastRenderedFrame)
             {
                 if (System.Cycles < 0)
                     System.ResetCycles();
 
                 System.Update();
                 
-                while (sound.PendingBufferCount < 3)
-                {
-                    System.APU.UpdateBuffer();
-                    sound.SubmitBuffer(System.APU.Buffer);
-                }
+                while (sound.PendingBufferCount < 3 && Options.EnableSound)
+                    sound.SubmitBuffer(System.SoundBuffer);
             }
         }
 
@@ -186,11 +180,11 @@ namespace bEmu
             {
                 drawCounter++;
 
-                if (System.PPU.Frame > lastRenderedFrame)
+                if (System.Frame > lastRenderedFrame)
                 {
-                    scaler.Update(System.PPU.Frame);
+                    scaler.Update(System.Frame);
                     backBuffer.SetData(scaler.ScaledFramebuffer.Data);
-                    lastRenderedFrame = System.PPU.Frame;
+                    lastRenderedFrame = System.Frame;
                 }
             }
 
@@ -219,9 +213,8 @@ namespace bEmu
         public void SetScaler()
         {
             scaler = ScalerFactory.Get(Options.Scaler, Options.Size);
-            scaler.Framebuffer = System.PPU.Framebuffer;
-            
-            scaler.Update(System.PPU.Frame);
+            scaler.Framebuffer = System.Framebuffer;
+            scaler.Update(System.Frame);
             
             backBuffer = new Texture2D(GraphicsDevice, System.Width * scaler.ScaleFactor, System.Height * scaler.ScaleFactor);
             backBuffer.SetData(scaler.ScaledFramebuffer.Data);
@@ -275,6 +268,37 @@ namespace bEmu
                 sound.Play();
             else
                 sound.Pause();
+        }
+
+        public virtual void OptionChangedEvent(object sender, OnOptionChangedEventArgs e)
+        {
+            var options = sender as Core.Components.Options;
+            var gameBoyOptions = sender as Systems.Gameboy.Options;
+            switch (e.Property)
+            {
+                case "ShowFPS":
+                    Osd.RemoveMessage(MessageType.FPS);
+
+                    if (options.ShowFPS)
+                        Osd.InsertMessage(MessageType.FPS, string.Empty);
+
+                    break;
+                case "Frameskip":
+                    System.Frameskip = options.Frameskip;
+                    break;
+                case "Scaler":
+                    SetScaler();
+                    break;
+                case "Size":
+                    SetScreenSize();
+                    break;
+                case "EnableSound":
+                    SetSound(options.EnableSound);
+                    break;
+                case "PaletteType":
+                    (System as Systems.Gameboy.System).ColorPalette = ColorPaletteFactory.Get(gameBoyOptions.PaletteType);
+                    break;
+            }
         }
     }
 }

@@ -5,22 +5,60 @@ namespace bEmu.Core
 {
     public abstract class System : ISystem
     {
+        public abstract int Width { get; }
+        public abstract int Height { get; }
+        public abstract int RefreshRate { get; }
+        public abstract int CycleCount { get; }
+        public abstract int StartAddress { get; }
+        public abstract IState GetInitialState();
+        public abstract void Stop();
+        public abstract void UpdateGamePad(IGamePad gamePad);
+
         public IRunner Runner { get; protected set; }
         public IState State { get; protected set; }
         public IMMU MMU { get; protected set; }
         public IPPU PPU { get; protected set; }
         public IAPU APU { get; protected set; }
         public IDebugger Debugger { get; set; }
-        public abstract int Width { get; }
-        public abstract int Height { get; }
-        public abstract int RefreshRate { get; }
-        public abstract int CycleCount { get; }
-        public abstract int StartAddress { get; }
         public string FileName { get; set; }
         public string SaveFileName => FileNameWithoutExtension + ".sav";
         public string SaveStateName => FileNameWithoutExtension + ".state";
         private string FileNameWithoutExtension => Path.Combine(Path.GetDirectoryName(FileName), Path.GetFileNameWithoutExtension(FileName));
         public int Cycles { get; protected set; }
+        public int Frame
+        {
+            get => PPU?.Frame ?? 0;
+            set
+            {
+                if (PPU != null)
+                    PPU.Frame = value;
+            }  
+        }
+        public int Frameskip
+        {
+            get => PPU?.Frameskip ?? 0;
+            set
+            {
+                if (PPU != null)
+                    PPU.Frameskip = value;
+            }
+        }
+
+        public Framebuffer Framebuffer => PPU?.Framebuffer ?? new Framebuffer(Width, Height);
+
+        public byte[] SoundBuffer
+        {
+            get
+            {
+                if (APU != null)
+                {
+                    APU.UpdateBuffer();
+                    return APU.Buffer;
+                }
+
+                return new byte[0];
+            }
+        }
 
         public System(string fileName)
         {
@@ -58,17 +96,19 @@ namespace bEmu.Core
             File.WriteAllBytes(SaveStateName, Enumerable.Concat(state, mmu).ToArray());
         }
 
-        public abstract IState GetInitialState();
         public virtual bool Update()
         {
             return !(Debugger != null && (Debugger.IsStopped || (Debugger.BreakpointAddress > 0 && Debugger.BreakpointAddress == State.PC)));
         }
 
-        public abstract void Stop();
-        public abstract void UpdateGamePad(IGamePad gamePad);
         public void ResetCycles()
         {
             Cycles = CycleCount;
+        }
+
+        public virtual void LoadProgram()
+        {
+            MMU.LoadProgram();
         }
     }
 }

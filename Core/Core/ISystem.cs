@@ -17,6 +17,11 @@ namespace bEmu.Core
         string FileName { get; set; }
         string SaveFileName { get; }
         string SaveStateName { get; }
+        int Frame { get; set; }
+        int Frameskip { get; set; }
+        Framebuffer Framebuffer { get; }
+        byte[] SoundBuffer { get; }
+
         IState GetInitialState();
         void Reset();
         bool LoadState();
@@ -25,5 +30,6 @@ namespace bEmu.Core
         void Stop();
         void UpdateGamePad(IGamePad gamePad);
         void ResetCycles();
+        void LoadProgram();
     }
 }

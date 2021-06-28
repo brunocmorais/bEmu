@@ -9,7 +9,7 @@ using System.Linq;
 namespace bEmu.Components
 {
 
-    public class OSD : IDrawable
+    public class OSD
     {
         private readonly IMainGame game;
         private List<Message> messages;

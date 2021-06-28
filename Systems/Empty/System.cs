@@ -4,7 +4,7 @@ namespace bEmu.Systems.Empty
 {
     public class System : Core.System
     {
-        public System(string fileName) : base(fileName)
+        public System() : base(string.Empty)
         {
         }
 
@@ -25,17 +25,6 @@ namespace bEmu.Systems.Empty
 
         public override void Stop() {}
 
-        public override bool Update() 
-        {
-            return true;
-        }
-
         public override void UpdateGamePad(IGamePad gamePad) {}
-
-        public override void Initialize()
-        {
-            PPU = new PPU(this, Width, Height);
-            MMU = new MMU(this, 0);
-        }
     }
 }

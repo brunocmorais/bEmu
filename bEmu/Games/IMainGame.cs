@@ -4,6 +4,7 @@ using bEmu.Systems;
 using Microsoft.Xna.Framework.Graphics;
 using bEmu.Core;
 using bEmu.Menus;
+using bEmu.Core.Components;
 
 namespace bEmu
 {
@@ -28,5 +29,6 @@ namespace bEmu
         void CloseGame();
         void Pause();
         void SetSound(bool enable);
+        void OptionChangedEvent(object sender, OnOptionChangedEventArgs e);
     }
 }
