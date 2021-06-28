@@ -1,4 +1,4 @@
-namespace bEmu.Components
+namespace bEmu.Menus
 {
     public enum MenuOptionAlignment
     {

@@ -4,29 +4,30 @@ using bEmu.Core.Scalers;
 
 namespace bEmu.Core.Components
 {
-    public class Options
+
+    public class Options : IOptions
     {
 
         [Description("Pular quadros")]
         [Range(0, 9)]
-        public int Frameskip { get; set; }
-        
+        public int Frameskip { get; protected set; }
+
         [Description("Exibir FPS")]
-        public bool ShowFPS { get; set; }
+        public bool ShowFPS { get; protected set; }
 
         [Description("Scaler")]
-        public Scaler Scaler { get; set; }
+        public Scaler Scaler { get; protected set; }
 
         [Description("Tamanho")]
         [Range(1, 10)]
-        public int Size { get; set; }
+        public int Size { get; protected set; }
 
         [Description("Ativar Som")]
-        public bool EnableSound { get; set; }
+        public bool EnableSound { get; protected set; }
 
-        public event EventHandler<OnOptionChangedEventArgs> OptionChanged;
+        private event EventHandler<OnOptionChangedEventArgs> OptionChanged;
 
-        public Options(EventHandler<OnOptionChangedEventArgs> eventHandler, Options options)
+        public Options(EventHandler<OnOptionChangedEventArgs> eventHandler, IOptions options, int size)
         {
             if (options != null)
                 foreach (var property in typeof(Options).GetProperties())
@@ -34,6 +35,7 @@ namespace bEmu.Core.Components
 
             EnableSound = true;
             OptionChanged += eventHandler;
+            Size = size;
         }
 
         public void SetOption(string optionName, bool increment)
@@ -50,11 +52,11 @@ namespace bEmu.Core.Components
                 var attr = property.GetCustomAttributes(typeof(RangeAttribute), true)[0] as RangeAttribute;
                 int currentValue = (int)property.GetValue(this);
 
-                if (attr == null || (!increment && currentValue > (int) attr.Minimum) || (increment && currentValue < (int) attr.Maximum))
+                if (attr == null || (!increment && currentValue > (int)attr.Minimum) || (increment && currentValue < (int)attr.Maximum))
                     property.SetValue(this, currentValue + (increment ? 1 : -1));
             }
             else if (propType == typeof(bool))
-                property.SetValue(this, !(bool) property.GetValue(this));
+                property.SetValue(this, !(bool)property.GetValue(this));
             else if (propType.IsEnum)
             {
                 int currentValue = (int)property.GetValue(this);
@@ -70,10 +72,5 @@ namespace bEmu.Core.Components
 
             OptionChanged(this, new OnOptionChangedEventArgs() { Property = property.Name });
         }
-    }
-
-    public class OnOptionChangedEventArgs : EventArgs
-    {
-        public string Property { get; set; }
     }
 }

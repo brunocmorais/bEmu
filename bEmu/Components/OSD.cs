@@ -78,17 +78,4 @@ namespace bEmu.Components
             messages.RemoveAll(x => x.Type == type);
         }
     }
-
-    public class Message
-    {
-        public string Text { get; set; }
-        public DateTime ExpirationDate { get; set; }
-        public MessageType Type { get; set; }
-    }
-
-    public enum MessageType
-    {
-        Default = 0,
-        FPS = 1
-    }
 }

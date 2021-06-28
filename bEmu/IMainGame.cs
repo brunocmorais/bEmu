@@ -10,13 +10,13 @@ namespace bEmu
 {
     public interface IMainGame : IDisposable
     {
-        Options Options { get; set; }
+        Options Options { get; }
         GameMenu Menu { get; }
         GraphicsDevice GraphicsDevice { get; }
         OSD Osd { get; }
         SpriteBatch SpriteBatch { get; }
         Fonts Fonts { get; }
-        bool IsRunning { get; set; }
+        bool IsRunning { get; }
         ISystem System { get; }
 
         void LoadSystem(SupportedSystems system, string file);
@@ -29,6 +29,5 @@ namespace bEmu
         void CloseGame();
         void Pause();
         void SetSound(bool enable);
-        void OptionChangedEvent(object sender, OnOptionChangedEventArgs e);
     }
 }

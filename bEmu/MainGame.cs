@@ -34,7 +34,7 @@ namespace bEmu
         public OSD Osd { get; set; }
         public GameMenu Menu { get; set; }
         public bool IsRunning { get; set; }
-        public Core.Components.Options Options { get; set; }
+        public Options Options { get; set; }
         public ISystem System { get; set; }
 
         public MainGame()
@@ -65,30 +65,32 @@ namespace bEmu
         public void LoadSystem(SupportedSystems system, string file)
         {
             this.type = system;
-            Core.Components.Options options = new Core.Components.Options(this.OptionChangedEvent, this.Options);
+            IOptions options = default;
+            int size;
 
             switch (system)
             {
                 case SupportedSystems.Chip8:
-                    options.Size = 5;
+                    size = 5;
                     break;
                 case SupportedSystems.Generic8080:
-                    options.Size = 2;
+                    size = 2;
                     break;
                 case SupportedSystems.GameBoy:
-                    options = new Systems.Gameboy.Options(this.OptionChangedEvent, options);
-
-                    if (options.Size < 2) 
-                        options.Size = 2;
-                    
+                    size = 2;
+                    options = new Systems.Gameboy.Options(OptionChangedEvent, Options, size);
                     break;
                 default:
-                    options.Size = 1;
+                    size = 1;
                     break;
             }
 
             System = SystemFactory.Get(type, file);
-            Options = options;
+
+            if (options == null)
+                options = new Core.Components.Options(OptionChangedEvent, Options, size);
+
+            Options = (Options) options;
 
             TargetElapsedTime = new TimeSpan(0, 0, 0, 0, System.RefreshRate);
 
@@ -270,32 +272,33 @@ namespace bEmu
                 sound.Pause();
         }
 
-        public virtual void OptionChangedEvent(object sender, OnOptionChangedEventArgs e)
+        private void OptionChangedEvent(object sender, OnOptionChangedEventArgs e)
         {
             var options = sender as Core.Components.Options;
             var gameBoyOptions = sender as Systems.Gameboy.Options;
+
             switch (e.Property)
             {
-                case "ShowFPS":
+                case nameof(options.ShowFPS):
                     Osd.RemoveMessage(MessageType.FPS);
 
                     if (options.ShowFPS)
                         Osd.InsertMessage(MessageType.FPS, string.Empty);
 
                     break;
-                case "Frameskip":
+                case nameof(options.Frameskip):
                     System.Frameskip = options.Frameskip;
                     break;
-                case "Scaler":
+                case nameof(options.Scaler):
                     SetScaler();
                     break;
-                case "Size":
+                case nameof(options.Size):
                     SetScreenSize();
                     break;
-                case "EnableSound":
+                case nameof(options.EnableSound):
                     SetSound(options.EnableSound);
                     break;
-                case "PaletteType":
+                case nameof(gameBoyOptions.PaletteType):
                     (System as Systems.Gameboy.System).ColorPalette = ColorPaletteFactory.Get(gameBoyOptions.PaletteType);
                     break;
             }

@@ -94,10 +94,7 @@ namespace bEmu.Menus
             }
 
             if (KeyboardStateExtensions.HasBeenPressed(Keys.F2)) // mostrar informações
-            {
-                game.Options.ShowFPS = !game.Options.ShowFPS;
-                game.OptionChangedEvent(this, new OnOptionChangedEventArgs() { Property = "ShowFPS" });
-            }
+                game.Options.SetOption(nameof(Options.ShowFPS), false);
         }
     }
 }

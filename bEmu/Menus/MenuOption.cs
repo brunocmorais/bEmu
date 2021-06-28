@@ -1,6 +1,6 @@
 using System;
 
-namespace bEmu.Components
+namespace bEmu.Menus
 {
     public class MenuOption
     {
