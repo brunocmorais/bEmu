@@ -2,20 +2,11 @@ using bEmu.Core;
 
 namespace bEmu.Systems.Gameboy.Sound
 {
-    public class Channel3 : IGBSoundChannel
+    public class Channel3 : GbSoundChannel
     {
-        public APU APU { get; }
-        public MMU MMU { get; }
-        public SoundOscillator Oscillator { get; }
         private byte[] wavePattern = new byte[32];
-        private int cycleToEnd = 0;
 
-        public Channel3(APU apu)
-        {
-            APU = apu;
-            MMU = apu.System.MMU as MMU;
-            Oscillator = new SoundOscillator();
-        }
+        public Channel3(APU apu) : base(apu) { }
 
         public byte[] WavePattern
         {
@@ -33,11 +24,11 @@ namespace bEmu.Systems.Gameboy.Sound
 
         public bool ChannelOn => (MMU.IO[0x1A] & 0x80) == 0x80;
         
-        public float SoundLength => (256 - MMU.IO[0x1B]) * (1.0f / 256.0f);
+        public override float SoundLength => (256 - MMU.IO[0x1B]) * (1.0f / 256.0f);
 
         public Channel3OutputLevel OutputLevel => (Channel3OutputLevel) ((MMU.IO[0x1C] & 0x60) >> 5);
             
-        public int Frequency => 0x10000 / (0x800 - (((MMU.IO[0x1E] & 0x7) << 8) | MMU.IO[0x1D]));
+        public override int Frequency => 0x10000 / (0x800 - (((MMU.IO[0x1E] & 0x7) << 8) | MMU.IO[0x1D]));
 
         private int Shifter
         {
@@ -57,14 +48,9 @@ namespace bEmu.Systems.Gameboy.Sound
             }
         }
 
-        public byte Volume => 0xFF;
+        public override byte Volume { get; protected set; }
 
-        public void StartSound()
-        {
-            cycleToEnd = (int) (APU.Cycles + (SoundLength * APU.CycleCount));
-        }
-
-        public float GenerateWave(int currentCycle)
+        public override float GenerateWave()
         {
             return (float) Oscillator.GenerateCustomWave(WavePattern, APU.Time, Frequency, 0.25f);
         }

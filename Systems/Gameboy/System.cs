@@ -9,7 +9,7 @@ namespace bEmu.Systems.Gameboy
 {
     public class System : Core.System
     {
-        public bool GBCMode { get; set; }
+        public bool GBCMode => (MMU as MMU).Bios.IsGBC;
         public IColorPalette ColorPalette { get; set; }
         public bool DoubleSpeedMode => (MMU[0xFF4D] & 0x80) == 0x80;
         public override int Width => 160;
@@ -49,7 +49,6 @@ namespace bEmu.Systems.Gameboy
         public override void Reset()
         {
             base.Reset();
-            GBCMode = false;
         }
 
         public override bool Update()
@@ -60,6 +59,7 @@ namespace bEmu.Systems.Gameboy
                     return false;
                     
                 var opcode = Runner.StepCycle();
+                //global::System.Console.Write(State.PC.ToString("x") + " ");
 
                 PPU.Cycles += opcode.CyclesTaken;
                 PPU.StepCycle();

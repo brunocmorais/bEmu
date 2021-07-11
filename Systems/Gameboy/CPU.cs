@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using bEmu.Core;
 using bEmu.Core.CPUs.LR35902;
 using bEmu.Systems.Gameboy.MBCs;
@@ -42,17 +43,6 @@ namespace bEmu.Systems.Gameboy
 
         public override IOpcode StepCycle()
         {
-            if (MMU.Bios.Running && State.PC == 0x100)
-            {
-                MMU.Bios.Running = false;
-
-                if ((MMU.CartridgeHeader.GBCFlag & 0x80) == 0x80) // set gameboy color mode
-                {
-                    State.A = 0x11;
-                    (System as System).GBCMode = true;
-                }
-            }
-
             var opcode = base.StepCycle();
 
             if (((System) System).DoubleSpeedMode)

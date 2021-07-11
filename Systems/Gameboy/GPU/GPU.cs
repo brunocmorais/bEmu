@@ -50,6 +50,9 @@ namespace bEmu.Systems.Gameboy.GPU
         {
             state.LCD.Mode = GPUMode.HBlank;
             Cycles = 0;
+            lcdEnabled = false;
+
+            Framebuffer.Reset();
         }
 
         public override void StepCycle()

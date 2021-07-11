@@ -6,9 +6,19 @@ namespace bEmu.Core
     {
         private Random random = new Random();
 
-        public double GenerateSquareWave(double time, double frequency, double amplitude)
+        public double GenerateSquareWave(double time, double frequency, double amplitude, WaveDuty waveDuty)
         {
-            return Math.Sin(frequency * time * 2 * Math.PI) >= 0 ? amplitude : -amplitude;
+            double limit = 0;
+
+            switch (waveDuty)
+            {
+                case WaveDuty.Normal:  limit = 0; break;
+                case WaveDuty.Half:    limit = 0.5; break;
+                case WaveDuty.Quarter: limit = 0.75; break;
+                case WaveDuty.HalfPlus: limit = -0.25; break;
+            }
+
+            return Math.Sin(frequency * time * 2 * Math.PI) > limit ? +amplitude : -amplitude;
         }
 
         public double GenerateSineWave(double time, double frequency, double amplitude)

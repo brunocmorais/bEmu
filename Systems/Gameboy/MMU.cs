@@ -6,6 +6,7 @@ using System.Text;
 using bEmu.Core;
 using bEmu.Systems.Gameboy.GPU;
 using bEmu.Systems.Gameboy.MBCs;
+using Debugger = System.Diagnostics.Debugger;
 
 namespace bEmu.Systems.Gameboy
 {
@@ -27,7 +28,6 @@ namespace bEmu.Systems.Gameboy
         public MMU(ISystem system) : base(system, 0x10000)
         {
             IO = new byte[128];
-            Bios = new BIOS();
             VRAM = new VRAM(this);
             WRAM = new WRAM(this);
             OAM = new OAM(this);
@@ -41,7 +41,7 @@ namespace bEmu.Systems.Gameboy
         { 
             get
             {
-                if (Bios.Running && addr < 0x100)
+                if (Bios.Running && (addr < 0x100 || (addr >= 0x200 && addr < Bios.InitAddress)))
                     return Bios[addr];
                 else if (addr >= 0x0000 && addr <= 0x7FFF)
                     return MBC.ReadROM(addr);
@@ -96,41 +96,48 @@ namespace bEmu.Systems.Gameboy
 
         public void SetRegister(int addr, byte value)
         {
+            IO[addr - 0xFF00] = value;
+
             if (addr == 0xFF00) // joypad
                 Joypad.SetJoypadColumn(value);
+            else if (addr == 0xFF10) // sweep envelope Channel1
+                APU.StartSweepEnvelope();
             else if (addr == 0xFF11) // sound length Channel1
                 APU.StartSound(Sound.GbSoundChannels.Channel1);
+            else if (addr == 0xFF12) // volume envelope Channel1
+                APU.StartVolumeEnvelope(Sound.GbSoundChannels.Channel1);
+            else if (addr == 0xFF13 || addr == 0xFF14)
+                APU.StartSound(Sound.GbSoundChannels.Channel1);
             else if (addr == 0xFF16) // sound length Channel2
+                APU.StartSound(Sound.GbSoundChannels.Channel2);
+            else if (addr == 0xFF17) // volume envelope Channel2
+                APU.StartVolumeEnvelope(Sound.GbSoundChannels.Channel2);
+            else if (addr == 0xFF18 || addr == 0xFF19)
                 APU.StartSound(Sound.GbSoundChannels.Channel2);
             else if (addr == 0xFF1B) // sound length Channel3
                 APU.StartSound(Sound.GbSoundChannels.Channel3);
             else if (addr == 0xFF20) // sound length Channel4
                 APU.StartSound(Sound.GbSoundChannels.Channel4);
+            else if (addr == 0xFF21) // volume envelope Channel4
+                APU.StartVolumeEnvelope(Sound.GbSoundChannels.Channel4);
             else if (addr == 0xFF04) // DIV timer
                 IO[addr - 0xFF00] = 0;
-            else if (addr == 0xFF44) // registrador LY 
-                return;
             else if (addr == 0xFF46) // OAM DMA
                 OAM.StartDMATransfer(value);
             else if (addr == 0xFF55) // VRAM DMA
                 VRAM.StartDMATransfer(value);
             else if (addr >= 0xFF68 && addr <= 0xFF6B) // paletas de cor
                 ColorPaletteData[addr] = value;
-            else
-                IO[addr - 0xFF00] = value;
         }
 
         public override void LoadProgram()
         {
             byte[] bytes = File.ReadAllBytes(System.FileName);
             CartridgeHeader = new CartridgeHeader(bytes);
+            bool gbc = (CartridgeHeader.GBCFlag & 0x80) == 0x80;
+            Bios = new BIOS(System, gbc);
             MBC = MBCFactory.GetMBC(this, CartridgeHeader.CartridgeType);
             MBC.LoadProgram(bytes);
-        }
-
-        public override void LoadProgram(byte[] bytes, int startAddress = 0)
-        {
-            throw new NotImplementedException();
         }
     }
 }
