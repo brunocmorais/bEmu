@@ -56,14 +56,14 @@ namespace bEmu.Core.CPUs.Z80
                 case 0x2D: Sra(Register.L); break;
                 case 0x2E: Sra(Register.HL); break;
                 case 0x2F: Sra(Register.A); break;
-                case 0x30: Swap(Register.B); break;
-                case 0x31: Swap(Register.C); break;
-                case 0x32: Swap(Register.D); break;
-                case 0x33: Swap(Register.E); break;
-                case 0x34: Swap(Register.H); break;
-                case 0x35: Swap(Register.L); break;
-                case 0x36: Swap(Register.HL); break;
-                case 0x37: Swap(Register.A); break;
+                case 0x30: Sll(Register.B); break;
+                case 0x31: Sll(Register.C); break;
+                case 0x32: Sll(Register.D); break;
+                case 0x33: Sll(Register.E); break;
+                case 0x34: Sll(Register.H); break;
+                case 0x35: Sll(Register.L); break;
+                case 0x36: Sll(Register.HL); break;
+                case 0x37: Sll(Register.A); break;
                 case 0x38: Srl(Register.B); break;
                 case 0x39: Srl(Register.C); break;
                 case 0x3A: Srl(Register.D); break;
@@ -379,23 +379,18 @@ namespace bEmu.Core.CPUs.Z80
             IncreaseCycles(8);
         }
 
-        protected void Swap(Register register)
+        protected void Sll(Register register)
         {
             if (register == Register.HL)
                 IncreaseCycles(8);
 
             byte value = GetByteFromRegister(register);
+            State.Flags.Carry = (value & 0x80) == 0x80;
+            SetByteToRegister(register, (byte) ((value << 1) | 1));
 
-            byte msb = (byte) ((value & 0xF0) >> 4);
-            byte lsb = (byte) ((value & 0x0F));
-            byte result = (byte) ((lsb << 4) | msb);
-
-            SetByteToRegister(register, result);
-
-            State.Flags.Zero = CheckZero(result);
+            State.Flags.Zero = CheckZero(GetByteFromRegister(register));
             State.Flags.Subtract = false;
             State.Flags.HalfCarry = false;
-            State.Flags.Carry = false;
 
             IncreaseCycles(8);
         }

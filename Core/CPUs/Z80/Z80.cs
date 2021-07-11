@@ -82,6 +82,40 @@ namespace bEmu.Core.CPUs.Z80
             }
         }
 
+        protected byte GetByteFromAlternateRegister(Register register)
+        {
+            switch (register)
+            {
+                case Register.A: return State.Alt.A;
+                case Register.B: return State.Alt.B;
+                case Register.C: return State.Alt.C;
+                case Register.D: return State.Alt.D;
+                case Register.E: return State.Alt.E;
+                case Register.F: return State.Alt.F;
+                case Register.H: return State.Alt.H;
+                case Register.L: return State.Alt.L;
+                case Register.AF: return ReadByteFromMemory(State.Alt.AF);
+                case Register.BC: return ReadByteFromMemory(State.Alt.BC);
+                case Register.DE: return ReadByteFromMemory(State.Alt.DE);
+                case Register.HL: return ReadByteFromMemory(State.Alt.HL);
+                default:
+                    throw new Exception("Registrador desconhecido.");
+            }
+        }
+
+        protected ushort GetWordFromAlternateRegister(Register register)
+        {
+            switch (register)
+            {
+                case Register.AF: return State.Alt.AF;
+                case Register.BC: return State.Alt.BC;
+                case Register.DE: return State.Alt.DE;
+                case Register.HL: return State.Alt.HL;
+                default:
+                    throw new Exception("Registrador desconhecido.");
+            }
+        }
+
         protected ushort GetWordFromRegister(Register register)
         {
             switch (register)
@@ -92,6 +126,19 @@ namespace bEmu.Core.CPUs.Z80
                 case Register.HL: return State.HL;
                 case Register.SP: return State.SP;
                 case Register.PC: return State.PC;
+                default:
+                    throw new Exception("Registrador não permitido.");
+            }
+        }
+
+        protected ushort GetWordFromMainRegister(Register register)
+        {
+            switch (register)
+            {
+                case Register.AF: return State.Main.AF;
+                case Register.BC: return State.Main.BC;
+                case Register.DE: return State.Main.DE;
+                case Register.HL: return State.Main.HL;
                 default:
                     throw new Exception("Registrador não permitido.");
             }
@@ -114,6 +161,45 @@ namespace bEmu.Core.CPUs.Z80
                 case Register.HL: WriteByteToMemory(State.HL, value); break;
                 case Register.SP: WriteByteToMemory(State.SP, value); break;
                 case Register.PC: WriteByteToMemory(State.PC, value); break;
+                default:
+                    throw new Exception("Registrador desconhecido.");
+            }
+        }
+
+        protected void SetWordToAlternateRegister(Register register, ushort value)
+        {
+            switch (register)
+            {
+                case Register.AF: State.Alt.AF = value; break;
+                case Register.BC: State.Alt.BC = value; break;
+                case Register.DE: State.Alt.DE = value; break;
+                case Register.HL: State.Alt.HL = value; break;
+                default:
+                    throw new Exception("Registrador desconhecido.");
+            }
+        }
+
+        protected void SetWordToMainRegister(Register register, ushort value)
+        {
+            switch (register)
+            {
+                case Register.AF: State.Main.AF = value; break;
+                case Register.BC: State.Main.BC = value; break;
+                case Register.DE: State.Main.DE = value; break;
+                case Register.HL: State.Main.HL = value; break;
+                default:
+                    throw new Exception("Registrador desconhecido.");
+            }
+        }
+
+        protected void SetWordToRegister(Register register, ushort value)
+        {
+            switch (register)
+            {
+                case Register.AF: State.AF = value; break;
+                case Register.BC: State.BC = value; break;
+                case Register.DE: State.DE = value; break;
+                case Register.HL: State.HL = value; break;
                 default:
                     throw new Exception("Registrador desconhecido.");
             }
@@ -158,7 +244,7 @@ namespace bEmu.Core.CPUs.Z80
             switch (opcode.Byte)
             {
                 case 0x00: Nop(); break;
-                case 0x10: Stop(); break;
+                case 0x10: Djnz(); break;
                 case 0x20: JrNZ(); break;
                 case 0x30: JrNC(); break;
                 case 0x01: LD_d16(Register.BC); break;
@@ -189,7 +275,7 @@ namespace bEmu.Core.CPUs.Z80
                 case 0x17: Rla(); break;
                 case 0x27: Daa(); break;
                 case 0x37: Scf(); break;
-                case 0x08: Ld_SP(); break;
+                case 0x08: ExAlt(Register.AF, Register.AF); break;
                 case 0x18: Jr(); break;
                 case 0x28: Jrz(); break;
                 case 0x38: Jrc(); break;
@@ -351,8 +437,8 @@ namespace bEmu.Core.CPUs.Z80
                 case 0xBF: Cp(Register.A); break;
                 case 0xC0: RetNZ(); break;
                 case 0xD0: RetNC(); break;
-                case 0xE0: Ldh_a8_A(); break;
-                case 0xF0: Ldh_A_a8(); break;
+                case 0xE0: RetPO(); break;
+                case 0xF0: RetP(); break;
                 case 0xC1: Pop(Register.BC); break;
                 case 0xD1: Pop(Register.DE); break;
                 case 0xE1: Pop(Register.HL); break;
@@ -362,13 +448,13 @@ namespace bEmu.Core.CPUs.Z80
                 case 0xE2: Ld_C_A(); break;
                 case 0xF2: Ld_A_C(); break;
                 case 0xC3: Jp(); break;
-                case 0xD3: break;
-                case 0xE3: break;
+                case 0xD3: Out(Register.A); break;
+                case 0xE3: Ex_SP_HL(); break;
                 case 0xF3: Di(); break;
                 case 0xC4: CallNZ(); break;
                 case 0xD4: CallNC(); break;
-                case 0xE4: break;
-                case 0xF4: break;
+                case 0xE4: CallPO(); break;
+                case 0xF4: CallP(); break;
                 case 0xC5: Push(Register.BC); break;
                 case 0xD5: Push(Register.DE); break;
                 case 0xE5: Push(Register.HL); break;
@@ -383,28 +469,28 @@ namespace bEmu.Core.CPUs.Z80
                 case 0xF7: Rst(0x30); break;
                 case 0xC8: RetZ(); break;
                 case 0xD8: RetC(); break;
-                case 0xE8: AddSP(); break;
-                case 0xF8: Ld_HL_SPr8(); break;
+                case 0xE8: RetPE(); break;
+                case 0xF8: RetM(); break;
                 case 0xC9: Ret(); break;
-                case 0xD9: Reti(); break;
+                case 0xD9: Exx(); break;
                 case 0xE9: Jp_HL(); break;
                 case 0xF9: Ld_SPHL(); break;
                 case 0xCA: JpZ(); break;
                 case 0xDA: JpC(); break;
-                case 0xEA: Ld_a16_A(); break;
-                case 0xFA: Ld_A_a16(); break;
+                case 0xEA: JpPE(); break;
+                case 0xFA: JpM(); break;
                 case 0xCB: Cb(); break;
-                case 0xDB: break;
-                case 0xEB: break;
+                case 0xDB: In(Register.A); break;
+                case 0xEB: Ex(Register.DE, Register.HL); break;
                 case 0xFB: Ei(); break;
                 case 0xCC: CallZ(); break;
                 case 0xDC: CallC(); break;
-                case 0xEC: break;
-                case 0xFC: break;
+                case 0xEC: CallPE(); break;
+                case 0xFC: CallM(); break;
                 case 0xCD: Call(); break;
-                case 0xDD: break;
-                case 0xED: break;
-                case 0xFD: break;
+                case 0xDD: Dd(); break;
+                case 0xED: Ed(); break;
+                case 0xFD: Fd(); break;
                 case 0xCE: Adc(); break;
                 case 0xDE: Sbc(); break;
                 case 0xEE: Xor(); break;

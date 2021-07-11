@@ -12,6 +12,8 @@ namespace bEmu.Core.CPUs.Z80
         public RegisterSet Main { get; }
         public RegisterSet Alt { get; }
         public bool EnableInterrupts { get; set; }
+        public Ports Ports { get; set; }
+
         public byte A 
         {
             get => AlternativeRegisters ? Alt.A : Main.A;
@@ -92,6 +94,7 @@ namespace bEmu.Core.CPUs.Z80
         { 
             Main = new RegisterSet();
             Alt = new RegisterSet();
+            Ports = new Ports(0x100);
         }
     }
 }

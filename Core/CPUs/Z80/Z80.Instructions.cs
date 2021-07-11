@@ -956,5 +956,125 @@ namespace bEmu.Core.CPUs.Z80
 
             IncreaseCycles(4);
         }
+
+        protected void ExAlt(Register a, Register b)
+        {
+            ushort valueA = GetWordFromMainRegister(a);
+            ushort valueB = GetWordFromAlternateRegister(b);
+
+            SetWordToAlternateRegister(b, valueA);
+            SetWordToMainRegister(a, valueB);
+
+            IncreaseCycles(4);
+        }
+
+        protected void Djnz()
+        {
+            ConditionalJr(--State.B != 0);
+        }
+
+        protected void RetPO()
+        {
+            ConditionalRet(!State.Flags.ParityOrOverflow);   
+        }
+
+        protected void RetP()
+        {
+            ConditionalRet(!State.Flags.Sign);
+        }
+
+        protected void Out(Register register)
+        {
+            byte value = GetByteFromRegister(register);
+            State.Ports[GetNextByte()] = value;
+            IncreaseCycles(11);
+        }
+
+        protected void Ex_SP_HL()
+        {
+            ushort sp = ReadWordFromMemory(State.SP);
+            ushort hl = State.HL;
+
+            State.HL = sp;
+            State.SP = hl;
+
+            IncreaseCycles(19);
+        }
+
+        protected void CallM()
+        {
+            ConditionalCall(State.Flags.Sign);
+        }
+
+        protected void CallPE()
+        {
+            ConditionalCall(State.Flags.ParityOrOverflow);
+        }
+
+        protected void Ex(Register a, Register b)
+        {
+            var valueA = GetWordFromRegister(a);
+            var valueB = GetWordFromRegister(b);
+
+            SetWordToRegister(a, valueB);
+            SetWordToRegister(b, valueA);
+
+            IncreaseCycles(4);
+        }
+
+        protected void In(Register a)
+        {
+            SetByteToRegister(a, State.Ports[GetNextByte()]);
+            IncreaseCycles(11);
+        }
+
+        protected void JpM()
+        {
+            ConditionalJmp(State.Flags.Sign);
+        }
+
+        protected void JpPE()
+        {
+            ConditionalJmp(State.Flags.ParityOrOverflow);
+        }
+
+        protected void Exx()
+        {
+            ushort mainBC = GetWordFromMainRegister(Register.BC);
+            ushort altBC  = GetWordFromAlternateRegister(Register.BC);
+            ushort mainDE = GetWordFromMainRegister(Register.DE);
+            ushort altDE  = GetWordFromAlternateRegister(Register.DE);
+            ushort mainHL = GetWordFromMainRegister(Register.HL);
+            ushort altHL  = GetWordFromAlternateRegister(Register.HL);
+
+            SetWordToAlternateRegister(Register.BC, mainBC);
+            SetWordToMainRegister(Register.BC, altBC);
+            SetWordToAlternateRegister(Register.DE, mainDE);
+            SetWordToMainRegister(Register.DE, altDE);
+            SetWordToAlternateRegister(Register.HL, mainHL);
+            SetWordToMainRegister(Register.HL, altHL);
+
+            IncreaseCycles(4);
+        }
+
+        protected void RetM()
+        {
+            ConditionalRet(State.Flags.Sign);
+        }
+
+        protected void RetPE()
+        {
+            ConditionalRet(State.Flags.ParityOrOverflow);
+        }
+
+        protected void CallP()
+        {
+            ConditionalCall(!State.Flags.Sign);
+        }
+
+        protected void CallPO()
+        {
+            ConditionalCall(!State.Flags.ParityOrOverflow);
+        }
     }
 }

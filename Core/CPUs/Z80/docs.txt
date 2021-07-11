@@ -1,23 +1,28 @@
 Z80
+http://z80-heaven.wikidot.com/opcode-reference-chart
 
-0x08 - ex af, af'
-0x10 - djnz *
-0xE0 - ret po
-0xF0 - ret p
-0xD3 - out (*), a
-0xE3 - ex (sp), hl
-0xE4 - call po, **
-0xF4 - call p, **
-0xE8 - ret pe
-0xF8 - ret m
-0xD9 - exx
-0xEA - jp pe, **
-0xFA - jp m, **
-0xCB - prefixo CB (bit instructions)
-0xDB - in a, **
-0xEB - ex de,hl
-0xEC - call pe, **
-0xFC - call m, **
+Main
+
+0x08 - ex af, af' = OK
+0x10 - djnz * = OK
+0xE0 - ret po = OK
+0xF0 - ret p = OK
+0xD3 - out (*), a = OK
+0xE3 - ex (sp), hl = OK
+0xE4 - call po, ** = OK
+0xF4 - call p, ** = OK
+0xE8 - ret pe = OK
+0xF8 - ret m = OK
+0xD9 - exx = OK
+0xEA - jp pe, ** = OK
+0xFA - jp m, ** = OK
+0xCB - prefixo CB (bit instructions) = OK
+0xDB - in a, ** = OK
+0xEB - ex de,hl = OK
+0xEC - call pe, ** = OK
+0xFC - call m, ** = OK
 0xDD - prefixo DD (instruções IX)
 0xED - prefixo ED (extended instructions)
 0xFD - prefixo FD (instruções IY)
+
+TODO: verificar todo o comportamento de flags do Z80 em relação à implementação do LR35902
