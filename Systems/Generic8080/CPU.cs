@@ -1,5 +1,5 @@
 using bEmu.Core;
-using bEmu.Core.CPUs.Intel8080;
+using bEmu.Core.CPU.Intel8080;
 using bEmu.Core.Util;
 
 namespace bEmu.Systems.Generic8080

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using bEmu.Core;
-using bEmu.Core.CPUs.LR35902;
+using bEmu.Core.CPU.LR35902;
 using bEmu.Systems.Gameboy.GPU.Palettes;
 
 namespace bEmu.Systems.Gameboy.GPU
 {
-    public class GPU : Core.PPU
+    public class GPU : Core.Video.PPU
     {
         private State state;
         private MMU mmu;

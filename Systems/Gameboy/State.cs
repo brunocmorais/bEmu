@@ -1,13 +1,13 @@
 using System;
 using System.IO;
-using bEmu.Core.CPUs.LR35902;
+using bEmu.Core.CPU.LR35902;
 using bEmu.Core;
 using bEmu.Core.Util;
 using bEmu.Systems.Gameboy.GPU;
 
 namespace bEmu.Systems.Gameboy
 {
-    public class State : Core.CPUs.LR35902.State
+    public class State : Core.CPU.LR35902.State
     {
         public LCD LCD { get; set; }
 

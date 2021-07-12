@@ -1,17 +1,16 @@
 using bEmu.Core;
+using bEmu.Core.Audio;
 
 namespace bEmu.Systems.Chip8
 {
-    public class APU : Core.APU
+    public class APU : Core.Audio.APU
     {
         private const int Frequency = 440;
         private const float Amplitude = 1.0f;
-        private SoundOscillator oscillator;
         private bool playingTone = false;
 
         public APU(ISystem system) : base(system) 
         { 
-            oscillator = new SoundOscillator();
         }
 
         public override void UpdateBuffer()
@@ -21,7 +20,7 @@ namespace bEmu.Systems.Chip8
                 float wave = 0;
 
                 if (playingTone)
-                    wave = (float) oscillator.GenerateSineWave(Time, Frequency, Amplitude);
+                    wave = (float) SoundOscillator.GenerateSineWave(Time, Frequency, Amplitude);
                 
                 byte value = (byte)(wave * sbyte.MaxValue);
                 

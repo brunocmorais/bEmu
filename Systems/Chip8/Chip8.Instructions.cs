@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using bEmu.Core;
+using bEmu.Core.CPU;
 using bEmu.Core.Util;
 
 namespace bEmu.Core.VMs.Chip8

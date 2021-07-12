@@ -1,4 +1,5 @@
 using bEmu.Core;
+using bEmu.Core.Audio;
 
 namespace bEmu.Systems.Gameboy.Sound
 {
@@ -17,8 +18,10 @@ namespace bEmu.Systems.Gameboy.Sound
 
         public override float GenerateWave()
         {
-            base.GenerateWave();
-            return (float) Oscillator.GenerateSquareWave(APU.Time, Frequency, 0.25f * (Volume / 16.0f), APU.GetWaveDuty(WaveDuty));
+            if (base.GenerateWave() == 0)
+                return 0;
+                
+            return (float) SoundOscillator.GenerateSquareWave(APU.Time, Frequency, 0.25f * (Volume / 16.0f), APU.GetWaveDuty(WaveDuty));
         }
     }
 }

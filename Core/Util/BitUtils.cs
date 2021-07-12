@@ -30,6 +30,12 @@ namespace bEmu.Core.Util
                 yield return (byte)((num >> ((sizeof(uint) - 1 - i) * 8)) & 0xFF);
         }
 
+        public static IEnumerable<byte> ToBytes(ulong num)
+        {
+            for (int i = 0; i < sizeof(ulong); i++)
+                yield return (byte)((num >> ((sizeof(ulong) - 1 - i) * 8)) & 0xFF);
+        }
+
         public static IEnumerable<byte> ToBytes(short num)
         {
             for (int i = 0; i < sizeof(short); i++)

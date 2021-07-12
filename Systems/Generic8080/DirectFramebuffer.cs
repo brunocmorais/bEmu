@@ -1,4 +1,5 @@
 using bEmu.Core;
+using bEmu.Core.Video;
 
 namespace bEmu.Systems.Generic8080
 {

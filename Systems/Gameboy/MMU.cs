@@ -10,7 +10,7 @@ using Debugger = System.Diagnostics.Debugger;
 
 namespace bEmu.Systems.Gameboy
 {
-    public class MMU : bEmu.Core.MMU
+    public class MMU : bEmu.Core.Memory.MMU
     {
         public VRAM VRAM { get; private set; }
         public byte[] IO { get; private set; }

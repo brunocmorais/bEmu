@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using bEmu.Core;
-using bEmu.Core.CPUs.LR35902;
+using bEmu.Core.CPU.LR35902;
+using bEmu.Core.CPU;
 using bEmu.Systems.Gameboy.MBCs;
 
 namespace bEmu.Systems.Gameboy

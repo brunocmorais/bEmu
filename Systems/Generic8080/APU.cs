@@ -6,7 +6,7 @@ using bEmu.Core.Util;
 
 namespace bEmu.Systems.Generic8080
 {
-    public class APU : Core.APU
+    public class APU : Core.Audio.APU
     {
         private readonly float[] waveBuffer;
         private readonly Sound shot;

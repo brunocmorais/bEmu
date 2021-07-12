@@ -4,7 +4,7 @@ using bEmu.Core.Util;
 
 namespace bEmu.Systems.Chip8
 {
-    public class PPU : Core.PPU
+    public class PPU : Core.Video.PPU
     {
         private State state;
         public PPU(State state, int width, int height) : base(state.System, width, height) 

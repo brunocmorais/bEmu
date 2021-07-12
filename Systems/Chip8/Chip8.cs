@@ -1,5 +1,6 @@
 using System;
 using bEmu.Core;
+using bEmu.Core.CPU;
 using bEmu.Systems.Chip8;
 
 namespace bEmu.Core.VMs.Chip8

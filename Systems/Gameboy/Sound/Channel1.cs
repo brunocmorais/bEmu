@@ -1,5 +1,6 @@
 using System;
 using bEmu.Core;
+using bEmu.Core.Audio;
 
 namespace bEmu.Systems.Gameboy.Sound
 {
@@ -30,7 +31,7 @@ namespace bEmu.Systems.Gameboy.Sound
 
             int frequency = SweepFrequency != 0 ? SweepFrequency : Frequency;
 
-            return (float) Oscillator.GenerateSquareWave(APU.Time, frequency, 0.25f * (Volume / 16.0f), APU.GetWaveDuty(WaveDuty));
+            return (float) SoundOscillator.GenerateSquareWave(APU.Time, frequency, 0.25f * (Volume / 16.0f), APU.GetWaveDuty(WaveDuty));
         }
     }
 }

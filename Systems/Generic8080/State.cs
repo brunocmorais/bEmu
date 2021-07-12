@@ -1,12 +1,12 @@
 using System;
 using System.IO;
-using bEmu.Core.CPUs.Intel8080;
+using bEmu.Core.CPU.Intel8080;
 using bEmu.Core;
 using bEmu.Core.Util;
 
 namespace bEmu.Systems.Generic8080
 {
-    public class State : bEmu.Core.CPUs.Intel8080.State
+    public class State : bEmu.Core.CPU.Intel8080.State
     {
         public Ports Ports;
 

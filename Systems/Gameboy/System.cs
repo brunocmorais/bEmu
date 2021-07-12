@@ -1,25 +1,42 @@
-using bEmu.Core.CPUs.LR35902;
+using bEmu.Core.CPU.LR35902;
 using bEmu.Core;
-using bEmu.Systems.Gameboy.Sound;
+using APU = bEmu.Systems.Gameboy.Sound.APU;
+using bEmu.Core.Enums;
+using bEmu.Systems.Gameboy.GPU;
 using bEmu.Systems.Gameboy.GPU.Palettes;
-using bEmu.Systems.Gameboy.MBCs;
-using System.Diagnostics;
+using bEmu.Core.Audio;
+using bEmu.Core.Input;
+using bEmu.Core.Memory;
+using bEmu.Core.CPU;
+using bEmu.Core.Video;
 
 namespace bEmu.Systems.Gameboy
 {
     public class System : Core.System
     {
         public bool GBCMode => (MMU as MMU).Bios.IsGBC;
-        public IColorPalette ColorPalette { get; set; }
+        public IColorPalette ColorPalette { get; private set; }
         public bool DoubleSpeedMode => (MMU[0xFF4D] & 0x80) == 0x80;
         public override int Width => 160;
         public override int Height => 144;
         public override int RefreshRate => 16;
         public override int CycleCount => 69905;
         public override int StartAddress => 0;
+        public override SystemType Type => SystemType.GameBoy;
+        public override IRunner Runner { get; }
+        public override IState State { get; }
+        public override IMMU MMU { get; }
+        public override IPPU PPU { get; }
+        public override IAPU APU { get; }
 
         public System(string fileName) : base(fileName)
         {
+            State = GetInitialState();
+            MMU = new MMU(this);
+            PPU = new GPU.GPU(this);
+            APU = new APU(this);
+            Runner = new CPU(this);
+            ColorPalette = ColorPaletteFactory.Get(MonochromePaletteType.Gray);
         }
 
         public override IState GetInitialState()
@@ -36,21 +53,6 @@ namespace bEmu.Systems.Gameboy
             return state;
         }
 
-        public override void Initialize()
-        {
-            base.Initialize();
-            MMU = new MMU(this);
-            PPU = new GPU.GPU(this);
-            APU = new bEmu.Systems.Gameboy.Sound.APU(this);
-            Runner = new CPU(this);
-            ColorPalette = ColorPaletteFactory.Get(MonochromePaletteType.Gray);
-        }
-
-        public override void Reset()
-        {
-            base.Reset();
-        }
-
         public override bool Update()
         {            
             while (Cycles >= 0)
@@ -59,7 +61,6 @@ namespace bEmu.Systems.Gameboy
                     return false;
                     
                 var opcode = Runner.StepCycle();
-                //global::System.Console.Write(State.PC.ToString("x") + " ");
 
                 PPU.Cycles += opcode.CyclesTaken;
                 PPU.StepCycle();
@@ -116,6 +117,11 @@ namespace bEmu.Systems.Gameboy
 
             if (joypad.Column1 != 0xF || joypad.Column2 != 0xF)
                 ((State)State).RequestInterrupt(InterruptType.Joypad);
+        }
+
+        public void SetColorPalette(MonochromePaletteType type)
+        {
+            ColorPalette = ColorPaletteFactory.Get(type);
         }
     }
 }

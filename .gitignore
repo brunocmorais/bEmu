@@ -1,6 +1,6 @@
 */bin/*
 */obj/*
-*/Content/bin/*
-*/Content/obj/*
+*/MonoGame/Content/bin/*
+*/MonoGame/Content/obj/*
 Tests/test_roms/*
 BGB

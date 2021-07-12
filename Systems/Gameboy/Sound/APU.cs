@@ -1,9 +1,10 @@
 using System;
 using bEmu.Core;
+using bEmu.Core.Enums;
 
 namespace bEmu.Systems.Gameboy.Sound
 {
-    public class APU : Core.APU
+    public class APU : Core.Audio.APU
     {
         public IGbSoundChannel[] Channels { get; }
         public IVolumeEnvelopeChannel[] VolumeEnvelopeChannels { get; }

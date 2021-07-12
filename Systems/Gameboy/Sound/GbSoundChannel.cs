@@ -6,7 +6,6 @@ namespace bEmu.Systems.Gameboy.Sound
     {
         public int CycleToEnd { get; protected set; }
         public APU APU { get; }
-        public SoundOscillator Oscillator { get; }
         public MMU MMU { get; }
         public abstract float SoundLength { get; }
         public abstract byte Volume { get; protected set; }
@@ -16,7 +15,6 @@ namespace bEmu.Systems.Gameboy.Sound
         {
             APU = apu;
             MMU = apu.System.MMU as MMU;
-            Oscillator = new SoundOscillator();
         }
 
         public virtual void StartSound()

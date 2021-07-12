@@ -1,4 +1,4 @@
-using bEmu.Core.CPUs.Intel8080;
+using bEmu.Core.CPU.Intel8080;
 using bEmu.Core;
 using System.Collections.Generic;
 using System.IO.Compression;
@@ -6,6 +6,12 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Linq;
 using System;
+using bEmu.Core.Enums;
+using bEmu.Core.Audio;
+using bEmu.Core.Input;
+using bEmu.Core.Memory;
+using bEmu.Core.CPU;
+using bEmu.Core.Video;
 
 namespace bEmu.Systems.Generic8080
 {
@@ -16,13 +22,25 @@ namespace bEmu.Systems.Generic8080
         public override int Height => 256;
         public override int RefreshRate => 8;
         public override int CycleCount => 34952;
-
         public override int StartAddress => 0;
-
+        public override SystemType Type => SystemType.Generic8080;
+        public override IRunner Runner { get; }
+        public override IState State { get; }
+        public override IMMU MMU { get; }
+        public override IPPU PPU { get; }
+        public override IAPU APU { get; }
         public const string AssetFolder = "Assets/Generic8080";
 
         public System(string fileName) : base(fileName)
         {
+            State = GetInitialState();
+            MMU = new MMU(this);
+            PPU = new PPU(this, 224, 256);
+            Runner = new CPU(this);
+            APU = new APU(this);
+
+            ((Systems.Generic8080.State) State).UpdatePorts(1, 0x01);
+            ((Systems.Generic8080.State) State).UpdatePorts(2, 0x00);
         }
 
         public void LoadZipFile(IList<GameInfo> gameInfos)
@@ -68,18 +86,6 @@ namespace bEmu.Systems.Generic8080
             state.Instructions = 0;
 
             return state;
-        }
-
-        public override void Initialize()
-        {
-            base.Initialize();
-            MMU = new MMU(this);
-            PPU = new PPU(this, 224, 256);
-            Runner = new CPU(this);
-            APU = new APU(this);
-
-            ((Systems.Generic8080.State) State).UpdatePorts(1, 0x01);
-            ((Systems.Generic8080.State) State).UpdatePorts(2, 0x00);
         }
 
         public void SetStartPoint(ushort pc)

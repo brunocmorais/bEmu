@@ -2,6 +2,12 @@ using System;
 using System.IO;
 using System.Linq;
 using bEmu.Core;
+using bEmu.Core.Audio;
+using bEmu.Core.Enums;
+using bEmu.Core.Input;
+using bEmu.Core.Memory;
+using bEmu.Core.CPU;
+using bEmu.Core.Video;
 
 namespace bEmu.Systems.Chip8
 {
@@ -20,6 +26,12 @@ namespace bEmu.Systems.Chip8
         public override int RefreshRate => 16;
         public override int CycleCount => 8;
         public override int StartAddress => 0x200;
+        public override SystemType Type => SystemType.Chip8;
+        public override IRunner Runner { get; }
+        public override IState State { get; }
+        public override IMMU MMU { get; }
+        public override IPPU PPU { get; }
+        public override IAPU APU { get; }
 
         public void SetSuperChipMode()
         {
@@ -43,19 +55,18 @@ namespace bEmu.Systems.Chip8
             return state;
         }
 
-        public override void Initialize()
-        {
-            MMU = new MMU(this);
-            base.Initialize();
-            SetChip8Mode();
-            PPU = new PPU((State) State, Width, Height);
-            Runner = new Core.VMs.Chip8.Chip8(this);
-            APU = new APU(this);
-            InitializeBIOS();
-        }
-
         public System(string fileName) : base(fileName)
         {
+            Runner = new Core.VMs.Chip8.Chip8(this);
+            MMU = new MMU(this);
+            State = GetInitialState();
+
+            SetChip8Mode();
+            
+            PPU = new PPU((State) State, Width, Height);
+            APU = new APU(this);
+            
+            InitializeBIOS();
         }
 
         public override void Reset()

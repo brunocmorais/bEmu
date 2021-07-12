@@ -1,4 +1,5 @@
 using bEmu.Core;
+using bEmu.Core.Memory;
 
 namespace bEmu.Systems.Gameboy.MBCs
 {

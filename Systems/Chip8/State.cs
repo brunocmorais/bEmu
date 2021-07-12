@@ -78,7 +78,7 @@ namespace bEmu.Systems.Chip8
             SP = BitUtils.FromBytes<ushort>(bytes.GetRange((counter += size = sizeof(ushort)) - size, size));
             Cycles = BitUtils.FromBytes<int>(bytes.GetRange((counter += size = sizeof(int)) - size, size));
             Halted = BitUtils.FromBytes<bool>(bytes.GetRange((counter += size = sizeof(bool)) - size, size));
-            Instructions = BitUtils.FromBytes<int>(bytes.GetRange((counter += size = sizeof(int)) - size, size));
+            Instructions = BitUtils.FromBytes<ulong>(bytes.GetRange((counter += size = sizeof(int)) - size, size));
             V = BitUtils.FromBytes<byte>(bytes.GetRange((counter += size = (sizeof(byte) * V.Length)) - size, size), V.Length);
             Keys = BitUtils.FromBytes<bool>(bytes.GetRange((counter += size = (sizeof(bool) * Keys.Length)) - size, size), Keys.Length);
             I = BitUtils.FromBytes<ushort>(bytes.GetRange((counter += size = sizeof(ushort)) - size, size));

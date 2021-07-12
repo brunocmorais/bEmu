@@ -9,7 +9,6 @@ namespace bEmu.Systems.Gameboy.Sound
         float SoundLength { get; }
         byte Volume { get; }
         APU APU { get; }
-        SoundOscillator Oscillator { get; }
         MMU MMU { get; }
         int Frequency { get; }
         int CycleToEnd { get; }

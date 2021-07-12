@@ -2,7 +2,8 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using bEmu.Core;
-using bEmu.Core.CPUs.Intel8080;
+using bEmu.Core.CPU.Intel8080;
+using bEmu.Core.CPU;
 using bEmu.Systems.Gameboy;
 using bEmu.Systems.Generic8080;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,7 +18,7 @@ namespace Tests
         {
             string fileName = "../../../test_roms/gb/10-bit ops.gb";
             var system = new bEmu.Systems.Gameboy.System(fileName);
-            var disassembler = new bEmu.Core.CPUs.LR35902.Disassembler(system.MMU);
+            var disassembler = new bEmu.Core.CPU.LR35902.Disassembler(system.MMU);
             var sb = new StringBuilder();
 
             system.MMU.LoadProgram();

@@ -2,7 +2,7 @@ using bEmu.Core;
 
 namespace bEmu.Systems.Generic8080
 {
-    public class PPU : Core.PPU
+    public class PPU : Core.Video.PPU
     {
         public const int VRAMAddress = 0x2400;
 

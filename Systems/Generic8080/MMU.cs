@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace bEmu.Systems.Generic8080
 {
-    public class MMU : Core.MMU
+    public class MMU : Core.Memory.MMU
     {
         private readonly IList<GameInfo> games;
 
