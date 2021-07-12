@@ -1,9 +1,12 @@
 using System.ComponentModel;
+using bEmu.Core.Util;
 
 namespace bEmu.Core.Enums
 {
     public enum SystemType
     {
+        [Ignore]
+        None = 0,
         [Description("Arcade / Space Invaders")]
         Generic8080 = 1,
         [Description("CHIP-8")]

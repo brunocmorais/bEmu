@@ -8,10 +8,11 @@ using bEmu.Core.Input;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;
+using bEmu.Core.System;
 
 namespace bEmu.Systems.Chip8
 {
-    public class System : Core.System
+    public class System : Core.System.System
     {
         private readonly GamePadKey[] keys = new GamePadKey[]
         {

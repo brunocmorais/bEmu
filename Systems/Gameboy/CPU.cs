@@ -3,6 +3,7 @@ using bEmu.Core;
 using bEmu.Core.CPU.LR35902;
 using bEmu.Core.CPU;
 using bEmu.Systems.Gameboy.MBCs;
+using bEmu.Core.System;
 
 namespace bEmu.Systems.Gameboy
 {

@@ -9,10 +9,11 @@ using bEmu.Core.Input;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;
+using bEmu.Core.System;
 
 namespace bEmu.Systems.Gameboy
 {
-    public class System : Core.System
+    public class System : Core.System.System
     {
         public bool GBCMode => (MMU as MMU).Bios.IsGBC;
         public IColorPalette ColorPalette { get; private set; }

@@ -12,10 +12,11 @@ using bEmu.Core.Input;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;
+using bEmu.Core.System;
 
 namespace bEmu.Systems.Generic8080
 {
-    public class System : Core.System
+    public class System : Core.System.System
     {
         private int lastInterrupt = 1;
         public override int Width => 224;

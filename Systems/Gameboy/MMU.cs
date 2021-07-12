@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using bEmu.Core;
+using bEmu.Core.System;
 using bEmu.Systems.Gameboy.GPU;
 using bEmu.Systems.Gameboy.MBCs;
 using Debugger = System.Diagnostics.Debugger;

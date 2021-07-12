@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using bEmu.Core;
+using bEmu.Core.System;
 using bEmu.Core.Util;
 using Newtonsoft.Json;
 

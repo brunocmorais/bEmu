@@ -3,6 +3,7 @@ using System.IO;
 using bEmu.Core.CPU.Intel8080;
 using bEmu.Core;
 using bEmu.Core.Util;
+using bEmu.Core.System;
 
 namespace bEmu.Systems.Generic8080
 {

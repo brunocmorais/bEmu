@@ -1,5 +1,6 @@
 using bEmu.Core;
 using bEmu.Core.Audio;
+using bEmu.Core.System;
 
 namespace bEmu.Systems.Chip8
 {

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using bEmu.Core;
+using bEmu.Core.System;
 using bEmu.Core.Util;
 
 namespace bEmu.Systems.Generic8080

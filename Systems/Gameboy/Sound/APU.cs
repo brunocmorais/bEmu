@@ -1,6 +1,7 @@
 using System;
 using bEmu.Core;
 using bEmu.Core.Enums;
+using bEmu.Core.System;
 
 namespace bEmu.Systems.Gameboy.Sound
 {
