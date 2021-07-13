@@ -3,12 +3,12 @@ using bEmu.Core.Video;
 
 namespace bEmu.Systems.Generic8080
 {
-    public class DirectFramebuffer : Framebuffer
+    public class DirectFrameBuffer : FrameBuffer
     {
         private readonly byte[] data;
         private readonly MMU mmu;
 
-        public DirectFramebuffer(int width, int height, MMU mmu) : base(width, height)
+        public DirectFrameBuffer(int width, int height, MMU mmu) : base(width, height)
         {
             this.mmu = mmu;
             this.data = new byte[Width * Height * 4];

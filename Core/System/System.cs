@@ -6,6 +6,7 @@ using bEmu.Core.Input;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;
+using bEmu.Core.Video.Scalers;
 
 namespace bEmu.Core.System
 {
@@ -52,7 +53,7 @@ namespace bEmu.Core.System
             }
         }
 
-        public Framebuffer Framebuffer => PPU?.Framebuffer ?? new Framebuffer(Width, Height);
+        public IFrameBuffer Framebuffer => PPU?.Framebuffer ?? new FrameBuffer(Width, Height);
 
         public byte[] SoundBuffer
         {

@@ -5,13 +5,13 @@ namespace bEmu.Core.Video.Scalers
 {
     public class EmptyScaler : BaseScaler
     {
-        public override Framebuffer ScaledFramebuffer => Framebuffer;
+        public override IFrameBuffer ScaledFramebuffer => Framebuffer;
 
         public EmptyScaler() : base(1)  { }
 
-        public override void Update(int frame) 
-        { 
-            base.Update(frame);
+        public override void Update(int x, int y)
+        {
+            
         }
     }
 }

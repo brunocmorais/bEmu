@@ -1,4 +1,6 @@
+using bEmu.Core.Enums;
 using bEmu.Core.System;
+using bEmu.Core.Video.Scalers;
 
 namespace bEmu.Core.Video
 {
@@ -8,7 +10,7 @@ namespace bEmu.Core.Video
         public ISystem System { get; }
         public int Width { get; private set; }
         public int Height { get; private set; }
-        public virtual Framebuffer Framebuffer { get; protected set; }
+        public IFrameBuffer Framebuffer { get; protected set; }
         public int Frameskip { get; set; }
         public int Frame { get; set; }
         public int Cycles { get; set; }
@@ -25,7 +27,7 @@ namespace bEmu.Core.Video
             Height = height;
 
             if (Framebuffer == null)
-                Framebuffer = new Framebuffer(width, height);
+                Framebuffer = new FrameBuffer(width, height);
             else
                 Framebuffer.SetSize(width, height);
         }

@@ -4,6 +4,7 @@ using bEmu.Core.Input;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;
+using bEmu.Core.Video.Scalers;
 
 namespace bEmu.Core.System
 {
@@ -25,7 +26,7 @@ namespace bEmu.Core.System
         string SaveStateName { get; }
         int Frame { get; }
         int Frameskip { get; set; }
-        Framebuffer Framebuffer { get; }
+        IFrameBuffer Framebuffer { get; }
         byte[] SoundBuffer { get; }
         IDebugger Debugger { get; }
         SystemType Type { get; }

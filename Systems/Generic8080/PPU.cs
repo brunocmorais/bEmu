@@ -8,7 +8,7 @@ namespace bEmu.Systems.Generic8080
 
         public PPU(System system, int width, int height) : base(system, width, height) 
         { 
-            Framebuffer = new DirectFramebuffer(width, height, this.System.MMU as MMU);
+            Framebuffer = new DirectFrameBuffer(width, height, this.System.MMU as MMU);
         }
 
         public override void StepCycle() { }

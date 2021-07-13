@@ -6,17 +6,17 @@ namespace bEmu.Core.Video.Scalers
     {
         public BilinearScaler(int scaleFactor) : base(scaleFactor) { }
 
-        public override void Update(int frame)
+        public override void Update(int x, int y)
         {
             int xScale = Framebuffer.Width * ScaleFactor;
             int yScale = Framebuffer.Height * ScaleFactor;
- 
-            for (int x = 0; x < xScale; x++) 
+
+            for (int i = 0; i < ScaleFactor; i++)
             {
-                for (int y = 0; y < yScale; y++) 
-                {
-                    float gx = ((float) x) / xScale * (Framebuffer.Width - 1);
-                    float gy = ((float) y) / yScale * (Framebuffer.Height - 1);
+                for (int j = 0; j < ScaleFactor; j++)
+                {        
+                    float gx = ((float) i + (x * ScaleFactor)) / xScale * (Framebuffer.Width - 1);
+                    float gy = ((float) j + (y * ScaleFactor)) / yScale * (Framebuffer.Height - 1);
                     int gxi = (int) gx;
                     int gyi = (int) gy;
                     var c00 = Framebuffer[gxi, gyi];
@@ -29,11 +29,9 @@ namespace bEmu.Core.Video.Scalers
                     var g = (uint) ScalerHelpers.Blerp((c00 >> 16) & 0xFF, (c10 >> 16) & 0xFF, (c01 >> 16) & 0xFF, (c11 >> 16) & 0xFF, tx, ty);
                     var b = (uint) ScalerHelpers.Blerp((c00 >>  8) & 0xFF, (c10 >>  8) & 0xFF, (c01 >>  8) & 0xFF, (c11 >>  8) & 0xFF, tx, ty);
 
-                    ScaledFramebuffer[x, y] = (r << 24) | (g << 16) | (b << 8) | 0xFF;
+                    ScaledFramebuffer[i + (x * ScaleFactor), j + (y * ScaleFactor)] = (r << 24) | (g << 16) | (b << 8) | 0xFF;
                 }
             }
-
-            base.Update(frame);
         }
     }
 }

@@ -5,10 +5,11 @@ namespace bEmu.Core.Video.Scalers
 {
     public interface IScaler
     {
-        int ScaleFactor { get; set; }
-        Framebuffer Framebuffer { get; set; }
-        Framebuffer ScaledFramebuffer { get; }
+        int ScaleFactor { get; }
+        IFrameBuffer Framebuffer { get; set; }
+        IFrameBuffer ScaledFramebuffer { get; }
         int Frame { get; set; }
         void Update(int frame);
+        void Update(int x, int y);
     }
 }
