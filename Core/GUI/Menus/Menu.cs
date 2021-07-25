@@ -23,6 +23,7 @@ namespace bEmu.Core.GUI.Menus
             this.game = game;
             SelectedOption = 0;
             UpdateMenuOptions();
+            UpdateSize();
         }
 
         public abstract IEnumerable<MenuOption> GetMenuOptions();
@@ -32,7 +33,7 @@ namespace bEmu.Core.GUI.Menus
             MenuOptions = GetMenuOptions().ToArray();
         }
 
-        protected void UpdateSize()
+        public void UpdateSize()
         {
             this.Width = game.System.Width * game.Options.Size;
             this.Height = game.System.Height * game.Options.Size;

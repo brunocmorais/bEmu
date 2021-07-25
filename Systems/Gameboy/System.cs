@@ -20,8 +20,6 @@ namespace bEmu.Systems.Gameboy
         public bool DoubleSpeedMode => (MMU[0xFF4D] & 0x80) == 0x80;
         public override int Width => 160;
         public override int Height => 144;
-        public override int RefreshRate => 16;
-        public override int CycleCount => 69905;
         public override int StartAddress => 0;
         public override SystemType Type => SystemType.GameBoy;
         public override IRunner Runner { get; }
@@ -36,7 +34,7 @@ namespace bEmu.Systems.Gameboy
             MMU = new MMU(this);
             PPU = new GPU.GPU(this);
             APU = new APU(this);
-            Runner = new CPU(this);
+            Runner = new CPU(this, 4194304);
             ColorPalette = ColorPaletteFactory.Get(MonochromePaletteType.Gray);
         }
 
@@ -55,12 +53,12 @@ namespace bEmu.Systems.Gameboy
         }
 
         public override bool Update()
-        {            
+        {    
+            if (!base.Update())
+                return false;
+
             while (Cycles >= 0)
-            {
-                if (!base.Update())
-                    return false;
-                    
+            {                    
                 var opcode = Runner.StepCycle();
 
                 PPU.Cycles += opcode.CyclesTaken;

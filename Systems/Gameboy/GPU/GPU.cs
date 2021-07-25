@@ -18,7 +18,6 @@ namespace bEmu.Systems.Gameboy.GPU
         private bool windowDisplay;
         private bool spriteDisplay;
         private IEnumerable<Sprite> spritesCurrentLine;
-        private bool skipFrame => (Frameskip >= 1 && Frame % (Frameskip + 1) != 0);
         private bool GBCMode => (System as System).GBCMode;
         private BackgroundMap backgroundMap;
         private uint[] currentLine;
@@ -51,8 +50,6 @@ namespace bEmu.Systems.Gameboy.GPU
             state.LCD.Mode = GPUMode.HBlank;
             Cycles = 0;
             lcdEnabled = false;
-
-            Framebuffer.Reset();
         }
 
         public override void StepCycle()
@@ -92,7 +89,7 @@ namespace bEmu.Systems.Gameboy.GPU
                 if (state.LCD.GetSTATFlag(STAT.Mode2OAMInterrupt))
                     state.RequestInterrupt(InterruptType.LcdStat);
 
-                if (!skipFrame && lcdEnabled && spriteDisplay)
+                if (!System.SkipFrame && lcdEnabled && spriteDisplay)
                     spritesCurrentLine = mmu.OAM.GetSpritesForScanline(state.LCD.LY, spriteSize);
 
                 Cycles -= 80;
@@ -135,7 +132,7 @@ namespace bEmu.Systems.Gameboy.GPU
                 if (state.LCD.GetSTATFlag(STAT.Mode0HBlankInterrupt))
                     state.RequestInterrupt(InterruptType.LcdStat);
 
-                if (!skipFrame && lcdEnabled && state.LCD.LY < 144)
+                if (!System.SkipFrame && lcdEnabled && state.LCD.LY < 144)
                 {
                     windowDisplay = state.LCD.GetLCDCFlag(LCDC.WindowDisplayEnable);
                     spriteDisplay = state.LCD.GetLCDCFlag(LCDC.SpriteDisplayEnable);

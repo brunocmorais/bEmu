@@ -2,7 +2,7 @@ using bEmu.Core;
 
 namespace bEmu.Core.Video.Scalers
 {
-    public class NearestNeighborScaler : BaseScaler
+    public class NearestNeighborScaler : Scaler
     {
         public NearestNeighborScaler(int scaleFactor) : base(scaleFactor) { }
 

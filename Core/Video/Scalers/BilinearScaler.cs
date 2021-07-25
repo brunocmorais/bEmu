@@ -2,7 +2,7 @@ using bEmu.Core;
 
 namespace bEmu.Core.Video.Scalers
 {
-    public class BilinearScaler : BaseScaler
+    public class BilinearScaler : Scaler
     {
         public BilinearScaler(int scaleFactor) : base(scaleFactor) { }
 

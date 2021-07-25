@@ -17,7 +17,6 @@ namespace bEmu.Core.System
         IAPU APU { get; }
         int Width { get; }
         int Height { get; }
-        int RefreshRate { get; }
         int CycleCount { get; }
         int Cycles { get; }
         int StartAddress { get; }
@@ -30,6 +29,7 @@ namespace bEmu.Core.System
         byte[] SoundBuffer { get; }
         IDebugger Debugger { get; }
         SystemType Type { get; }
+        bool SkipFrame { get; }
 
         IState GetInitialState();
         void Reset();

@@ -6,7 +6,6 @@ using bEmu.Core.Input;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;
-using bEmu.Core.Video.Scalers;
 
 namespace bEmu.Core.System
 {
@@ -17,8 +16,6 @@ namespace bEmu.Core.System
         public IDebugger Debugger { get; private set; }
         public abstract int Width { get; }
         public abstract int Height { get; }
-        public abstract int RefreshRate { get; }
-        public abstract int CycleCount { get; }
         public abstract int StartAddress { get; }
         public abstract IState GetInitialState();
         public abstract void Stop();
@@ -33,6 +30,8 @@ namespace bEmu.Core.System
         public int Cycles { get; protected set; }
         public string SaveFileName => FileNameWithoutExtension + ".sav";
         public string SaveStateName => FileNameWithoutExtension + ".state";
+        public bool SkipFrame => (Frameskip >= 1 && Frame % (Frameskip + 1) != 0);
+        public int CycleCount => Runner?.Clock / 60 ?? 0;
         
         public int Frame
         {
@@ -102,6 +101,8 @@ namespace bEmu.Core.System
 
         public virtual bool Update()
         {
+            ResetCycles();
+
             return !(Debugger != null && (Debugger.IsStopped || (Debugger.BreakpointAddress > 0 && Debugger.BreakpointAddress == State.PC)));
         }
 

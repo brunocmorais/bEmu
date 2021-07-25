@@ -6,5 +6,6 @@ namespace bEmu.Core.CPU
     {
         ISystem System { get; }
         IOpcode StepCycle();
+        int Clock { get; }
     }
 }

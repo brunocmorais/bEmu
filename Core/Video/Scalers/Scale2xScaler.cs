@@ -1,7 +1,7 @@
 
 namespace bEmu.Core.Video.Scalers
 {
-    public class Scale2xScaler : BaseScaler
+    public class Scale2xScaler : Scaler
     {
         public Scale2xScaler() : base(2) { }
 

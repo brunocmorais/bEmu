@@ -22,7 +22,7 @@ namespace bEmu.Core.GUI.Menus
 
         public override IEnumerable<MenuOption> GetMenuOptions()
         {
-            yield return new MenuOption("Carregar jogo", (_) => game.MenuManager.OpenMenu(romSelectorMenu));
+            yield return new MenuOption("Carregar jogo", (_) => game.MenuManager.Open(romSelectorMenu));
             yield return new MenuOption("Carregar estado", (_) => game.LoadState());
             yield return new MenuOption("Salvar estado", (_) => game.SaveState());
             yield return new MenuOption("Reiniciar", (_) => game.ResetGame());
@@ -73,7 +73,7 @@ namespace bEmu.Core.GUI.Menus
 
         private void SelectSystem(string file)
         {
-            game.MenuManager.OpenMenu(new EnumSelectorMenu<SystemType>(game, (system) => game.LoadSystem(system, file)));
+            game.MenuManager.Open(new EnumSelectorMenu<SystemType>(game, (system) => game.LoadSystem(system, file)));
         }
     }
 }

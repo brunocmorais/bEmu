@@ -3,7 +3,7 @@ using bEmu.Core.Video;
 
 namespace bEmu.Core.Video.Scalers
 {
-    public class Scale3xScaler : BaseScaler
+    public class Scale3xScaler : Scaler
     {
         struct NeighborPixels
         {

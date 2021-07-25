@@ -12,8 +12,6 @@ namespace bEmu.Core.System
     {
         public override int Width => 640;
         public override int Height => 480;
-        public override int RefreshRate => 16;
-        public override int CycleCount => 0;
         public override int StartAddress => 0;
         public override SystemType Type => SystemType.None;
         public override IRunner Runner { get; }

@@ -8,6 +8,8 @@ namespace bEmu.Core.GUI.Menus
         IEnumerable<MenuOption> GetMenuOptions();
         void Update(double totalMilliseconds);
         void UpdateMenuOptions();
+        void UpdateSize();
+
         bool IsSelectable { get; set; }
         int Width { get; }
         int Height { get; }

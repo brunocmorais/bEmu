@@ -18,11 +18,8 @@ namespace bEmu.Systems.Generic8080
 {
     public class System : Core.System.System
     {
-        private int lastInterrupt = 1;
         public override int Width => 224;
         public override int Height => 256;
-        public override int RefreshRate => 8;
-        public override int CycleCount => 34952;
         public override int StartAddress => 0;
         public override SystemType Type => SystemType.Generic8080;
         public override IRunner Runner { get; }
@@ -37,7 +34,7 @@ namespace bEmu.Systems.Generic8080
             State = GetInitialState();
             MMU = new MMU(this);
             PPU = new PPU(this, 224, 256);
-            Runner = new CPU(this);
+            Runner = new CPU(this, 2097152);
             APU = new APU(this);
 
             ((Systems.Generic8080.State) State).UpdatePorts(1, 0x01);
@@ -103,30 +100,35 @@ namespace bEmu.Systems.Generic8080
         {
             if (!base.Update())
                 return false;
-                
-            var state = (Systems.Generic8080.State) State;
 
-            if (state.EnableInterrupts)
-            {
-                lastInterrupt = lastInterrupt == 1 ? 2 : 1;
-
-                if (lastInterrupt == 1)
-                    PPU.Frame++;
-
-                (Runner as CPU).GenerateInterrupt(lastInterrupt);
-            }
+            int halfCycles = (CycleCount / 2);
+            int lastInterrupt = GenerateInterrupt(2);
 
             while (Cycles >= 0)
             {
-                if (!base.Update())
-                    return false;
-
                 var opcode = Runner.StepCycle();
                 Cycles -= opcode.CyclesTaken;
+
+                if (lastInterrupt == 2 && Cycles <= halfCycles)
+                    lastInterrupt = GenerateInterrupt(1);
+
                 APU.Update(Cycles);
             }
 
             return true;
+        }
+
+        private int GenerateInterrupt(int interrupt)
+        {
+            if (((Systems.Generic8080.State)State).EnableInterrupts)
+            {
+                if (interrupt == 1)
+                    PPU.Frame++;
+
+                (Runner as CPU).GenerateInterrupt(interrupt);
+            }
+
+            return interrupt;
         }
 
         public override void Stop()

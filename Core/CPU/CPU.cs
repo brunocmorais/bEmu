@@ -10,12 +10,14 @@ namespace bEmu.Core.CPU
         public ISystem System { get; }
         public TState State { get; }
         public TMMU MMU { get; }
+        public int Clock { get; }
 
-        public CPU(ISystem system)
+        public CPU(ISystem system, int clock)
         {
             System = system;
             State = system.State as TState;
             MMU = system.MMU as TMMU;
+            Clock = clock;
         }
 
         public virtual IOpcode StepCycle()

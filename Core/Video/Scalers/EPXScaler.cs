@@ -4,7 +4,7 @@ using bEmu.Core.Video;
 
 namespace bEmu.Core.Video.Scalers
 {
-    public class EPXScaler : BaseScaler
+    public class EPXScaler : Scaler
     {
         public EPXScaler() : base(2) { }
 

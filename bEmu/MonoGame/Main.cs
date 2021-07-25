@@ -11,6 +11,7 @@ using bEmu.Core.GUI;
 using bEmu.Core.Audio;
 using bEmu.Core.System;
 using bEmu.Core.Input;
+using bEmu.Core.GUI.Popups;
 
 namespace bEmu.MonoGame
 {
@@ -30,6 +31,7 @@ namespace bEmu.MonoGame
         private double FPS => Math.Round(drawCounter / (DateTime.Now - lastStartDate).TotalSeconds, 1);
         public IOSD Osd { get; }
         public IMenuManager MenuManager { get; }
+        public IPopupManager PopupManager { get; }
         public bool IsRunning { get; private set; }
         public IOptions Options { get; private set; }
         public ISystem System { get; private set; }
@@ -47,6 +49,7 @@ namespace bEmu.MonoGame
             LoadSystem(0, string.Empty);
             
             MenuManager = new MenuManager(this);
+            PopupManager = new PopupManager(this);
         }
 
         protected override void LoadContent()
@@ -63,16 +66,29 @@ namespace bEmu.MonoGame
         {
             System = SystemFactory.Get(system, file);
             Options = OptionsFactory.Build(this);
-            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, System.RefreshRate);
-
-            SetScreenSize();
-            SetScaler();
 
             if (system != SystemType.None)
             {
-                System.LoadProgram();
-                MenuManager.CloseAll();
-                Start();
+                try
+                {
+                    System.LoadProgram();
+                    MenuManager.CloseAll();
+
+                    SetScreenSize();
+                    SetScaler();
+
+                    Start();
+                }
+                catch (Exception ex)
+                {
+                    LoadSystem(SystemType.None, string.Empty);
+                    PopupManager.ShowErrorDialog("Erro", "Houve um erro do sistema ao carregar o jogo selecionado.", ex);
+                }
+            }
+            else
+            {
+                SetScreenSize();
+                SetScaler();
             }
         }
 
@@ -102,7 +118,11 @@ namespace bEmu.MonoGame
 
             GamePadStateProvider.Instance.UpdateState(gamePad);
             Osd.Update();
-            MenuManager.Update(gameTime.TotalGameTime.TotalMilliseconds);
+
+            if (PopupManager.IsOpen)
+                PopupManager.Update(gameTime.TotalGameTime.TotalMilliseconds);
+            else
+                MenuManager.Update(gameTime.TotalGameTime.TotalMilliseconds);
 
             if (IsRunning && System.Frame == lastRenderedFrame)
             {
@@ -111,13 +131,19 @@ namespace bEmu.MonoGame
                 if (Options.ShowFPS)
                     Osd.UpdateMessage(MessageType.FPS, $"{FPS:0.0} fps");
 
-                if (System.Cycles <= 0)
-                    System.ResetCycles();
-
                 while (sound.PendingBufferCount < APU.MaxBufferPending && Options.EnableSound)
-                    sound.SubmitBuffer(System.SoundBuffer);
+                {
+                    try 
+                    {
+                        sound.SubmitBuffer(System.SoundBuffer);
+                    }
+                    catch { }
+                }
 
                 System.Update();
+
+                if (scaler.Frame < System.Frame && !System.SkipFrame)
+                    scaler.Update(System.Frame);
             }
         }
 
@@ -140,9 +166,11 @@ namespace bEmu.MonoGame
 
             if (IsRunning && System.Frame > lastRenderedFrame)
             {
-                scaler.Update(System.Frame);
-                backBuffer.SetData(scaler.ScaledFramebuffer.Data);
                 lastRenderedFrame = System.Frame;
+
+                if (!System.SkipFrame)
+                    backBuffer.SetData(scaler.ScaledFramebuffer.Data);
+                    
                 drawCounter++;
             }
 
@@ -150,6 +178,9 @@ namespace bEmu.MonoGame
 
             if (MenuManager.IsOpen)
                 drawer.Draw(MenuManager.Current);
+
+            if (PopupManager.IsOpen)
+                drawer.Draw(PopupManager.Current);
 
             drawer.Draw(Osd);
             spriteBatch.End();

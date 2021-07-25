@@ -1,9 +1,6 @@
-using bEmu.Core;
-using bEmu.Core.Video;
-
 namespace bEmu.Core.Video.Scalers
 {
-    public abstract class BaseScaler : IScaler
+    public abstract class Scaler : IScaler
     {
         private IFrameBuffer original;
         public int ScaleFactor { get; }
@@ -19,7 +16,7 @@ namespace bEmu.Core.Video.Scalers
         public virtual IFrameBuffer ScaledFramebuffer { get; protected set; }
         public int Frame { get; set; }
 
-        public BaseScaler(int scaleFactor)
+        public Scaler(int scaleFactor)
         {
             ScaleFactor = scaleFactor;
         }

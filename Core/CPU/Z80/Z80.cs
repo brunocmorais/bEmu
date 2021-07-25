@@ -12,7 +12,7 @@ namespace bEmu.Core.CPU.Z80
     {
         const int CyclesInHalt = 12;
         
-        public Z80(ISystem system) : base(system) { }
+        public Z80(ISystem system, int clock) : base(system, clock) { }
 
         protected ushort GetNextWord()
         {

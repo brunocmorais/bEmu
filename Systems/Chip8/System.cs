@@ -24,8 +24,6 @@ namespace bEmu.Systems.Chip8
 
         public override int Width => 128; 
         public override int Height => 64;
-        public override int RefreshRate => 16;
-        public override int CycleCount => 8;
         public override int StartAddress => 0x200;
         public override SystemType Type => SystemType.Chip8;
         public override IRunner Runner { get; }
@@ -58,7 +56,7 @@ namespace bEmu.Systems.Chip8
 
         public System(string fileName) : base(fileName)
         {
-            Runner = new Core.VMs.Chip8.Chip8(this);
+            Runner = new Core.VMs.Chip8.Chip8(this, 480);
             MMU = new MMU(this);
             State = GetInitialState();
 

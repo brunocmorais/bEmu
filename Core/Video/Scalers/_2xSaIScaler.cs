@@ -3,7 +3,7 @@ using bEmu.Core.Video;
 
 namespace bEmu.Core.Video.Scalers
 {
-    public class _2xSaIScaler : BaseScaler
+    public class _2xSaIScaler : Scaler
     {
         public _2xSaIScaler() : base(2)
         {

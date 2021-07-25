@@ -3,7 +3,7 @@ using bEmu.Core.Video;
 
 namespace bEmu.Core.Video.Scalers
 {
-    public class EmptyScaler : BaseScaler
+    public class EmptyScaler : Scaler
     {
         public override IFrameBuffer ScaledFramebuffer => Framebuffer;
 

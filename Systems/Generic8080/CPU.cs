@@ -6,7 +6,7 @@ namespace bEmu.Systems.Generic8080
 {
     public class CPU : Intel8080<State, MMU>
     {
-        public CPU(System system) : base(system) { }
+        public CPU(System system, int clock) : base(system, clock) { }
 
         public override void In()
         {

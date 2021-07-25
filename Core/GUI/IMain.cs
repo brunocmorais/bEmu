@@ -2,16 +2,18 @@ using System;
 using bEmu.Core.Enums;
 using bEmu.Core.System;
 using bEmu.Core.GUI.Menus;
+using bEmu.Core.GUI.Popups;
 
 namespace bEmu.Core.GUI
 {
     public interface IMain : IDisposable
     {
         IOptions Options { get; }
-        IMenuManager MenuManager { get; }
         IOSD Osd { get; }
         bool IsRunning { get; }
         ISystem System { get; }
+        IMenuManager MenuManager { get; }
+        IPopupManager PopupManager { get; }
 
         void LoadSystem(SystemType system, string file);
         void StopGame();

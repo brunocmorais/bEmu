@@ -6,53 +6,33 @@ using bEmu.Core.System;
 
 namespace bEmu.Core.GUI.Menus
 {
-    public class MenuManager : IMenuManager
+
+    public class MenuManager : Manager<IMenu>, IMenuManager
     {
-        private readonly IMain game;
         private readonly MainMenu mainMenu;
-        public Stack<IMenu> Menus { get; }
-        public IMenu Current => Menus.Any() ? Menus.Peek() : default;
-        public bool IsOpen => Menus.Any();
 
-        public MenuManager(IMain game)
+        public MenuManager(IMain game) : base(game)
         {
-            Menus = new Stack<IMenu>();
-            this.game = game;
             mainMenu = new MainMenu(game);
-        }
-
-        public void CloseAll()
-        {
-            Menus.Clear();
-        }
-
-        public void CloseCurrentMenu()
-        {
-            Menus.TryPop(out IMenu result);
-        }
-
-        public void OpenMenu(IMenu menu)
-        {
-            Menus.Push(menu);
         }
 
         public void OpenMainMenu()
         {
             mainMenu.UpdateMenuOptions();
-            Menus.Push(mainMenu);
+            Items.Push(mainMenu);
         }
 
         public void ShowAbout()
         {
-            Menus.Push(new AboutMenu(game));
+            Items.Push(new AboutMenu(Game));
         }
 
         public void OpenDebugger()
         {
-            Menus.Push(new DebuggerMenu(game));
+            Items.Push(new DebuggerMenu(Game));
         }
 
-        public void Update(double totalMilliseconds)
+        public override void Update(double totalMilliseconds)
         {
             bool menuRelatedKeyPressed = false;
 
@@ -63,34 +43,34 @@ namespace bEmu.Core.GUI.Menus
             {
                 menuRelatedKeyPressed = true;
 
-                if (!game.MenuManager.IsOpen)
+                if (!Game.MenuManager.IsOpen)
                     OpenMainMenu();
                 else
-                    game.MenuManager.CloseCurrentMenu();
+                    Game.MenuManager.CloseCurrent();
             }
 
             if (GamePadStateProvider.Instance.HasBeenPressed(GamePadKey.F3)) // reiniciar jogo
-                game.ResetGame();
+                Game.ResetGame();
 
 
-            if (menuRelatedKeyPressed && ((game.MenuManager.IsOpen && game.IsRunning) || (!game.MenuManager.IsOpen && !game.IsRunning)))
-                game.Pause();
+            if (menuRelatedKeyPressed && ((Game.MenuManager.IsOpen && Game.IsRunning) || (!Game.MenuManager.IsOpen && !Game.IsRunning)))
+                Game.Pause();
 
             if (GamePadStateProvider.Instance.HasBeenPressed(GamePadKey.P)) // pausar
             {
-                if (!game.MenuManager.IsOpen)
+                if (!Game.MenuManager.IsOpen)
                 {
-                    if (game.IsRunning)
-                        game.Osd.InsertMessage(MessageType.Default, "Pausado");
+                    if (Game.IsRunning)
+                        Game.Osd.InsertMessage(MessageType.Default, "Pausado");
                     else
-                        game.Osd.InsertMessage(MessageType.Default, "Em andamento");
+                        Game.Osd.InsertMessage(MessageType.Default, "Em andamento");
 
-                    game.Pause();
+                    Game.Pause();
                 }
             }
 
             if (GamePadStateProvider.Instance.HasBeenPressed(GamePadKey.F2)) // mostrar informações
-                game.Options.SetOption(nameof(Options.ShowFPS), false);
+                Game.Options.SetOption(nameof(Options.ShowFPS), false);
         }
     }
 }

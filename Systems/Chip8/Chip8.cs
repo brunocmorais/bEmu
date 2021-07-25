@@ -10,7 +10,7 @@ namespace bEmu.Core.VMs.Chip8
     {
         private Random random;
         
-        public Chip8(ISystem system) : base(system) 
+        public Chip8(ISystem system, int clock) : base(system, clock) 
         { 
             random = new Random();
         }

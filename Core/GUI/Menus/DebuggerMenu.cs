@@ -104,7 +104,7 @@ namespace bEmu.Core.GUI.Menus
                     AddLine(PrintHelp());
                     break;
                 case "quit":
-                    game.MenuManager.CloseCurrentMenu();
+                    game.MenuManager.CloseCurrent();
                     break;
                 case "go":
                     if (!game.IsRunning)
