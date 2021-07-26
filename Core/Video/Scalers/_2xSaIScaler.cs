@@ -5,7 +5,7 @@ namespace bEmu.Core.Video.Scalers
 {
     public class _2xSaIScaler : Scaler
     {
-        public _2xSaIScaler() : base(2)
+        public _2xSaIScaler(IFrameBuffer frameBuffer) : base(frameBuffer, 2)
         {
         }
 

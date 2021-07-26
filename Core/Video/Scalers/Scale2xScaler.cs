@@ -3,7 +3,7 @@ namespace bEmu.Core.Video.Scalers
 {
     public class Scale2xScaler : Scaler
     {
-        public Scale2xScaler() : base(2) { }
+        public Scale2xScaler(IFrameBuffer frameBuffer) : base(frameBuffer, 2) { }
 
         public override void Update(int x, int y)
         {

@@ -6,5 +6,6 @@ namespace bEmu.Core.GUI.Popups
     {
         public string Text { get; }
         public Action Action { get; }
+        bool Close { get; }
     }
 }

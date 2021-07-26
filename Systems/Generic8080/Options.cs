@@ -1,17 +1,16 @@
 using System.ComponentModel;
-using bEmu.Core.System;
 using bEmu.Core.GUI;
-using bEmu.Systems.Gameboy.GPU.Palettes;
+using bEmu.Core.System;
 
-namespace bEmu.Systems.Gameboy
+namespace bEmu.Systems.Generic8080
 {
     public class Options : Core.System.Options
     {
-        [Description("Paleta de cores")]
-        public MonochromePaletteType PaletteType { get; protected set; }
-
+        [Description("Cores customizadas")]
+        public bool CustomColors { get; protected set; }
         public Options(IMain game, int size) : base(game, size)
         {
+            SetOption(nameof(CustomColors), false);
         }
 
         public override void OptionChangedEvent(object sender, OnOptionChangedEventArgs e)
@@ -22,8 +21,8 @@ namespace bEmu.Systems.Gameboy
 
             switch (e.Property)
             {
-                case nameof(options.PaletteType):
-                    (Game.System as Systems.Gameboy.System).SetColorPalette(options.PaletteType);
+                case nameof(options.CustomColors):
+                    (Game.System as Systems.Generic8080.System).SetCustomColors(options.CustomColors);
                     break;
             }
         }

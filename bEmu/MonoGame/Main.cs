@@ -12,6 +12,7 @@ using bEmu.Core.Audio;
 using bEmu.Core.System;
 using bEmu.Core.Input;
 using bEmu.Core.GUI.Popups;
+using bEmu.MonoGame.Drawers;
 
 namespace bEmu.MonoGame
 {
@@ -26,11 +27,13 @@ namespace bEmu.MonoGame
         private IScaler scaler;
         private int lastRenderedFrame;
         private Texture2D backBuffer;
-        private IDrawer drawer;
+        private IDrawer<IOSD> osdDrawer;
+        private IDrawer<IMenu> menuDrawer;
+        private IDrawer<IPopup> popupDrawer;
         private SpriteBatch spriteBatch;
         private double FPS => Math.Round(drawCounter / (DateTime.Now - lastStartDate).TotalSeconds, 1);
         public IOSD Osd { get; }
-        public IMenuManager MenuManager { get; }
+        public MenuManager MenuManager { get; }
         public IPopupManager PopupManager { get; }
         public bool IsRunning { get; private set; }
         public IOptions Options { get; private set; }
@@ -46,7 +49,7 @@ namespace bEmu.MonoGame
             Osd = new OSD();
             gamePadBuilder = new GamePadBuilder();
 
-            LoadSystem(0, string.Empty);
+            LoadSystem(SystemType.None, string.Empty);
             
             MenuManager = new MenuManager(this);
             PopupManager = new PopupManager(this);
@@ -57,9 +60,11 @@ namespace bEmu.MonoGame
             var regular = Content.Load<SpriteFont>("Common/Regular");
             var title = Content.Load<SpriteFont>("Common/Title");
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            drawer = new Drawer(spriteBatch, GraphicsDevice, regular, title);
+            osdDrawer = new OSDDrawer(spriteBatch, GraphicsDevice, regular, title);
+            menuDrawer = new MenuDrawer(spriteBatch, GraphicsDevice, regular, title);
+            popupDrawer = new PopupDrawer(spriteBatch, GraphicsDevice, regular, title);
 
-            MenuManager.OpenMainMenu();
+            MenuManager.Open((new MainMenu(this)));
         }
 
         public void LoadSystem(SystemType system, string file)
@@ -114,16 +119,24 @@ namespace bEmu.MonoGame
 
         protected override void Update(GameTime gameTime)
         {
+            // atualização do GamePad
             var gamePad = gamePadBuilder.Build(Keyboard.GetState().GetPressedKeys());
-
             GamePadStateProvider.Instance.UpdateState(gamePad);
+
+            // atualização dos itens renderizáveis em tela 
+            MenuManager.Update();
+            PopupManager.Update();
+
+            // atualização das notificações
             Osd.Update();
 
+            // atualização dos itens controláveis
             if (PopupManager.IsOpen)
-                PopupManager.Update(gameTime.TotalGameTime.TotalMilliseconds);
+                PopupManager.UpdateControls(gameTime.TotalGameTime.TotalMilliseconds);
             else
-                MenuManager.Update(gameTime.TotalGameTime.TotalMilliseconds);
+                MenuManager.UpdateControls(gameTime.TotalGameTime.TotalMilliseconds);
 
+            // atualização do sistema em execução
             if (IsRunning && System.Frame == lastRenderedFrame)
             {
                 System.UpdateGamePad(gamePad);
@@ -132,13 +145,7 @@ namespace bEmu.MonoGame
                     Osd.UpdateMessage(MessageType.FPS, $"{FPS:0.0} fps");
 
                 while (sound.PendingBufferCount < APU.MaxBufferPending && Options.EnableSound)
-                {
-                    try 
-                    {
-                        sound.SubmitBuffer(System.SoundBuffer);
-                    }
-                    catch { }
-                }
+                    sound.SubmitBuffer(System.SoundBuffer);
 
                 System.Update();
 
@@ -157,7 +164,8 @@ namespace bEmu.MonoGame
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            if (System.Type == SystemType.None)
+                GraphicsDevice.Clear(Color.Black);
 
             if (backBuffer == null)
                 return;
@@ -177,12 +185,12 @@ namespace bEmu.MonoGame
             spriteBatch.Draw(backBuffer, destinationRectangle, Color.White);
 
             if (MenuManager.IsOpen)
-                drawer.Draw(MenuManager.Current);
+                menuDrawer.Draw(MenuManager.Current);
 
             if (PopupManager.IsOpen)
-                drawer.Draw(PopupManager.Current);
+                popupDrawer.Draw(PopupManager.Current);
 
-            drawer.Draw(Osd);
+            osdDrawer.Draw(Osd);
             spriteBatch.End();
         }
 
@@ -199,8 +207,7 @@ namespace bEmu.MonoGame
 
         public void SetScaler()
         {
-            scaler = ScalerFactory.Get(Options.Scaler, Options.Size);
-            scaler.Framebuffer = System.Framebuffer;
+            scaler = ScalerFactory.Get(Options.Scaler, Options.Size, System.Framebuffer);
             scaler.Update(System.Frame);
             
             backBuffer = new Texture2D(GraphicsDevice, System.Width * scaler.ScaleFactor, System.Height * scaler.ScaleFactor);

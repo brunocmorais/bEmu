@@ -4,7 +4,7 @@ namespace bEmu.Core.Video.Scalers
 {
     public class BilinearScaler : Scaler
     {
-        public BilinearScaler(int scaleFactor) : base(scaleFactor) { }
+        public BilinearScaler(IFrameBuffer frameBuffer, int scaleFactor) : base(frameBuffer, scaleFactor) { }
 
         public override void Update(int x, int y)
         {

@@ -9,29 +9,17 @@ namespace bEmu.Systems.Factory
     {
         public static IOptions Build(IMain game)
         {
-            IOptions options;
-            int size;
-
             switch (game.System.Type)
             {
                 case SystemType.Chip8:
-                    size = 5;
-                    break;
+                    return new Systems.Chip8.Options(game, 5);
                 case SystemType.Generic8080:
+                    return new Systems.Generic8080.Options(game, 2);
                 case SystemType.GameBoy:
-                    size = 2;
-                    break;
+                    return new Systems.Gameboy.Options(game, 2);
                 default:
-                    size = 1;
-                    break;
+                    return new Core.System.Options(game, 1);
             }
-
-            if (game.System.Type == SystemType.GameBoy)
-                options = new Systems.Gameboy.Options(game, size);
-            else
-                options = new Core.System.Options(game, size);
-
-            return options;
         }
     }
 }

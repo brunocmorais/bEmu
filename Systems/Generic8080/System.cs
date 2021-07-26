@@ -34,7 +34,7 @@ namespace bEmu.Systems.Generic8080
             State = GetInitialState();
             MMU = new MMU(this);
             PPU = new PPU(this, 224, 256);
-            Runner = new CPU(this, 2097152);
+            Runner = new CPU(this, 4194304);
             APU = new APU(this);
 
             ((Systems.Generic8080.State) State).UpdatePorts(1, 0x01);
@@ -156,6 +156,11 @@ namespace bEmu.Systems.Generic8080
                 read1 = (byte) (read1 | (1 << 6));
 
             ((State)State).UpdatePorts(1, read1);
+        }
+
+        public void SetCustomColors(bool value)
+        {
+            (PPU as PPU).SetCustomColors(value);
         }
     }
 }

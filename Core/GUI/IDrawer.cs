@@ -1,12 +1,7 @@
-using bEmu.Core.GUI.Menus;
-using bEmu.Core.GUI.Popups;
-
 namespace bEmu.Core.GUI
 {
-    public interface IDrawer
+    public interface IDrawer<T> where T : IDrawable
     {
-        void Draw(IMenu menu);
-        void Draw(IOSD osd);
-        void Draw(IPopup popup);
+        void Draw(T obj);
     }
 }

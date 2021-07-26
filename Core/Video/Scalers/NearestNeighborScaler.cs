@@ -4,14 +4,11 @@ namespace bEmu.Core.Video.Scalers
 {
     public class NearestNeighborScaler : Scaler
     {
-        public NearestNeighborScaler(int scaleFactor) : base(scaleFactor) { }
+        public NearestNeighborScaler(IFrameBuffer frameBuffer, int scaleFactor) : base(frameBuffer, scaleFactor) { }
 
         public override void Update(int x, int y)
         {
-            var scaledPixel = new ScaledPixel(ScaleFactor);
-            scaledPixel.Fill(this[x, y]);
-
-            ScaledFramebuffer.SetScaledPixel(scaledPixel, x, y);
+            ScaledFramebuffer.SetScaledPixel(new ScaledPixel(ScaleFactor, this[x, y]), x, y);
         }
     }
 }

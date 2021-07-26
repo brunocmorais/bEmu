@@ -1,6 +1,7 @@
 using System;
 using bEmu.Core;
 using bEmu.Core.Util;
+using bEmu.Core.Video;
 
 namespace bEmu.Systems.Chip8
 {
@@ -194,12 +195,7 @@ namespace bEmu.Systems.Chip8
                 if (((State) state).SuperChipMode)
                     Framebuffer[x, y] = value;
                 else
-                {
-                    Framebuffer[(x * 2) + 0, (y * 2) + 0] = value;
-                    Framebuffer[(x * 2) + 1, (y * 2) + 0] = value;
-                    Framebuffer[(x * 2) + 0, (y * 2) + 1] = value;
-                    Framebuffer[(x * 2) + 1, (y * 2) + 1] = value;
-                }
+                    Framebuffer.SetScaledPixel(new ScaledPixel(2, value), x, y);
             }
         }
 

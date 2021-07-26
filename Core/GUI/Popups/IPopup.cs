@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace bEmu.Core.GUI.Popups
 {
-    public interface IPopup
+    public interface IPopup : IDrawable
     {
         int Width { get; }
         int Height { get; }

@@ -6,15 +6,17 @@ namespace bEmu.Core.GUI.Popups
     {
         public string Text { get; }
         public Action Action { get; }
+        public bool Close { get; }
 
-        public Button(string text, Action action) : this(text)
+        public Button(string text, bool close, Action action) : this(text, close)
         {
             Action = action;
         }
 
-        public Button(string text)
+        public Button(string text, bool close)
         {
             Text = text;
+            Close = close;
         }
     }
 }

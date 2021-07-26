@@ -6,7 +6,7 @@ namespace bEmu.MonoGame
 {
     public class GamePadBuilder : IGamePadBuilder<Keys>
     {
-        public Core.Input.GamePad Build(Keys[] pressedKeys)
+        public IGamePad Build(Keys[] pressedKeys)
         {
             var keys = new GamePadKey[pressedKeys.Length];
 
@@ -16,7 +16,7 @@ namespace bEmu.MonoGame
             return new Core.Input.GamePad(keys);
         }
 
-        private GamePadKey GetGamePadKey(Keys key)
+        public GamePadKey GetGamePadKey(Keys key)
         {
             switch (key)
             {

@@ -2,13 +2,12 @@ using System.Collections.Generic;
 
 namespace bEmu.Core.GUI.Menus
 {
-    public interface IMenu
+    public interface IMenu : IDrawable
     {
         string Title { get; }
         IEnumerable<MenuOption> GetMenuOptions();
-        void Update(double totalMilliseconds);
+        void UpdateControls(double totalMilliseconds);
         void UpdateMenuOptions();
-        void UpdateSize();
 
         bool IsSelectable { get; set; }
         int Width { get; }

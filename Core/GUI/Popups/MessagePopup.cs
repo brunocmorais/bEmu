@@ -2,8 +2,8 @@ namespace bEmu.Core.GUI.Popups
 {
     public class MessagePopup : Popup
     {
-        public MessagePopup(string title, string text, int width, int height, int screenX, int screenY, params IButton[] buttons) :
-            base(width, height, GetCenterPosition(width, screenX), GetCenterPosition(height, screenY), text, title, buttons)
+        public MessagePopup(IMain game, PopupSize size, string text, string title, params IButton[] buttons) : 
+            base(game, size, text, title, buttons)
         {
         }
     }

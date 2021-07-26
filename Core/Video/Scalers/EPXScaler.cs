@@ -6,7 +6,7 @@ namespace bEmu.Core.Video.Scalers
 {
     public class EPXScaler : Scaler
     {
-        public EPXScaler() : base(2) { }
+        public EPXScaler(IFrameBuffer frameBuffer) : base(frameBuffer, 2) { }
 
         public override void Update(int x, int y)
         {

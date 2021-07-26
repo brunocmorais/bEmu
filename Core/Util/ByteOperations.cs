@@ -11,6 +11,11 @@ namespace bEmu.Core.Util
             return (ushort)((msb << 8) | lsb);
         }
 
+        public static uint GetDWordFrom4Bytes(byte b1, byte b2, byte b3, byte b4)
+        {
+            return (uint)((b4 << 24) | (b3 << 16) | (b2 << 8) | b1);
+        }
+
         public static void Get2BytesFromWord(ushort value, out byte msb, out byte lsb)
         {
             msb = (byte) ((value & 0xFF00) >> 8);

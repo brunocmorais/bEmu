@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace bEmu.Core.GUI
 {
-    public abstract class Manager<T> : IManager<T>
+    public abstract class Manager<T> : IManager<T> where T : IDrawable
     {
         public Stack<T> Items { get; }
         public T Current => Items.Any() ? Items.Peek() : default;
@@ -32,6 +32,12 @@ namespace bEmu.Core.GUI
             Items.Push(popup);
         }
 
-        public abstract void Update(double totalMilliseconds);
+        public virtual void Update()
+        {
+            foreach (var item in Items)
+                item.Update();
+        }
+
+        public abstract void UpdateControls(double totalMilliseconds);
     }
 }

@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using bEmu.Core.Enums;
+using bEmu.Core.Extensions;
 using bEmu.Core.Input;
 
 namespace bEmu.Core.GUI.Menus
@@ -23,7 +25,7 @@ namespace bEmu.Core.GUI.Menus
             this.game = game;
             SelectedOption = 0;
             UpdateMenuOptions();
-            UpdateSize();
+            Update();
         }
 
         public abstract IEnumerable<MenuOption> GetMenuOptions();
@@ -33,20 +35,18 @@ namespace bEmu.Core.GUI.Menus
             MenuOptions = GetMenuOptions().ToArray();
         }
 
-        public void UpdateSize()
+        public void Update()
         {
             this.Width = game.System.Width * game.Options.Size;
             this.Height = game.System.Height * game.Options.Size;
         }
 
-        public virtual void Update(double totalMilliseconds)
+        public virtual void UpdateControls(double totalMilliseconds)
         {
             var pressedKeys = GamePadStateProvider.Instance.PressedKeys;
             var option = MenuOptions[SelectedOption];
             bool updateSelection = (totalMilliseconds - lastSelectionUpdate) > Delay;
             bool simpleOption = option.Type == typeof(void);
-
-            UpdateSize();
 
             if (pressedKeys.Contains(GamePadKey.Down) && updateSelection)
                 UpdateSelectedOption(1, totalMilliseconds);

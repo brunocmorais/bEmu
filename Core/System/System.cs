@@ -11,6 +11,7 @@ namespace bEmu.Core.System
 {
     public abstract class System : ISystem
     {
+        private readonly byte[] dummySoundBuffer = new byte[Audio.APU.BufferSize];
         protected string FileNameWithoutExtension => 
             Path.Combine(Path.GetDirectoryName(FileName), Path.GetFileNameWithoutExtension(FileName));
         public IDebugger Debugger { get; private set; }
@@ -31,7 +32,7 @@ namespace bEmu.Core.System
         public string SaveFileName => FileNameWithoutExtension + ".sav";
         public string SaveStateName => FileNameWithoutExtension + ".state";
         public bool SkipFrame => (Frameskip >= 1 && Frame % (Frameskip + 1) != 0);
-        public int CycleCount => Runner?.Clock / 60 ?? 0;
+        public virtual int CycleCount => Runner?.Clock / 60 ?? 0;
         
         public int Frame
         {
@@ -64,7 +65,7 @@ namespace bEmu.Core.System
                     return APU.Buffer;
                 }
 
-                return new byte[0];
+                return dummySoundBuffer;
             }
         }
 

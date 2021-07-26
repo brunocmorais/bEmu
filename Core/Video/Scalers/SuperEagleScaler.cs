@@ -5,7 +5,7 @@ namespace bEmu.Core.Video.Scalers
 {
     public class SuperEagleScaler : Scaler
     {
-        public SuperEagleScaler() : base(2)
+        public SuperEagleScaler(IFrameBuffer frameBuffer) : base(frameBuffer, 2)
         {
         }
 

@@ -10,7 +10,7 @@ namespace bEmu.Core.Video.Scalers
             public uint A, B, C, D, E, F, G, H, I;
         }
 
-        public Scale3xScaler() : base(3) { }
+        public Scale3xScaler(IFrameBuffer frameBuffer) : base(frameBuffer, 3) { }
 
         public override void Update(int x, int y)
         {

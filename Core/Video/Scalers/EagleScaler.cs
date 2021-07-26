@@ -5,7 +5,7 @@ namespace bEmu.Core.Video.Scalers
 {
     public class EagleScaler : Scaler
     {
-        public EagleScaler() : base(2) { }
+        public EagleScaler(IFrameBuffer frameBuffer) : base(frameBuffer, 2) { }
 
         public override void Update(int x, int y)
         {

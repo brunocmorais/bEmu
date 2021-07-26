@@ -12,7 +12,7 @@ namespace bEmu.Core.GUI
         IOSD Osd { get; }
         bool IsRunning { get; }
         ISystem System { get; }
-        IMenuManager MenuManager { get; }
+        MenuManager MenuManager { get; }
         IPopupManager PopupManager { get; }
 
         void LoadSystem(SystemType system, string file);

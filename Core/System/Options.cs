@@ -31,14 +31,19 @@ namespace bEmu.Core.System
 
         public Options(IMain game, int size)
         {
-            if (game.Options != null)
-                foreach (var property in typeof(Options).GetProperties())
-                    property.SetValue(this, property.GetValue(game.Options));
-
             Game = game;
             EnableSound = true;
-            OptionChanged += OptionChangedEvent;
+            Init(size);
+        }
+
+        private void Init(int size)
+        {
+            if (Game.Options != null)
+                foreach (var property in typeof(Options).GetProperties())
+                    property.SetValue(this, property.GetValue(Game.Options));
+
             Size = size;
+            OptionChanged += OptionChangedEvent;
         }
 
         public void SetOption(string optionName, bool increment)

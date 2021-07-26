@@ -19,7 +19,7 @@ namespace bEmu.Core.GUI.Popups
             base.Open(popup);
         }
 
-        public override void Update(double totalMilliseconds)
+        public override void UpdateControls(double totalMilliseconds)
         {
             if (!Items.Any())
                 return;
@@ -31,7 +31,7 @@ namespace bEmu.Core.GUI.Popups
                     if (Current.SelectedButton.Action != null)
                         Current.SelectedButton.Action();
 
-                    if (Current.Closed)
+                    if (Current.Closed || Current.SelectedButton.Close)
                         CloseCurrent();
                 }
             }
@@ -43,37 +43,15 @@ namespace bEmu.Core.GUI.Popups
                 Current.SelectLeftButton();
         }
 
-        public IPopup BuildPopup(string title, string text, PopupSize popupSize)
-        {
-            int width = 0, height = 0;
-            switch (popupSize)
-            {
-                case PopupSize.Small:
-                    width = (int)(Game.System.Width / 2);
-                    height = Game.System.Height / 4;
-                    break;
-                case PopupSize.Medium:
-                    width = (int)(Game.System.Width / 1.25);
-                    height = (int)(Game.System.Height / 2.5);
-                    break;
-                case PopupSize.Large:
-                    width = (int)(Game.System.Width - 40);
-                    height = (int)(Game.System.Height - 40);
-                    break;
-            }
-
-            return new MessagePopup(title, text, width, height, Game.System.Width, Game.System.Height);
-        }
-
         public void ShowErrorDialog(string title, string text, Exception ex)
         {
-            var detailsPopup = BuildPopup("Detalhes", ex.GetValidatedExceptionString(), PopupSize.Large);
-            var errorPopup = BuildPopup(title, text, PopupSize.Medium);
+            var detailsPopup = new MessagePopup(Game, PopupSize.Large, ex.GetValidatedExceptionString(), "Detalhes");
+            var errorPopup = new MessagePopup(Game, PopupSize.Medium, text, title);
 
-            detailsPopup.Buttons.Add(new Button("OK", () => detailsPopup.Closed = true));
+            detailsPopup.Buttons.Add(new Button("OK", true));
 
-            errorPopup.Buttons.Add(new Button("OK", () => errorPopup.Closed = true));
-            errorPopup.Buttons.Add(new Button("Detalhes", () => Open(detailsPopup)));
+            errorPopup.Buttons.Add(new Button("OK", true));
+            errorPopup.Buttons.Add(new Button("Detalhes", false, () => Open(detailsPopup)));
 
             Open(errorPopup);
         }

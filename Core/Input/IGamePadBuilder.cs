@@ -4,6 +4,7 @@ namespace bEmu.Core.Input
 {
     public interface IGamePadBuilder<T> where T : struct
     {
-        GamePad Build(T[] pressedKeys);
+        IGamePad Build(T[] pressedKeys);
+        GamePadKey GetGamePadKey(T key);
     }
 }

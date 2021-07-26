@@ -8,9 +8,14 @@ namespace bEmu.Systems.Generic8080
 
         public PPU(System system, int width, int height) : base(system, width, height) 
         { 
-            Framebuffer = new DirectFrameBuffer(width, height, this.System.MMU as MMU);
+            Framebuffer = new Direct8080FrameBuffer(width, height, this.System.MMU as MMU);
         }
 
         public override void StepCycle() { }
+
+        public void SetCustomColors(bool value)
+        {
+            (Framebuffer as Direct8080FrameBuffer).CustomColors = value;
+        }
     }
 }

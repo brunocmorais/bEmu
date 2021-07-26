@@ -7,44 +7,25 @@ using bEmu.Core.System;
 namespace bEmu.Core.GUI.Menus
 {
 
-    public class MenuManager : Manager<IMenu>, IMenuManager
+    public class MenuManager : Manager<IMenu>
     {
-        private readonly MainMenu mainMenu;
-
         public MenuManager(IMain game) : base(game)
         {
-            mainMenu = new MainMenu(game);
         }
 
-        public void OpenMainMenu()
-        {
-            mainMenu.UpdateMenuOptions();
-            Items.Push(mainMenu);
-        }
-
-        public void ShowAbout()
-        {
-            Items.Push(new AboutMenu(Game));
-        }
-
-        public void OpenDebugger()
-        {
-            Items.Push(new DebuggerMenu(Game));
-        }
-
-        public override void Update(double totalMilliseconds)
+        public override void UpdateControls(double totalMilliseconds)
         {
             bool menuRelatedKeyPressed = false;
 
             if (IsOpen)
-                Current.Update(totalMilliseconds);
+                Current.UpdateControls(totalMilliseconds);
 
             if (GamePadStateProvider.Instance.HasBeenPressed(GamePadKey.Escape)) // sair
             {
                 menuRelatedKeyPressed = true;
 
                 if (!Game.MenuManager.IsOpen)
-                    OpenMainMenu();
+                    Open(new MainMenu(Game));
                 else
                     Game.MenuManager.CloseCurrent();
             }

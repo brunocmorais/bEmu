@@ -31,6 +31,24 @@ namespace bEmu.Systems.Chip8
         public override IMMU MMU { get; }
         public override IPPU PPU { get; }
         public override IAPU APU { get; }
+        public ExecutionSpeed Speed { get; set; }
+        public override int CycleCount 
+        {
+            get
+            {
+                float multiplier;
+
+                switch (Speed)
+                {
+                    case ExecutionSpeed.Normal: multiplier = 1; break;
+                    case ExecutionSpeed.Half: multiplier = 0.5f; break;
+                    case ExecutionSpeed.HalfPlus: multiplier = 1.5f; break;
+                    case ExecutionSpeed.Double: multiplier = 2; break;
+                    default: multiplier = 1; break;
+                }
+                return (int)(base.CycleCount * multiplier);
+            }
+        }
 
         public void SetSuperChipMode()
         {

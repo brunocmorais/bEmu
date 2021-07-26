@@ -5,42 +5,62 @@ namespace bEmu.Core.GUI.Popups
 {
     public abstract class Popup : IPopup
     {
-        public int Width { get; }
-        public int Height { get; }
-        public int X { get; }
-        public int Y { get; }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+        public int X { get; private set; }
+        public int Y { get; private set; }
         public string Text { get; }
         public string Title { get; }
         public IList<IButton> Buttons { get; }
         public IButton SelectedButton => Buttons[selectedButtonIndex];
         public bool Closed { get; set; }
         private int selectedButtonIndex = 0;
+        private readonly IMain game;
+        private readonly PopupSize size;
 
-        public Popup(int width, int height, int x, int y, string text, string title, params IButton[] buttons)
+        public Popup(IMain game, PopupSize size, string text, string title, params IButton[] buttons)
         {
-            Width = width;
-            Height = height;
-            X = x;
-            Y = y;
+            this.game = game;
+            this.size = size;
             Text = text;
             Title = title;
             Buttons = buttons.ToList();
+
+            Update();
         }
 
-        public void SelectRightButton()
+        public virtual void SelectRightButton()
         {
             selectedButtonIndex = (selectedButtonIndex + 1) % Buttons.Count;
         }
 
-        public void SelectLeftButton()
+        public virtual void SelectLeftButton()
         {
             int value = (selectedButtonIndex - 1);
             selectedButtonIndex = value < 0 ? Buttons.Count - 1 : value;
         }
 
-        protected static int GetCenterPosition(int size, int screenSize)
+        public virtual void Update()
         {
-            return (screenSize / 2 - (size / 2));
+            float widthFactor = 0, heightFactor = 0;
+
+            switch (size)
+            {
+                case PopupSize.Small:
+                    widthFactor = 0.5f; heightFactor = 0.25f; break;
+                case PopupSize.Medium:
+                    widthFactor = 0.8f; heightFactor = 0.4f; break;
+                case PopupSize.Large:
+                    widthFactor = 0.9f; heightFactor = 0.9f; break;
+            }
+
+            int screenWidth = game.System.Width * game.Options.Size;
+            int screenHeight = game.System.Height * game.Options.Size;
+
+            Width = (int)(widthFactor * screenWidth);
+            Height = (int)(heightFactor * screenHeight);
+            X = screenWidth / 2 - (Width / 2);
+            Y = screenHeight / 2 - (Height / 2);
         }
     }
 }

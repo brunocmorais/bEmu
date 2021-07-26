@@ -33,9 +33,9 @@ namespace bEmu.Core.GUI.Menus
 
         public override string Title => "Debugger";
 
-        public override void Update(double totalMilliseconds)
+        public override void UpdateControls(double totalMilliseconds)
         {
-            base.Update(totalMilliseconds);
+            base.UpdateControls(totalMilliseconds);
             string lastCommand = command;
             bool executedCommand = false;
             
