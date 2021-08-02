@@ -7,7 +7,7 @@ namespace bEmu.Core.Video.Scalers
     {
         struct NeighborPixels
         {
-            public uint A, B, C, D, E, F, G, H, I;
+            public Pixel A, B, C, D, E, F, G, H, I;
         }
 
         public Scale3xScaler(IFrameBuffer frameBuffer) : base(frameBuffer, 3) { }
@@ -15,7 +15,7 @@ namespace bEmu.Core.Video.Scalers
         public override void Update(int x, int y)
         {
             var pixel3x = new ScaledPixel(3);
-            uint pixel = this[x, y];
+            Pixel pixel = this[x, y];
                     
             pixel3x[0, 0] = pixel3x[1, 0] = pixel3x[2, 0] = 
             pixel3x[0, 1] = pixel3x[1, 1] = pixel3x[2, 1] =

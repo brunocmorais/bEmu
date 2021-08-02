@@ -14,12 +14,12 @@ namespace bEmu.Core.Video.Scalers
             ScaledFramebuffer = new FrameBuffer(Framebuffer.Width * ScaleFactor, Framebuffer.Height * ScaleFactor);
         }
 
-        public uint this[int x, int y]
+        public Pixel this[int x, int y]
         {
             get
             {
                 if (x < 0 || y < 0 || x >= Framebuffer.Width || y >= Framebuffer.Height)
-                    return 0xFFFFFFFF;
+                    return new Pixel(0xFFFFFFFF);
 
                 return Framebuffer[x, y];
             }

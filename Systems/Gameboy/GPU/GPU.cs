@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using bEmu.Core;
 using bEmu.Core.CPU.LR35902;
+using bEmu.Core.Video;
 using bEmu.Systems.Gameboy.GPU.Palettes;
 
 namespace bEmu.Systems.Gameboy.GPU
@@ -162,7 +163,7 @@ namespace bEmu.Systems.Gameboy.GPU
         private void UpdateFramebuffer()
         {
             for (int i = 0; i < currentLine.Length; i++)
-                Framebuffer[i, state.LCD.LY] = currentLine[i];
+                Framebuffer[i, state.LCD.LY] = new Pixel(currentLine[i]);
         }
 
         private void Push(Palette palette, int padding, int x)

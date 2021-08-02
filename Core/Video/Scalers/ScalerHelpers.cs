@@ -7,7 +7,7 @@ namespace bEmu.Core.Video.Scalers
         public const uint QcolorMask = 0xFCFCFCFF;
         public const uint QlowpixelMask = 0x030303FF;
 
-        public static int GetResult1(uint a, uint b, uint c, uint d)
+        public static int GetResult1(Pixel a, Pixel b, Pixel c, Pixel d)
         {
             int x = 0; 
             int y = 0;
@@ -25,7 +25,7 @@ namespace bEmu.Core.Video.Scalers
             return r;
         }
 
-        public static int GetResult2(uint a, uint b, uint c, uint d)
+        public static int GetResult2(Pixel a, Pixel b, Pixel c, Pixel d)
         {
             int x = 0; 
             int y = 0;
@@ -43,15 +43,15 @@ namespace bEmu.Core.Video.Scalers
             return r;
         }
 
-        public static uint Interpolate(uint a, uint b)
+        public static Pixel Interpolate(Pixel a, Pixel b)
         {
             if (a != b)
-                return (((a & ColorMask) >> 1) + ((b & ColorMask) >> 1) + (a & b & LowPixelMask));
+                return new Pixel((((a & ColorMask) >> 1) + ((b & ColorMask) >> 1) + (a & b & LowPixelMask)));
 
             return a;
         }
 
-        public static uint QInterpolate(uint a, uint b, uint c, uint d)
+        public static Pixel QInterpolate(Pixel a, Pixel b, Pixel c, Pixel d)
         {
             uint x = ((a & QcolorMask) >> 2) +
                 ((b & QcolorMask) >> 2) +
@@ -62,7 +62,7 @@ namespace bEmu.Core.Video.Scalers
                 (c & QlowpixelMask) +
                 (d & QlowpixelMask);
             y = (y >> 2) & QlowpixelMask;
-            return x + y;
+            return new Pixel(x + y);
         }
 
         public static float Lerp(float s, float e, float t) => s + (e - s) * t; 

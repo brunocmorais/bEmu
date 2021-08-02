@@ -13,7 +13,7 @@ namespace bEmu.Core.Video.Scalers
         {
             var pixel2x = new ScaledPixel(2);
             
-            uint color4, color5, color6,
+            Pixel color4, color5, color6,
                  color1, color2, color3,
                  colorA0, colorA1, colorA2, colorA3,
                  colorB0, colorB1, colorB2, colorB3,

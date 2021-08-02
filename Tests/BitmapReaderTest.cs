@@ -1,4 +1,4 @@
-using bEmu.Core.Image;
+using bEmu.Core.Video;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.Linq;

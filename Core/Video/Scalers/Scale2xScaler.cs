@@ -8,7 +8,7 @@ namespace bEmu.Core.Video.Scalers
         public override void Update(int x, int y)
         {
             var pixel2x = new ScaledPixel(2);
-            uint pixel = this[x, y];
+            Pixel pixel = this[x, y];
                     
             pixel2x[0, 0] = pixel2x[1, 0] = pixel2x[0, 1] = pixel2x[1, 1] = pixel;
 
@@ -33,7 +33,7 @@ namespace bEmu.Core.Video.Scalers
 
         struct NeighborPixels
         {
-            public uint A, B, C, D, E, F, G, H, I;
+            public Pixel A, B, C, D, E, F, G, H, I;
         }
     }
 }

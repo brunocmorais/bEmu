@@ -32,7 +32,7 @@ namespace bEmu.Core.Video.Scalers
 
         struct NeighborPixels
         {
-            public uint A, 
+            public Pixel A, 
                      C, P, B,
                         D;
         }

@@ -6,7 +6,7 @@ using bEmu.Core.Extensions;
 using bEmu.Core.Util;
 using bEmu.Core.Video;
 
-namespace bEmu.Core.Image
+namespace bEmu.Core.Video
 {
     // TODO: transformar uints em struct Pixel
     public class Bitmap
@@ -17,10 +17,10 @@ namespace bEmu.Core.Image
 
         public int Width { get; }
         public int Height { get; }
-        private uint[,] pixels;
+        private Pixel[,] pixels;
         public int Length => Width * Height;
 
-        public uint this[int x, int y] 
+        public Pixel this[int x, int y] 
         {
             get => pixels[x, y];
             set => pixels[x, y] = value;
@@ -30,7 +30,7 @@ namespace bEmu.Core.Image
         {
             Width = width;
             Height = height;
-            pixels = new uint[Width, Height];
+            pixels = new Pixel[Width, Height];
         }
 
         public static Bitmap Read(byte[] bytes)
@@ -51,7 +51,7 @@ namespace bEmu.Core.Image
                     byte a = bytes[pointer++];
 
                     uint v = ByteOperations.GetDWordFrom4Bytes(a, b, g, r);
-                    bitmap[i, j] = v;
+                    bitmap[i, j] = new Pixel(v);
                 }
             }
 
@@ -99,7 +99,7 @@ namespace bEmu.Core.Image
                 {
                     for (int i = 0; i < Width; i++)
                     {
-                        var bytes = ByteOperations.ToBytes(this[i, j]).ToArray();
+                        var bytes = ByteOperations.ToBytes(this[i, j].ToUInt()).ToArray();
                         stream.WriteUInt(ByteOperations.GetDWordFrom4Bytes(bytes[2], bytes[1], bytes[0], bytes[3]));
                     }
                 }

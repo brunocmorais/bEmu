@@ -13,12 +13,12 @@ namespace bEmu.Core.Video.Scalers
         {
             var pixel2x = new ScaledPixel(2);
 
-            uint colorA, colorB, colorC, colorD,
+            Pixel colorA, colorB, colorC, colorD,
                  colorE, colorF, colorG, colorH,
                  colorI, colorJ, colorK, colorL,
                  colorM, colorN, colorO, colorP;
 
-            uint product, product1, product2;
+            Pixel product, product1, product2;
 
             colorI = this[x - 1, y - 1];
             colorE = this[x, y - 1];

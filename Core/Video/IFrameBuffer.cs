@@ -2,7 +2,7 @@ namespace bEmu.Core.Video
 {
     public interface IFrameBuffer
     {
-        uint this[int x, int y] { get; set; }
+        Pixel this[int x, int y] { get; set; }
 
         byte[] Data { get; }
         int Width { get; }

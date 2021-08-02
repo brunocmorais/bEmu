@@ -1,7 +1,6 @@
 using bEmu.Core.Extensions;
-using bEmu.Core.Image;
-using bEmu.Core.IO;
 using bEmu.Core.Video;
+using bEmu.Core.IO;
 
 namespace bEmu.Systems.Generic8080
 {
@@ -30,7 +29,7 @@ namespace bEmu.Systems.Generic8080
                 {
                     for (int j = 0; j < Width; j++)
                     {
-                        uint value = this[j, i];
+                        var value = this[j, i].ToUInt();
                             
                         data[counter++] = (byte)((value & 0xFF000000) >> 24);
                         data[counter++] = (byte)((value & 0x00FF0000) >> 16);
@@ -43,7 +42,7 @@ namespace bEmu.Systems.Generic8080
             }
         }
 
-        public override uint this[int x, int y]
+        public override Pixel this[int x, int y]
         {
             get 
             {
@@ -57,22 +56,22 @@ namespace bEmu.Systems.Generic8080
                     if (UseBackdrop)
                         return backdrop[x, y];
                     else
-                        return 0x000000FF;
+                        return new Pixel(0x000000FF);
                 }
             }
         }
 
-        private uint GetColor(int y)
+        private Pixel GetColor(int y)
         {
             if (!CustomColors)
-                return 0xFFFFFFFF;
+                return new Pixel(0xFFFFFFFF);
 
             if (y >= 0 && y <= 100)
-                return 0x00FF00FF;
+                return new Pixel(0x00FF00FF);
             else if (y > 100 && y <= 200)
-                return 0xFFFFFFFF;
+                return new Pixel(0xFFFFFFFF);
             else
-                return 0xFF0000FF;
+                return new Pixel(0xFF0000FF);
         }
     }
 }

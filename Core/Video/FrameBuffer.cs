@@ -28,20 +28,21 @@ namespace bEmu.Core.Video
 
         protected int GetIndex(int x, int y) => (y * Width * 4) + (x * 4);
 
-        public virtual uint this[int x, int y]
+        public virtual Pixel this[int x, int y]
         {
             get
             {
                 int start = GetIndex(x, y);
-                return (uint)((Data[start] << 24) | (Data[start + 1] << 16) | (Data[start + 2] << 8) | (Data[start + 3]));
+                return new Pixel((uint)((Data[start] << 24) | (Data[start + 1] << 16) | (Data[start + 2] << 8) | (Data[start + 3])));
             }
             set
             {
+                var num = value.ToUInt();
                 int start = GetIndex(x, y);
-                Data[start] = (byte)((value & 0xFF000000) >> 24);
-                Data[start + 1] = (byte)((value & 0x00FF0000) >> 16);
-                Data[start + 2] = (byte)((value & 0x0000FF00) >> 8);
-                Data[start + 3] = (byte)((value & 0x000000FF));
+                Data[start] = (byte)((num & 0xFF000000) >> 24);
+                Data[start + 1] = (byte)((num & 0x00FF0000) >> 16);
+                Data[start + 2] = (byte)((num & 0x0000FF00) >> 8);
+                Data[start + 3] = (byte)((num & 0x000000FF));
             }
         }
 

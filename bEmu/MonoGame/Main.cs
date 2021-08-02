@@ -13,34 +13,34 @@ using bEmu.Core.System;
 using bEmu.Core.GamePad;
 using bEmu.Core.GUI.Popups;
 using bEmu.MonoGame.Drawers;
-using bEmu.Core.Image;
+using bEmu.Core.Video;
 using bEmu.Core.IO;
 
 namespace bEmu.MonoGame
 {
-    public sealed class Main : Game, IMain
+    public class Main : Game, IMain
     {
         private readonly GraphicsDeviceManager graphics;
         private readonly DynamicSoundEffectInstance sound;
-        private readonly GamePadBuilder gamePadBuilder;
         private Rectangle destinationRectangle;
+        private Texture2D backBuffer;
+        private SpriteBatch spriteBatch;
+        private readonly GamePadBuilder gamePadBuilder;
         private DateTime lastStartDate;
         private int drawCounter;
         private IScaler scaler;
         private int lastRenderedFrame;
-        private Texture2D backBuffer;
         private IDrawer<IOSD> osdDrawer;
         private IDrawer<IMenu> menuDrawer;
         private IDrawer<IPopup> popupDrawer;
-        private SpriteBatch spriteBatch;
-        private Wave recording;
+        public Wave Recording { get; private set; }
         private double FPS => Math.Round(drawCounter / (DateTime.Now - lastStartDate).TotalSeconds, 1);
         public IOSD Osd { get; }
         public MenuManager MenuManager { get; }
         public IPopupManager PopupManager { get; }
         public bool IsRunning { get; private set; }
-        public IOptions Options { get; private set; }
-        public ISystem System { get; private set; }
+        public IOptions Options { get; set; }
+        public ISystem System { get; set; }
 
         public Main()
         {
@@ -109,7 +109,7 @@ namespace bEmu.MonoGame
             graphics.ApplyChanges();
         }
 
-        private void Start()
+        public void Start()
         {
             IsRunning = true;
             lastStartDate = DateTime.Now;
@@ -143,26 +143,38 @@ namespace bEmu.MonoGame
                 MenuManager.UpdateControls(gameTime.TotalGameTime.TotalMilliseconds);
 
             // atualização do sistema em execução
+            UpdateSystem(gamePad);
+        }
+
+        private void UpdateSystem(IGamePad gamePad)
+        {
             if (IsRunning && System.Frame == lastRenderedFrame)
             {
                 System.UpdateGamePad(gamePad);
 
                 if (Options.ShowFPS)
                     Osd.UpdateMessage(MessageType.FPS, $"{FPS:0.0} fps");
-
-                while (sound.PendingBufferCount < APU.MaxBufferPending && Options.EnableSound)
-                {
-                    var soundBuffer = System.SoundBuffer;
-                    sound.SubmitBuffer(soundBuffer);
-
-                    if (recording != null)
-                        recording.AddBytes(soundBuffer);   
-                }
+                
+                UpdateSound();
 
                 System.Update();
 
                 if (scaler.Frame < System.Frame && !System.SkipFrame)
                     scaler.Update(System.Frame);
+            }
+        }
+
+        private void UpdateSound()
+        {
+            while (sound.PendingBufferCount < APU.MaxBufferPending)
+            {
+                var soundBuffer = System.SoundBuffer;
+
+                if (Options.EnableSound)
+                    sound.SubmitBuffer(soundBuffer);
+
+                if (Recording != null)
+                    Recording.AddBytes(soundBuffer);
             }
         }
 
@@ -192,7 +204,7 @@ namespace bEmu.MonoGame
 
             if (GamePadStateProvider.Instance.HasBeenPressed(GamePadKey.F11)) // gravação
             {
-                if (recording == null)
+                if (Recording == null)
                     StartRecording();
                 else
                     StopRecording();
@@ -319,16 +331,16 @@ namespace bEmu.MonoGame
 
         public void StartRecording()
         {
-            recording = new Wave();
+            Recording = new Wave();
             Osd.InsertMessage(MessageType.Default, "Iniciando gravação de som!");
         }
 
         public void StopRecording()
         {
             string fileName = $"rec_{DateTime.Now.ToString("ddMMyyyyHHmmss")}.wav";
-            FileManager.Write(fileName, recording.ToBytes());
+            FileManager.Write(fileName, Recording.ToBytes());
             Osd.InsertMessage(MessageType.Default, $"Gravação '{fileName}' realizada!");
-            recording = null;
+            Recording = null;
         }
     }
 }
