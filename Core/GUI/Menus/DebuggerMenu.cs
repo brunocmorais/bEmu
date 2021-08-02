@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 using bEmu.Core.Enums;
-using bEmu.Core.Input;
+using bEmu.Core.GamePad;
 using bEmu.Core.System;
 
 namespace bEmu.Core.GUI.Menus

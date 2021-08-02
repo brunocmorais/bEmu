@@ -1,4 +1,6 @@
-using bEmu.Core;
+using bEmu.Core.Extensions;
+using bEmu.Core.Image;
+using bEmu.Core.IO;
 using bEmu.Core.Video;
 
 namespace bEmu.Systems.Generic8080
@@ -8,11 +10,14 @@ namespace bEmu.Systems.Generic8080
         private readonly byte[] data;
         private readonly MMU mmu;
         public bool CustomColors { get; set; }
+        public bool UseBackdrop { get; set; }
+        private Bitmap backdrop;
 
         public Direct8080FrameBuffer(int width, int height, MMU mmu) : base(width, height)
         {
             this.mmu = mmu;
             this.data = new byte[Width * Height * 4];
+            backdrop = Bitmap.Read(AssetLoader.Load(mmu.System, "backdrop.bmp").ToBytes());
         }
 
         public override byte[] Data
@@ -26,6 +31,7 @@ namespace bEmu.Systems.Generic8080
                     for (int j = 0; j < Width; j++)
                     {
                         uint value = this[j, i];
+                            
                         data[counter++] = (byte)((value & 0xFF000000) >> 24);
                         data[counter++] = (byte)((value & 0x00FF0000) >> 16);
                         data[counter++] = (byte)((value & 0x0000FF00) >> 8);
@@ -47,7 +53,12 @@ namespace bEmu.Systems.Generic8080
                 if ((sprite & (1 << y % 8)) > 0)
                     return GetColor(y);
                 else
-                    return 0x000000FF;
+                {
+                    if (UseBackdrop)
+                        return backdrop[x, y];
+                    else
+                        return 0x000000FF;
+                }
             }
         }
 

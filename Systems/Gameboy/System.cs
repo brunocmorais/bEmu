@@ -5,7 +5,7 @@ using bEmu.Core.Enums;
 using bEmu.Systems.Gameboy.GPU;
 using bEmu.Systems.Gameboy.GPU.Palettes;
 using bEmu.Core.Audio;
-using bEmu.Core.Input;
+using bEmu.Core.GamePad;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;

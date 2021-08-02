@@ -25,5 +25,8 @@ namespace bEmu.Core.GUI
         void Pause();
         void SetSound(bool enable);
         void SetScaler();
+        void Snapshot();
+        void StartRecording();
+        void StopRecording();
     }
 }

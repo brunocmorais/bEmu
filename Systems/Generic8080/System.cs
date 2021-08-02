@@ -8,7 +8,7 @@ using System.Linq;
 using System;
 using bEmu.Core.Enums;
 using bEmu.Core.Audio;
-using bEmu.Core.Input;
+using bEmu.Core.GamePad;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;
@@ -27,7 +27,6 @@ namespace bEmu.Systems.Generic8080
         public override IMMU MMU { get; }
         public override IPPU PPU { get; }
         public override IAPU APU { get; }
-        public const string AssetFolder = "Assets/Generic8080";
 
         public System(string fileName) : base(fileName)
         {
@@ -161,6 +160,11 @@ namespace bEmu.Systems.Generic8080
         public void SetCustomColors(bool value)
         {
             (PPU as PPU).SetCustomColors(value);
+        }
+
+        public void SetBackdrop(bool value)
+        {
+            (PPU as PPU).SetBackdrop(value);
         }
     }
 }

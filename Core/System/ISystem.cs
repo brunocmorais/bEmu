@@ -1,6 +1,6 @@
 using bEmu.Core.Audio;
 using bEmu.Core.Enums;
-using bEmu.Core.Input;
+using bEmu.Core.GamePad;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;
@@ -30,6 +30,8 @@ namespace bEmu.Core.System
         IDebugger Debugger { get; }
         SystemType Type { get; }
         bool SkipFrame { get; }
+        string FileNameWithoutExtension { get; }
+        string FilePath { get; }
 
         IState GetInitialState();
         void Reset();

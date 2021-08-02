@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using bEmu.Core.Enums;
 using bEmu.Core.Extensions;
-using bEmu.Core.Input;
+using bEmu.Core.GamePad;
 
 namespace bEmu.Core.GUI.Popups
 {

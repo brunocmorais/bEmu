@@ -1,5 +1,5 @@
 using bEmu.Core.Enums;
-using bEmu.Core.Input;
+using bEmu.Core.GamePad;
 using Microsoft.Xna.Framework.Input;
 
 namespace bEmu.MonoGame
@@ -13,7 +13,7 @@ namespace bEmu.MonoGame
             for (int i = 0; i < keys.Length; i++)
                 keys[i] = GetGamePadKey(pressedKeys[i]);
 
-            return new Core.Input.GamePad(keys);
+            return new Core.GamePad.GamePad(keys);
         }
 
         public GamePadKey GetGamePadKey(Keys key)

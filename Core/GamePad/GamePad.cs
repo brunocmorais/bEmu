@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using bEmu.Core.Enums;
 
-namespace bEmu.Core.Input
+namespace bEmu.Core.GamePad
 {
 
     public struct GamePad : IGamePad

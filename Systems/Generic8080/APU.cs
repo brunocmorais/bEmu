@@ -1,9 +1,6 @@
 using System;
-using System.IO;
-using System.Reflection;
-using bEmu.Core;
+using bEmu.Core.IO;
 using bEmu.Core.System;
-using bEmu.Core.Util;
 
 namespace bEmu.Systems.Generic8080
 {
@@ -23,16 +20,15 @@ namespace bEmu.Systems.Generic8080
 
         public APU(ISystem system) : base(system)
         {
-            string assetFolder = Path.Combine(Infrastructure.GetProgramLocation(), Generic8080.System.AssetFolder);
-            shot = new Sound(Path.Combine(assetFolder, "shot.wav"));
-            invaderDie = new Sound(Path.Combine(assetFolder, "invader_die.wav"));
-            explosion = new Sound(Path.Combine(assetFolder, "explosion.wav"));
-            ufoLowPitch = new Sound(Path.Combine(assetFolder, "ufo_lowpitch.wav"));
-            fastInvader1 = new Sound(Path.Combine(assetFolder, "fastinvader1.wav"));
-            fastInvader2 = new Sound(Path.Combine(assetFolder, "fastinvader2.wav"));
-            fastInvader3 = new Sound(Path.Combine(assetFolder, "fastinvader3.wav"));
-            fastInvader4 = new Sound(Path.Combine(assetFolder, "fastinvader4.wav"));
-            ufoHighPitch = new Sound(Path.Combine(assetFolder, "ufo_highpitch.wav"), true);
+            shot = new Sound(AssetLoader.Load(system, "shot.wav"));
+            invaderDie = new Sound(AssetLoader.Load(system, "invader_die.wav"));
+            explosion = new Sound(AssetLoader.Load(system, "explosion.wav"));
+            ufoLowPitch = new Sound(AssetLoader.Load(system, "ufo_lowpitch.wav"));
+            fastInvader1 = new Sound(AssetLoader.Load(system, "fastinvader1.wav"));
+            fastInvader2 = new Sound(AssetLoader.Load(system, "fastinvader2.wav"));
+            fastInvader3 = new Sound(AssetLoader.Load(system, "fastinvader3.wav"));
+            fastInvader4 = new Sound(AssetLoader.Load(system, "fastinvader4.wav"));
+            ufoHighPitch = new Sound(AssetLoader.Load(system, "ufo_highpitch.wav"), true);
             waveBuffer = new float[BufferSize];
         }
 

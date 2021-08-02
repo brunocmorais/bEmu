@@ -10,9 +10,11 @@ using bEmu.Core.Enums;
 using bEmu.Core.GUI;
 using bEmu.Core.Audio;
 using bEmu.Core.System;
-using bEmu.Core.Input;
+using bEmu.Core.GamePad;
 using bEmu.Core.GUI.Popups;
 using bEmu.MonoGame.Drawers;
+using bEmu.Core.Image;
+using bEmu.Core.IO;
 
 namespace bEmu.MonoGame
 {
@@ -31,6 +33,7 @@ namespace bEmu.MonoGame
         private IDrawer<IMenu> menuDrawer;
         private IDrawer<IPopup> popupDrawer;
         private SpriteBatch spriteBatch;
+        private Wave recording;
         private double FPS => Math.Round(drawCounter / (DateTime.Now - lastStartDate).TotalSeconds, 1);
         public IOSD Osd { get; }
         public MenuManager MenuManager { get; }
@@ -127,6 +130,9 @@ namespace bEmu.MonoGame
             MenuManager.Update();
             PopupManager.Update();
 
+            // atualização das funções
+            UpdateCommands();
+
             // atualização das notificações
             Osd.Update();
 
@@ -145,12 +151,51 @@ namespace bEmu.MonoGame
                     Osd.UpdateMessage(MessageType.FPS, $"{FPS:0.0} fps");
 
                 while (sound.PendingBufferCount < APU.MaxBufferPending && Options.EnableSound)
-                    sound.SubmitBuffer(System.SoundBuffer);
+                {
+                    var soundBuffer = System.SoundBuffer;
+                    sound.SubmitBuffer(soundBuffer);
+
+                    if (recording != null)
+                        recording.AddBytes(soundBuffer);   
+                }
 
                 System.Update();
 
                 if (scaler.Frame < System.Frame && !System.SkipFrame)
                     scaler.Update(System.Frame);
+            }
+        }
+
+        private void UpdateCommands()
+        {
+            if (GamePadStateProvider.Instance.HasBeenPressed(GamePadKey.F3)) // reiniciar jogo
+                ResetGame();
+
+            if (GamePadStateProvider.Instance.HasBeenPressed(GamePadKey.P)) // pausar
+            {
+                if (!MenuManager.IsOpen)
+                {
+                    if (IsRunning)
+                        Osd.InsertMessage(MessageType.Default, "Pausado");
+                    else
+                        Osd.InsertMessage(MessageType.Default, "Em andamento");
+
+                    Pause();
+                }
+            }
+
+            if (GamePadStateProvider.Instance.HasBeenPressed(GamePadKey.F2)) // mostrar informações
+                Options.SetOption(nameof(Options.ShowFPS), false);
+
+            if (GamePadStateProvider.Instance.HasBeenPressed(GamePadKey.F12)) // tirar snapshot
+                Snapshot();
+
+            if (GamePadStateProvider.Instance.HasBeenPressed(GamePadKey.F11)) // gravação
+            {
+                if (recording == null)
+                    StartRecording();
+                else
+                    StopRecording();
             }
         }
 
@@ -262,6 +307,28 @@ namespace bEmu.MonoGame
                 sound.Play();
             else
                 sound.Pause();
+        }
+
+        public void Snapshot()
+        {
+            var bitmap = Bitmap.From(scaler.ScaledFramebuffer);
+            string fileName = $"snapshot_{DateTime.Now.ToString("ddMMyyyyHHmmss")}.bmp";
+            FileManager.Write(fileName, bitmap.ToBytes());
+            Osd.InsertMessage(MessageType.Default, $"Snapshot '{fileName}' realizado!");
+        }
+
+        public void StartRecording()
+        {
+            recording = new Wave();
+            Osd.InsertMessage(MessageType.Default, "Iniciando gravação de som!");
+        }
+
+        public void StopRecording()
+        {
+            string fileName = $"rec_{DateTime.Now.ToString("ddMMyyyyHHmmss")}.wav";
+            FileManager.Write(fileName, recording.ToBytes());
+            Osd.InsertMessage(MessageType.Default, $"Gravação '{fileName}' realizada!");
+            recording = null;
         }
     }
 }

@@ -5,6 +5,7 @@ namespace bEmu.Core.Audio
     public abstract class APU : IAPU
     {
         public const int SampleRate = 22050;
+        public const int BitsPerSample = 16;
         public const int BufferSize = 2048;
         public const int MaxBufferPending = 4;
         public ISystem System { get; }

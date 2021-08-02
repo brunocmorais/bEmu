@@ -17,5 +17,10 @@ namespace bEmu.Systems.Generic8080
         {
             (Framebuffer as Direct8080FrameBuffer).CustomColors = value;
         }
+
+        public void SetBackdrop(bool value)
+        {
+            (Framebuffer as Direct8080FrameBuffer).UseBackdrop = value;
+        }
     }
 }

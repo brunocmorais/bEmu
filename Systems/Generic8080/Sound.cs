@@ -1,3 +1,4 @@
+using System.IO;
 using bEmu.Core;
 using bEmu.Core.Audio;
 
@@ -34,9 +35,9 @@ namespace bEmu.Systems.Generic8080
             }
         }
 
-        public Sound(string path, bool isLooped = false)
+        public Sound(FileStream fileStream, bool isLooped = false)
         {
-            bytes = WavReader.GetBytes(path);
+            bytes = Wave.From(fileStream).Data.ToArray();
             this.isLooped = isLooped;
         }
 

@@ -17,9 +17,6 @@ namespace bEmu.Core.Video
         public void Reset()
         {
             Data = new byte[Width * Height * 4];
-            
-            for (int i = 3; i < Data.Length; i += 4)
-                Data[i] = 0xFF;
         }
 
         public void SetSize(int width, int height)

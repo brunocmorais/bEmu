@@ -1,7 +1,7 @@
 using bEmu.Core;
 using bEmu.Core.Audio;
 using bEmu.Core.Enums;
-using bEmu.Core.Input;
+using bEmu.Core.GamePad;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;

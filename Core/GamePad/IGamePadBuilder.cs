@@ -1,6 +1,6 @@
 using bEmu.Core.Enums;
 
-namespace bEmu.Core.Input
+namespace bEmu.Core.GamePad
 {
     public interface IGamePadBuilder<T> where T : struct
     {

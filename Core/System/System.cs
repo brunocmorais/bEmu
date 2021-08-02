@@ -2,7 +2,7 @@ using System.IO;
 using System.Linq;
 using bEmu.Core.Audio;
 using bEmu.Core.Enums;
-using bEmu.Core.Input;
+using bEmu.Core.GamePad;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;
@@ -12,8 +12,9 @@ namespace bEmu.Core.System
     public abstract class System : ISystem
     {
         private readonly byte[] dummySoundBuffer = new byte[Audio.APU.BufferSize];
-        protected string FileNameWithoutExtension => 
+        public string FileNameWithoutExtension => 
             Path.Combine(Path.GetDirectoryName(FileName), Path.GetFileNameWithoutExtension(FileName));
+        public string FilePath => Path.GetDirectoryName(FileName);
         public IDebugger Debugger { get; private set; }
         public abstract int Width { get; }
         public abstract int Height { get; }

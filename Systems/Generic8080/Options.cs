@@ -8,9 +8,14 @@ namespace bEmu.Systems.Generic8080
     {
         [Description("Cores customizadas")]
         public bool CustomColors { get; protected set; }
+
+        [Description("Tema de fundo")]
+        public bool UseBackdrop { get; protected set; }
+
         public Options(IMain game, int size) : base(game, size)
         {
             SetOption(nameof(CustomColors), false);
+            SetOption(nameof(UseBackdrop), false);
         }
 
         public override void OptionChangedEvent(object sender, OnOptionChangedEventArgs e)
@@ -23,6 +28,9 @@ namespace bEmu.Systems.Generic8080
             {
                 case nameof(options.CustomColors):
                     (Game.System as Systems.Generic8080.System).SetCustomColors(options.CustomColors);
+                    break;
+                case nameof(options.UseBackdrop):
+                    (Game.System as Systems.Generic8080.System).SetBackdrop(options.UseBackdrop);
                     break;
             }
         }
