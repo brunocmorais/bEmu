@@ -21,8 +21,8 @@ namespace bEmu.Core.Video
 
         public override int GetHashCode() => HashCode.Combine(value, R, G, B, A);
 
-        public static bool operator ==(Pixel left, Pixel right) => left == right;
-        public static bool operator !=(Pixel left, Pixel right) => left != right;
+        public static bool operator ==(Pixel left, Pixel right) => left.Equals(right);
+        public static bool operator !=(Pixel left, Pixel right) => !left.Equals(right);
         public static bool operator ==(Pixel left, uint right) => left.ToUInt() == right;
         public static bool operator !=(Pixel left, uint right) => left.ToUInt() != right;
         public static Pixel operator &(Pixel left, Pixel right) => new Pixel(left.ToUInt() & right.ToUInt());
