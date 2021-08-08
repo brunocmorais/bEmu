@@ -18,7 +18,7 @@ using bEmu.Core.IO;
 
 namespace bEmu.MonoGame
 {
-    public class Main : Game, IMain
+    public sealed class Main : Game, IMain
     {
         private readonly GraphicsDeviceManager graphics;
         private readonly DynamicSoundEffectInstance sound;
@@ -39,13 +39,12 @@ namespace bEmu.MonoGame
         public MenuManager MenuManager { get; }
         public IPopupManager PopupManager { get; }
         public bool IsRunning { get; private set; }
-        public IOptions Options { get; set; }
-        public ISystem System { get; set; }
+        public IOptions Options { get; private set; }
+        public ISystem System { get; private set; }
 
         public Main()
         {
             graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
             IsMouseVisible = true;
             IsRunning = false;
             sound = new DynamicSoundEffectInstance(APU.SampleRate, AudioChannels.Stereo);
@@ -56,12 +55,10 @@ namespace bEmu.MonoGame
             
             MenuManager = new MenuManager(this);
             PopupManager = new PopupManager(this);
-        }
 
-        protected override void LoadContent()
-        {
-            var regular = Content.Load<SpriteFont>("Common/Regular");
-            var title = Content.Load<SpriteFont>("Common/Title");
+            var regular = SpriteFontLoader.Get("font.ttf", GraphicsDevice, 20);
+            var title = SpriteFontLoader.Get("font.ttf", GraphicsDevice, 24);
+            
             spriteBatch = new SpriteBatch(GraphicsDevice);
             osdDrawer = new OSDDrawer(spriteBatch, GraphicsDevice, regular, title);
             menuDrawer = new MenuDrawer(spriteBatch, GraphicsDevice, regular, title);
@@ -69,6 +66,8 @@ namespace bEmu.MonoGame
 
             MenuManager.Open((new MainMenu(this)));
         }
+
+        protected override void Initialize() => SetScreenSize();
 
         public void LoadSystem(SystemType system, string file)
         {

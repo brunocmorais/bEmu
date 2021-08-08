@@ -9,10 +9,10 @@ namespace bEmu.Core.GUI
 {
     public interface IMain : IDisposable
     {
-        IOptions Options { get; set; }
+        IOptions Options { get; }
         IOSD Osd { get; }
         bool IsRunning { get; }
-        ISystem System { get; set; }
+        ISystem System { get; }
         MenuManager MenuManager { get; }
         IPopupManager PopupManager { get; }
         Wave Recording { get; }
