@@ -51,7 +51,7 @@ namespace bEmu.Core.Video
                     byte a = bytes[pointer++];
 
                     uint v = ByteOperations.GetDWordFrom4Bytes(a, b, g, r);
-                    bitmap[i, j] = new Pixel(v);
+                    bitmap[i, j] = v;
                 }
             }
 

@@ -3,9 +3,7 @@ using bEmu.Core.CPU;
 
 namespace bEmu.Core.CPU.Z80
 {
-    public abstract partial class Z80<TState, TMMU> : CPU<TState, TMMU> 
-        where TState : State
-        where TMMU : MMU
+    public abstract partial class Z80<TState, TMMU>
     {
         public void Dd()
         {

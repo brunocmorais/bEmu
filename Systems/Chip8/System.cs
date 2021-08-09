@@ -64,6 +64,7 @@ namespace bEmu.Systems.Chip8
         {
             var state = new State(this);
             state.PC = 0x200;
+            state.SP = 0;
             state.V = new byte[16];
             state.Stack = new ushort[16];
             state.Keys = new bool[16];
@@ -74,14 +75,13 @@ namespace bEmu.Systems.Chip8
 
         public System(string fileName) : base(fileName)
         {
-            Runner = new Core.VMs.Chip8.Chip8(this, 480);
-            MMU = new MMU(this);
             State = GetInitialState();
-
-            SetChip8Mode();
-            
+            MMU = new MMU(this);
             PPU = new PPU((State) State, Width, Height);
             APU = new APU(this);
+            Runner = new Chip8(this, 480);
+
+            SetChip8Mode();
             
             InitializeBIOS();
         }

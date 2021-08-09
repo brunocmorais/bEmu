@@ -1,12 +1,7 @@
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using bEmu.Core;
-using bEmu.Core.Extensions;
+using System.Linq;
 using bEmu.Core.IO;
 using bEmu.Core.System;
-using bEmu.Core.Util;
-using Newtonsoft.Json;
 
 namespace bEmu.Systems.Generic8080
 {
@@ -15,9 +10,8 @@ namespace bEmu.Systems.Generic8080
         private readonly IList<GameInfo> games;
 
         public MMU(ISystem system) : base(system, 0x10000) 
-        { 
-            string json = AssetLoader.Load(system, "games.json").ToUTF8String();
-            games = JsonConvert.DeserializeObject<IList<GameInfo>>(json);
+        {
+            games = GameInfoReader.Read(AssetLoader.Load(system, "games.dat")).ToList();
         }
 
         public override void LoadProgram()

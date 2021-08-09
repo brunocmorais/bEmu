@@ -29,7 +29,7 @@ namespace Tests
 
             while (!system.State.Halted && counter <= 20000)
             {
-                var inst = disassembler.GetInstruction(system.State.PC).ToString();
+                var inst = disassembler.GetInstruction((system.State as bEmu.Core.CPU.LR35902.State).PC).ToString();
                 Console.WriteLine(system.State.ToString() + " op = " + inst);
                     
                 counter++;

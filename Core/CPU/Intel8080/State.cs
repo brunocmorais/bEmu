@@ -4,7 +4,7 @@ using bEmu.Core.Util;
 
 namespace bEmu.Core.CPU.Intel8080
 {
-    public class State : Core.System.State
+    public class State : Core.System.State<ushort, ushort>
     {
         public byte A { get; set; }
         public byte B { get; set; }

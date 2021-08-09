@@ -29,7 +29,7 @@ namespace bEmu.Systems.Chip8
                 for (int j = Height - 1; j >= 0; j--)
                 {
                     if ((i - 4) < 0)
-                        this[i, j] = new Pixel(0x000000FF);
+                        this[i, j] = (0x000000FF);
                     else
                         this[i, j] = this[i - 4, j];
                 }
@@ -45,7 +45,7 @@ namespace bEmu.Systems.Chip8
                 for (int j = 0; j < Height; j++)
                 {
                     if ((i + 4) > Width)
-                        this[i, j] = new Pixel(0x000000FF);
+                        this[i, j] = (0x000000FF);
                     else
                         this[i, j] = this[i + 4, j];
                 }   
@@ -61,7 +61,7 @@ namespace bEmu.Systems.Chip8
                 for (int j = Height - 1; j >= 0; j--)
                 {
                     if ((j - nibble) < 0)
-                        this[i, j] = new Pixel(0x000000FF);
+                        this[i, j] = (0x000000FF);
                     else
                         this[i, j] = this[i, j - nibble];
                 }   
@@ -77,7 +77,7 @@ namespace bEmu.Systems.Chip8
                 for (int j = 0; j < Height; j++)
                 {
                     if ((j + nibble) > Width)
-                        this[i, j] = new Pixel(0x000000FF);
+                        this[i, j] = (0x000000FF);
                     else
                         this[i, j] = this[i, j + nibble];
                 }   
@@ -121,7 +121,7 @@ namespace bEmu.Systems.Chip8
                 for (int j = 7; j >= 0; j--)
                 {
                     bool pixel = ((resultSprite & (0x1 << j)) >> j) == 1; 
-                    this[(byte) ((coordX + (7 - j)) % Width), coordY] = new Pixel(pixel ? 0xFFFFFFFF : 0x000000FF);
+                    this[(byte) ((coordX + (7 - j)) % Width), coordY] = (pixel ? 0xFFFFFFFF : 0x000000FF);
                 }
 
                 coordY++;
@@ -149,7 +149,7 @@ namespace bEmu.Systems.Chip8
 
                 for (int j = 0; j < 16; j++)
                 {
-                    bool pixel = this[(coordX + j) % Width, coordY] == new Pixel(0xFFFFFFFF);
+                    bool pixel = this[(coordX + j) % Width, coordY] == (0xFFFFFFFF);
                     originalSprite |= (ushort) ((pixel ? 1 : 0) << (15 - j));
                 }
                 
@@ -161,7 +161,7 @@ namespace bEmu.Systems.Chip8
                 for (int j = 15; j >= 0; j--)
                 {
                     bool pixel = ((resultSprite & (0x1 << j)) >> j) == 1; 
-                    this[(byte) ((coordX + (15 - j)) % Width), coordY] = new Pixel(pixel ? 0xFFFFFFFF : 0x000000FF);
+                    this[(byte) ((coordX + (15 - j)) % Width), coordY] = (pixel ? 0xFFFFFFFF : 0x000000FF);
                 }
 
                 coordY++;
@@ -176,7 +176,7 @@ namespace bEmu.Systems.Chip8
         {
             for (int i = 0; i < Width; i++)
                 for (int j = 0; j < Height; j++)
-                    this[i, j] = new Pixel(0x000000FF);
+                    this[i, j] = (0x000000FF);
 
             DrawNextTime();
         }

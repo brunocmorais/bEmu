@@ -2,11 +2,11 @@ using System;
 using bEmu.Core;
 using bEmu.Core.CPU;
 using bEmu.Core.System;
-using bEmu.Systems.Chip8;
+using bEmu.Core.Util;
 
-namespace bEmu.Core.VMs.Chip8
+namespace bEmu.Systems.Chip8
 {
-    public partial class Chip8 : VM<bEmu.Systems.Chip8.State, bEmu.Systems.Chip8.PPU>
+    public partial class Chip8 : VM<State, MMU, PPU, APU>
     {
         private Random random;
         
@@ -17,32 +17,34 @@ namespace bEmu.Core.VMs.Chip8
 
         public override IOpcode StepCycle()
         {
-            var opcode = new Opcode(MMU[State.PC++], MMU[State.PC++]);
+            byte lsb = MMU[State.PC++];
+            byte msb = MMU[State.PC++];
+            var opcode = new Opcode(ByteOperations.GetWordFrom2Bytes(msb, lsb));
 
             base.StepCycle();
 
-            switch (opcode.UShort & 0xF000)
+            switch (opcode & 0xF000)
             {
                 case 0x0000: 
-                    switch (opcode.UShort & 0x00F0)
+                    switch (opcode & 0x00F0)
                     {
                         case 0x00B0: PPU.ScrollUp(opcode.Nibble); break;
                         case 0x00C0: PPU.ScrollDown(opcode.Nibble); break;
                         case 0x00E0:
-                            switch (opcode.UShort & 0x000F)
+                            switch (opcode & 0x000F)
                             {
                                 case 0x0000: PPU.ClearScreen(); break;
                                 case 0x000E: Ret(); break;
                             }
                             break;
                         case 0x00F0:
-                            switch (opcode.UShort & 0x000F)
+                            switch (opcode & 0x000F)
                             {
                                 case 0x000B: PPU.ScrollLeft(); break;
                                 case 0x000C: PPU.ScrollRight(); break;
                                 case 0x000D: Quit(); break;
-                                case 0x000E: (System as bEmu.Systems.Chip8.System).SetChip8Mode(); break;
-                                case 0x000F: (System as bEmu.Systems.Chip8.System).SetSuperChipMode(); break;
+                                case 0x000E: (System as System).SetChip8Mode(); break;
+                                case 0x000F: (System as System).SetSuperChipMode(); break;
                             }
                             break;
                     }
@@ -55,7 +57,7 @@ namespace bEmu.Core.VMs.Chip8
                 case 0x6000: LdWithByte(opcode.X, opcode.Kk); break;
                 case 0x7000: AddWithByte(opcode.X, opcode.Kk); break;
                 case 0x8000: 
-                    switch (opcode.UShort & 0x000F)
+                    switch (opcode & 0x000F)
                     {
                         case 0x0000: Ld(opcode.X, opcode.Y); break;
                         case 0x0001: Or(opcode.X, opcode.Y); break;
@@ -74,14 +76,14 @@ namespace bEmu.Core.VMs.Chip8
                 case 0xC000: Rnd(opcode.X, opcode.Kk); break;
                 case 0xD000: PPU.Drw(opcode.X, opcode.Y, opcode.Nibble); break;
                 case 0xE000: 
-                    switch (opcode.UShort & 0x00FF)
+                    switch (opcode & 0x00FF)
                     {
                         case 0x009E: Skp(opcode.X); break;
                         case 0x00A1: Sknp(opcode.X); break;
                     }
                     break;
                 case 0xF000: 
-                    switch (opcode.UShort & 0x00FF)
+                    switch (opcode & 0x00FF)
                     {
                         case 0x0007: LdVxDt(opcode.X); break;
                         case 0x000A: LdVxK(opcode.X); break;

@@ -56,7 +56,7 @@ namespace bEmu.Systems.Generic8080
                     if (UseBackdrop)
                         return backdrop[x, y];
                     else
-                        return new Pixel(0x000000FF);
+                        return (0x000000FF);
                 }
             }
         }
@@ -64,14 +64,14 @@ namespace bEmu.Systems.Generic8080
         private Pixel GetColor(int y)
         {
             if (!CustomColors)
-                return new Pixel(0xFFFFFFFF);
+                return (0xFFFFFFFF);
 
             if (y >= 0 && y <= 100)
-                return new Pixel(0x00FF00FF);
+                return (0x00FF00FF);
             else if (y > 100 && y <= 200)
-                return new Pixel(0xFFFFFFFF);
+                return (0xFFFFFFFF);
             else
-                return new Pixel(0xFF0000FF);
+                return (0xFF0000FF);
         }
     }
 }

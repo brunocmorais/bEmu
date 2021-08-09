@@ -33,7 +33,7 @@ namespace bEmu.Core.Video
             get
             {
                 int start = GetIndex(x, y);
-                return new Pixel((uint)((Data[start] << 24) | (Data[start + 1] << 16) | (Data[start + 2] << 8) | (Data[start + 3])));
+                return ((uint)((Data[start] << 24) | (Data[start + 1] << 16) | (Data[start + 2] << 8) | (Data[start + 3])));
             }
             set
             {

@@ -5,9 +5,9 @@ using bEmu.Core;
 using bEmu.Core.CPU;
 using bEmu.Core.Util;
 
-namespace bEmu.Core.VMs.Chip8
+namespace bEmu.Systems.Chip8
 {
-    public partial class Chip8 : VM<bEmu.Systems.Chip8.State, bEmu.Systems.Chip8.PPU>
+    public partial class Chip8 : VM<State, MMU, PPU, APU>
     {
         private void Ret()
         {

@@ -104,8 +104,8 @@ namespace bEmu.Core.System
         public virtual bool Update()
         {
             ResetCycles();
-
-            return !(Debugger != null && (Debugger.IsStopped || (Debugger.BreakpointAddress > 0 && Debugger.BreakpointAddress == State.PC)));
+            return true;
+            //return !(Debugger != null && (Debugger.IsStopped || (Debugger.BreakpointAddress > 0) && Debugger.BreakpointAddress == (State as State<ushort>).PC));
         }
 
         public void ResetCycles()

@@ -46,7 +46,7 @@ namespace bEmu.Core.Video.Scalers
         public static Pixel Interpolate(Pixel a, Pixel b)
         {
             if (a != b)
-                return new Pixel((((a & ColorMask) >> 1) + ((b & ColorMask) >> 1) + (a & b & LowPixelMask)));
+                return ((((a & ColorMask) >> 1) + ((b & ColorMask) >> 1) + (a & b & LowPixelMask)));
 
             return a;
         }
@@ -62,7 +62,7 @@ namespace bEmu.Core.Video.Scalers
                 (c & QlowpixelMask) +
                 (d & QlowpixelMask);
             y = (y >> 2) & QlowpixelMask;
-            return new Pixel(x + y);
+            return (x + y);
         }
 
         public static float Lerp(float s, float e, float t) => s + (e - s) * t; 

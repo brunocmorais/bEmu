@@ -1,14 +1,10 @@
 using System;
-using System.IO;
-using bEmu.Core.CPU.LR35902;
-using bEmu.Core;
 using bEmu.Core.Util;
-using System.Collections.Generic;
 using bEmu.Core.System;
 
 namespace bEmu.Core.CPU.LR35902
 {
-    public class State : Core.System.State
+    public class State : Core.System.State<ushort, ushort>
     {
         public byte A { get; set; }
         public byte B { get; set; }

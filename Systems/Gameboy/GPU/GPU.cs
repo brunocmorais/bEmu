@@ -163,7 +163,7 @@ namespace bEmu.Systems.Gameboy.GPU
         private void UpdateFramebuffer()
         {
             for (int i = 0; i < currentLine.Length; i++)
-                Framebuffer[i, state.LCD.LY] = new Pixel(currentLine[i]);
+                Framebuffer[i, state.LCD.LY] = (currentLine[i]);
         }
 
         private void Push(Palette palette, int padding, int x)

@@ -1,9 +1,7 @@
 using bEmu.Core.CPU.Intel8080;
-using bEmu.Core;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.IO;
-using Newtonsoft.Json;
 using System.Linq;
 using System;
 using bEmu.Core.Enums;
@@ -87,7 +85,7 @@ namespace bEmu.Systems.Generic8080
 
         public void SetStartPoint(ushort pc)
         {
-            State.PC = pc;
+            (State as State).PC = pc;
         }
 
         public override void Reset()

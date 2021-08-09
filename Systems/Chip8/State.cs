@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using bEmu.Core;
+using bEmu.Core.CPU;
 using bEmu.Core.System;
 using bEmu.Core.Util;
 
 namespace bEmu.Systems.Chip8
 {
-    public class State : Core.System.State
+    public class State : Core.System.State<ushort, ushort>
     {
         public State(ISystem system) : base(system) { }
         public byte[] V { get; set; }
@@ -24,6 +25,7 @@ namespace bEmu.Systems.Chip8
             base.Reset();
 
             PC = 0x200;
+            SP = 0;
             V = new byte[16];
             Keys = new bool[16];
             I = 0;

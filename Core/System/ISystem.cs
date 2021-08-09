@@ -4,7 +4,6 @@ using bEmu.Core.GamePad;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;
-using bEmu.Core.Video.Scalers;
 
 namespace bEmu.Core.System
 {

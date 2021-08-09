@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using bEmu.Core.CPU.Intel8080;
+using bEmu.Core.IO;
+using bEmu.Systems.Generic8080;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using bEmu.Core.Extensions;
 
 namespace Tests
 {
@@ -22,12 +26,12 @@ namespace Tests
 
             while (!system.State.Halted)
             {
-                if (system.State.PC >= Pc)
-                    sb.AppendLine(disassembler.GetInstruction(system.State.PC - Pc).ToString());
+                if ((system.State as bEmu.Core.CPU.Intel8080.State).PC >= Pc)
+                    sb.AppendLine(disassembler.GetInstruction((system.State as bEmu.Core.CPU.Intel8080.State).PC - Pc).ToString());
 
-                var opcode = system.Runner.StepCycle();
+                var opcode = system.Runner.StepCycle() as Opcode;
 
-                if (opcode.Byte == 0xCD) // call
+                if (opcode == 0xCD) // call
                 {
                     diag = (system.Runner as Intel8080<bEmu.Systems.Generic8080.State, bEmu.Systems.Generic8080.MMU>).CallDiagnosticsRoutine();
 

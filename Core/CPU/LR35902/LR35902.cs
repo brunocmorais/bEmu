@@ -14,42 +14,6 @@ namespace bEmu.Core.CPU.LR35902
 
         public LR35902(ISystem system, int clock) : base(system, clock) { }
 
-        protected ushort GetNextWord()
-        {
-            byte b1 = MMU[State.PC++];
-            byte b2 = MMU[State.PC++];
-            return ByteOperations.GetWordFrom2Bytes(b1, b2);
-        }
-
-        public byte GetNextByte()
-        {
-            return MMU[State.PC++];
-        }
-
-        protected byte ReadByteFromMemory(ushort addr)
-        {
-            return MMU[addr];
-        }
-
-        protected void WriteByteToMemory(ushort addr, byte value)
-        {
-            MMU[addr] = value;
-        }
-
-        protected ushort ReadWordFromMemory(ushort addr)
-        {
-            byte a = MMU[addr];
-            byte b = MMU[addr + 1];
-            return ByteOperations.GetWordFrom2Bytes(a, b);
-        }
-
-        protected void WriteWordToMemory(ushort addr, ushort word)
-        {
-            ByteOperations.Get2BytesFromWord(word, out byte a, out byte b);
-            MMU[addr] = b;
-            MMU[addr + 1] = a;
-        }
-
         protected ushort PopStack()
         {
             ushort word = ReadWordFromMemory(State.SP);
@@ -158,7 +122,7 @@ namespace bEmu.Core.CPU.LR35902
             opcode = new Opcode(GetNextByte());
             int cycles = State.Cycles;
 
-            switch (opcode.Byte)
+            switch (opcode)
             {
                 case 0x00: Nop(); break;
                 case 0x10: Stop(); break;

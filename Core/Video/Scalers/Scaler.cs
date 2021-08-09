@@ -19,7 +19,7 @@ namespace bEmu.Core.Video.Scalers
             get
             {
                 if (x < 0 || y < 0 || x >= Framebuffer.Width || y >= Framebuffer.Height)
-                    return new Pixel(0xFFFFFFFF);
+                    return (0xFFFFFFFF);
 
                 return Framebuffer[x, y];
             }

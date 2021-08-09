@@ -220,8 +220,7 @@ namespace bEmu.MonoGame
 
         protected override void Draw(GameTime gameTime)
         {
-            if (System.Type == SystemType.None)
-                GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(Color.Black);
 
             if (backBuffer == null)
                 return;

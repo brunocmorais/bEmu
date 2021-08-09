@@ -29,7 +29,7 @@ namespace bEmu.Core.Video.Scalers
                     var g = (uint) ScalerHelpers.Blerp((c00 >> 16) & 0xFF, (c10 >> 16) & 0xFF, (c01 >> 16) & 0xFF, (c11 >> 16) & 0xFF, tx, ty);
                     var b = (uint) ScalerHelpers.Blerp((c00 >>  8) & 0xFF, (c10 >>  8) & 0xFF, (c01 >>  8) & 0xFF, (c11 >>  8) & 0xFF, tx, ty);
 
-                    ScaledFramebuffer[i + (x * ScaleFactor), j + (y * ScaleFactor)] = new Pixel((r << 24) | (g << 16) | (b << 8) | 0xFF);
+                    ScaledFramebuffer[i + (x * ScaleFactor), j + (y * ScaleFactor)] = ((r << 24) | (g << 16) | (b << 8) | 0xFF);
                 }
             }
         }

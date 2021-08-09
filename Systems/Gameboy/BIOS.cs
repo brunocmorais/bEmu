@@ -178,10 +178,10 @@ namespace bEmu.Systems.Gameboy
         {
             get
             {
-                if (running && System.State.PC >= InitAddress)
+                if (running && (System.State as State).PC >= InitAddress)
                     running = false;
 
-                return running && System.State.PC < InitAddress;
+                return running && (System.State as State).PC < InitAddress;
             }
         } 
         public int InitAddress => (IsGBC ? gbcBios.Length : gbBios.Length);
