@@ -16,12 +16,11 @@ namespace Tests
         [TestMethod]
         public void TestarGameboy()
         {
-            string fileName = "../../../test_roms/gb/10-bit ops.gb";
+            string fileName = "test_roms/gb/blargg/10-bit ops.gb";
             var system = new bEmu.Systems.Gameboy.System(fileName);
             var disassembler = new bEmu.Core.CPU.LR35902.Disassembler(system.MMU);
             var sb = new StringBuilder();
 
-            system.MMU.LoadProgram();
             int counter = 0;
 
             Console.WriteLine();

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using bEmu.Core.Attributes;
 using bEmu.Core.Enums;
 using bEmu.Core.GUI;
 using bEmu.Core.Util;

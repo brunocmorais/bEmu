@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using bEmu.Core.Memory;
 
 namespace bEmu.Core.CPU
@@ -12,5 +13,17 @@ namespace bEmu.Core.CPU
         }
 
         public abstract Instruction GetInstruction(int pointer);
+
+        public virtual IEnumerable<Instruction> GetInstructions()
+        {
+            int pointer = 0;
+
+            while (pointer < mmu.Length)
+            {
+                var instruction = GetInstruction(pointer);
+                pointer += instruction.Length;
+                yield return instruction;
+            } 
+        }
     }
 }

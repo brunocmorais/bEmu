@@ -2,14 +2,17 @@ using System;
 using bEmu.Core.Enums;
 using bEmu.Core.System;
 using bEmu.Core.GUI;
+using bEmu.Core.Factory;
 
 namespace bEmu.Systems.Factory
 {
-    public static class OptionsFactory
+    public class OptionsFactory : Factory<OptionsFactory, SystemType, IOptions>
     {
-        public static IOptions Build(IMain game)
+        public override IOptions Get(SystemType type, params object[] parameters)
         {
-            switch (game.System.Type)
+            var game = parameters[0] as IMain;
+
+            switch (type)
             {
                 case SystemType.Chip8:
                     return new Systems.Chip8.Options(game, 5);

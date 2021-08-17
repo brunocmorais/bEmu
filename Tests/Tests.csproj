@@ -18,4 +18,9 @@
     <ProjectReference Include="..\Systems\Systems.csproj" />
   </ItemGroup>
 
+  <ItemGroup> 
+    <Content Include="test_roms\**"> 
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory> 
+    </Content> 
+  </ItemGroup>
 </Project>

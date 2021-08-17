@@ -42,7 +42,9 @@ namespace bEmu.MonoGame
         public IOptions Options { get; private set; }
         public ISystem System { get; private set; }
 
-        public Main()
+        public Main() : this(SystemType.None, string.Empty) { }
+
+        public Main(SystemType type, string fileName)
         {
             graphics = new GraphicsDeviceManager(this);
             IsMouseVisible = true;
@@ -51,11 +53,14 @@ namespace bEmu.MonoGame
             Osd = new OSD();
             gamePadBuilder = new GamePadBuilder();
 
-            LoadSystem(SystemType.None, string.Empty);
-            
             MenuManager = new MenuManager(this);
             PopupManager = new PopupManager(this);
 
+            LoadSystem(type, fileName);
+        }
+
+        protected override void Initialize()
+        {
             var regular = SpriteFontLoader.Get("font.ttf", GraphicsDevice, 20);
             var title = SpriteFontLoader.Get("font.ttf", GraphicsDevice, 24);
             
@@ -64,21 +69,21 @@ namespace bEmu.MonoGame
             menuDrawer = new MenuDrawer(spriteBatch, GraphicsDevice, regular, title);
             popupDrawer = new PopupDrawer(spriteBatch, GraphicsDevice, regular, title);
 
-            MenuManager.Open((new MainMenu(this)));
-        }
+            if (System.Type == SystemType.None)
+                MenuManager.Open((new MainMenu(this)));
 
-        protected override void Initialize() => SetScreenSize();
+            SetScreenSize();
+        }
 
         public void LoadSystem(SystemType system, string file)
         {
-            System = SystemFactory.Get(system, file);
-            Options = OptionsFactory.Build(this);
+            System = SystemFactory.Instance.Get(system, file);
+            Options = OptionsFactory.Instance.Get(system, this);
 
             if (system != SystemType.None)
             {
                 try
                 {
-                    System.LoadProgram();
                     MenuManager.CloseAll();
 
                     SetScreenSize();

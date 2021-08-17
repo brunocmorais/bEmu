@@ -14,6 +14,17 @@ namespace bEmu.Core.Video
             SetSize(width, height);
         }
 
+        public static IFrameBuffer From(Bitmap bitmap)
+        {
+            var frameBuffer = new FrameBuffer(bitmap.Width, bitmap.Height);
+
+            for (int i = 0; i < frameBuffer.Width; i++)
+                for (int j = 0; j < frameBuffer.Height; j++)
+                    frameBuffer[i, j] = bitmap[i, j];
+
+            return frameBuffer;
+        } 
+
         public void Reset()
         {
             Data = new byte[Width * Height * 4];

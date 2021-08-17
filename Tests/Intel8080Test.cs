@@ -17,9 +17,8 @@ namespace Tests
         [TestMethod]
         public void TestarIntel8080()
         {
-            var system = new bEmu.Systems.Generic8080.System("cpudiag");
+            var system = new bEmu.Systems.Generic8080.System("test_roms/intel8080/cpudiag");
             system.SetStartPoint(Pc);
-            system.MMU.LoadProgram();
             bEmu.Core.CPU.Intel8080.Disassembler disassembler = new bEmu.Core.CPU.Intel8080.Disassembler(system.MMU);
             var sb = new StringBuilder();
             string diag = "";

@@ -172,21 +172,6 @@ namespace bEmu.Core.CPU.Z80
             }
         }
 
-        protected bool CheckZero(byte value)
-        {
-            return value == 0;
-        }
-
-        protected bool CheckHalfCarry(ushort a, ushort b, ushort result)
-        {
-            return (((a ^ b ^ result) & 0x10) == 0x10);
-        }
-
-        protected bool CheckHalfCarry(byte a, byte b, byte result)
-        {
-            return (((a ^ b ^ result) & 0x10) == 0x10);
-        }
-
         public abstract void HandleInterrupts();
 
         public override IOpcode StepCycle()

@@ -15,7 +15,7 @@ namespace bEmu.Systems.Gameboy
 {
     public class System : Core.System.System
     {
-        public bool GBCMode => (MMU as MMU).Bios.IsGBC;
+        public bool GBCMode => ((MMU as MMU).CartridgeHeader.GBCFlag & 0x80) == 0x80;
         public IColorPalette ColorPalette { get; private set; }
         public bool DoubleSpeedMode => (MMU[0xFF4D] & 0x80) == 0x80;
         public override int Width => 160;
@@ -30,8 +30,8 @@ namespace bEmu.Systems.Gameboy
 
         public System(string fileName) : base(fileName)
         {
-            State = GetInitialState();
             MMU = new MMU(this);
+            State = GetInitialState();
             PPU = new GPU.GPU(this);
             APU = new APU(this);
             Runner = new CPU(this, 4194304);
@@ -40,16 +40,10 @@ namespace bEmu.Systems.Gameboy
 
         public override IState GetInitialState()
         {
-            var state = new bEmu.Systems.Gameboy.State(this);
-            state.Flags = new Flags();
-
-            state.EnableInterrupts = false;
-            state.Cycles = 0;
-            state.Halted = false;
-            state.Instructions = 0;
-            state.PC = 0x0000;
-
-            return state;
+            if (GBCMode)
+                return Gameboy.State.GetCGBState(this);
+            else
+                return Gameboy.State.GetCGBState(this);
         }
 
         public override bool Update()
@@ -73,6 +67,7 @@ namespace bEmu.Systems.Gameboy
 
         public override void Stop()
         {
+            base.Stop();
             ((MMU) MMU).MBC.Shutdown();
         }
 

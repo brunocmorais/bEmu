@@ -14,6 +14,7 @@ namespace bEmu.Core.Memory
         {
             ram = new byte[size];
             System = system;
+            LoadProgram();
         }
 
         public virtual byte this[int addr]

@@ -6,21 +6,20 @@ using bEmu.Core.GamePad;
 using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;
+using bEmu.Core.Extensions;
 
 namespace bEmu.Core.System
 {
     public abstract class System : ISystem
     {
         private readonly byte[] dummySoundBuffer = new byte[Audio.APU.BufferSize];
-        public string FileNameWithoutExtension => 
-            Path.Combine(Path.GetDirectoryName(FileName), Path.GetFileNameWithoutExtension(FileName));
+        public string FileNameWithoutExtension => FileExtensions.GetFileNameWithoutExtension(FileName);
         public string FilePath => Path.GetDirectoryName(FileName);
         public IDebugger Debugger { get; private set; }
         public abstract int Width { get; }
         public abstract int Height { get; }
         public abstract int StartAddress { get; }
         public abstract IState GetInitialState();
-        public abstract void Stop();
         public abstract void UpdateGamePad(IGamePad gamePad);
         public abstract IRunner Runner { get; }
         public abstract IState State { get; }
@@ -34,7 +33,7 @@ namespace bEmu.Core.System
         public string SaveStateName => FileNameWithoutExtension + ".state";
         public bool SkipFrame => (Frameskip >= 1 && Frame % (Frameskip + 1) != 0);
         public virtual int CycleCount => Runner?.Clock / 60 ?? 0;
-        
+
         public int Frame
         {
             get => PPU?.Frame ?? 0;
@@ -42,7 +41,7 @@ namespace bEmu.Core.System
             {
                 if (PPU != null)
                     PPU.Frame = value;
-            }  
+            }
         }
         public int Frameskip
         {
@@ -123,6 +122,11 @@ namespace bEmu.Core.System
         {
             if (Debugger == null)
                 Debugger = new Debugger(this);
+        }
+
+        public virtual void Stop() 
+        { 
+            // adicionar lógica base para evento Stop
         }
     }
 }

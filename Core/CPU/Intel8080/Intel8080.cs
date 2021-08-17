@@ -83,11 +83,6 @@ namespace bEmu.Core.CPU.Intel8080
             }
         }
 
-        protected bool CheckZero(byte value)
-        {
-            return value == 0;
-        }
-
         protected bool CheckSign(byte value)
         {
             return (value & 0x80) == 0x80;
@@ -109,14 +104,6 @@ namespace bEmu.Core.CPU.Intel8080
                 bytes[i] &= 0x0F;
 
             return bytes.Sum(x => x) >= 0x10;
-        }
-
-        protected bool CheckAuxiliaryCarryAdd(params ushort[] words)
-        {
-            for (int i = 0; i < words.Length; i++)
-                words[i] &= 0x0FFF;
-
-            return words.Sum(x => x) >= 0x1000;
         }
 
         public override IOpcode StepCycle()
@@ -397,7 +384,7 @@ namespace bEmu.Core.CPU.Intel8080
                 if (State.C == 9)
                 {
                     var sb = new StringBuilder();
-                    ushort offset = ByteOperations.GetWordFrom2Bytes(State.E, State.D);
+                    ushort offset = LittleEndian.GetWordFrom2Bytes(State.E, State.D);
                     offset += 3;
                     char c = Convert.ToChar(MMU[offset]);
 

@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using bEmu.Core.Attributes;
 using bEmu.Core.Util;
 
 namespace bEmu.Core.Extensions

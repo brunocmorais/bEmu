@@ -45,5 +45,49 @@ namespace bEmu.Systems.Gameboy
             base.Reset();
             Timer = new Timer(System as Gameboy.System);
         }
+
+        private static State GetState(System system)
+        {
+            var state = new bEmu.Systems.Gameboy.State(system);
+            state.Flags = new Flags();
+
+            state.EnableInterrupts = false;
+            state.Cycles = 0;
+            state.Halted = false;
+            state.Instructions = 0;
+            state.PC = 0x0100;
+            state.SP = 0xFFFE;
+
+            state.Flags.Zero = true;
+            state.Flags.Subtract = false;
+            state.Flags.HalfCarry = false;
+            state.Flags.Carry = false;
+
+            return state;
+        }
+
+        public static State GetDMGState(System system)
+        {
+            var state = GetState(system);
+
+            state.A = 0x1;
+            state.BC = 0x0013;
+            state.DE = 0x00D8;
+            state.HL = 0x014D;
+
+            return state;
+        }
+
+        public static State GetCGBState(System system)
+        {
+            var state = GetState(system);
+
+            state.A = 0x11;
+            state.BC = 0x0000;
+            state.DE = 0xFF56;
+            state.HL = 0x000D;
+
+            return state;
+        }
     }
 }

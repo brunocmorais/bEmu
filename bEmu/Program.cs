@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using bEmu.MonoGame;
 
 namespace bEmu
@@ -8,8 +9,15 @@ namespace bEmu
         [STAThread]
         private static void Main(string[] args)
         {
-            using (var game = new Main())
-                game.Run();
+            if (!args.Any())
+            {
+                using (var game = new Main())
+                    game.Run();
+            }
+            else
+            {
+                CLI.CLI.ParseArgs(args);
+            }
         }
     }
 }

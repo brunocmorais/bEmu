@@ -36,7 +36,7 @@ namespace bEmu.Core.CPU
         {
             byte b1 = MMU[State.PC++];
             byte b2 = MMU[State.PC++];
-            return ByteOperations.GetWordFrom2Bytes(b1, b2);
+            return LittleEndian.GetWordFrom2Bytes(b1, b2);
         }
 
         protected virtual byte GetNextByte()
@@ -58,14 +58,34 @@ namespace bEmu.Core.CPU
         {
             byte a = MMU[addr];
             byte b = MMU[addr + 1];
-            return ByteOperations.GetWordFrom2Bytes(a, b);
+            return LittleEndian.GetWordFrom2Bytes(a, b);
         }
 
         protected virtual void WriteWordToMemory(ushort addr, ushort word)
         {
-            ByteOperations.Get2BytesFromWord(word, out byte a, out byte b);
+            LittleEndian.Get2BytesFromWord(word, out byte a, out byte b);
             MMU[addr] = b;
             MMU[addr + 1] = a;
+        }
+
+        protected virtual bool CheckZero(byte value)
+        {
+            return value == 0;
+        }
+
+        protected virtual bool CheckHalfCarry(ushort a, ushort b, ushort result)
+        {
+            return (((a ^ b ^ result) & 0x10) == 0x10);
+        }
+
+        protected virtual bool CheckHalfCarry(byte a, byte b, byte result)
+        {
+            return (((a ^ b ^ result) & 0x10) == 0x10);
+        }
+
+        protected virtual bool CheckNegative(byte value)
+        {
+            return (value & 0x80) == 0x80;
         }
     }
 }

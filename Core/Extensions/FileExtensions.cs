@@ -24,5 +24,10 @@ namespace bEmu.Core.Extensions
         {
             return Encoding.UTF8.GetString(ToBytes(fileStream));
         }
+
+        public static string GetFileNameWithoutExtension(string fileName)
+        {
+            return Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName));
+        }
     }
 }

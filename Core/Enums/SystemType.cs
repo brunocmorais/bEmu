@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using bEmu.Core.Attributes;
 using bEmu.Core.Util;
 
 namespace bEmu.Core.Enums

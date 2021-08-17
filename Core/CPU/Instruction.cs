@@ -19,6 +19,6 @@ namespace bEmu.Core.CPU
             return $"{pos}: {Mnemonic}";
         }
 
-        public static Instruction Empty => default(Instruction);
+        public static Instruction Empty => new Instruction(string.Empty, 1, 0);
     }
 }

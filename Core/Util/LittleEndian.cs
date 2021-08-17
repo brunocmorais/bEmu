@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace bEmu.Core.Util
 {
-    public static class ByteOperations
+    public static class LittleEndian
     {
         public static ushort GetWordFrom2Bytes(byte lsb, byte msb)
         {
@@ -55,7 +56,7 @@ namespace bEmu.Core.Util
         public static IEnumerable<byte> ToBytes<T>(IEnumerable<T> itens)
         {
             foreach (var item in itens)
-                foreach (var @byte in ByteOperations.ToBytes(item, typeof(T)))
+                foreach (var @byte in LittleEndian.ToBytes(item, typeof(T)))
                     yield return @byte;
         }
 

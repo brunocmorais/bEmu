@@ -1,6 +1,6 @@
 using System;
 
-namespace bEmu.Core.Util
+namespace bEmu.Core.Attributes
 {
     public class IgnoreAttribute : Attribute { }
 }

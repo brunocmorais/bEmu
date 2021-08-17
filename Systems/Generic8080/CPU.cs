@@ -21,7 +21,7 @@ namespace bEmu.Systems.Generic8080
                     State.A = State.Ports.Read2;
                     break;
                 case 3:
-                    ushort value = ByteOperations.GetWordFrom2Bytes(State.Ports.Shift0, State.Ports.Shift1);
+                    ushort value = LittleEndian.GetWordFrom2Bytes(State.Ports.Shift0, State.Ports.Shift1);
                     State.A = (byte)((value >> (8 - State.Ports.Write2)) & 0xFF);
                     break;
                 default:

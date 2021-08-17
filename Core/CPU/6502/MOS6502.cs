@@ -1,6 +1,8 @@
+using System;
 using bEmu.Core.Exceptions;
 using bEmu.Core.Memory;
 using bEmu.Core.System;
+using bEmu.Core.Util;
 
 namespace bEmu.Core.CPU.MOS6502
 {
@@ -8,7 +10,62 @@ namespace bEmu.Core.CPU.MOS6502
         where TState : State
         where TMMU : MMU
     {
+        public const ushort IrqVectorH = 0xFFFF;
+        public const ushort IrqVectorL = 0xFFFE;
+        public const ushort RstVectorH = 0xFFFC;
+        public const ushort RstVectorL = 0xFFFD;
+        public const ushort NmiVectorH = 0xFFFB;
+        public const ushort NmiVectorL = 0xFFFA;
+
         public MOS6502(ISystem system, int clock) : base(system, clock) { }
+
+        protected byte PullStack()
+        {
+            byte b = ReadByteFromMemory(State.SP);
+            State.SP++;
+            return b;
+        }
+
+        protected void PushStack(byte value)
+        {
+            State.SP--;
+            WriteWordToMemory(State.SP, value);
+        }
+
+        protected void UpdateNegativeAndZero(byte value)
+        {
+            State.Flags.Negative = CheckNegative(value);
+            State.Flags.Zero = CheckZero(value);
+        }
+
+        protected ushort GetAddressByMode(AddressMode mode)
+        {
+            switch (mode)
+            {
+                case AddressMode.ZeroPage:
+                    return GetNextByte();
+                case AddressMode.ZeroPageX:
+                    return (byte)(GetNextByte() + (sbyte) State.X);
+                case AddressMode.ZeroPageY:
+                    return (byte)(GetNextByte() + (sbyte) State.Y);
+                case AddressMode.XIndirect:
+                    return LittleEndian.GetWordFrom2Bytes((byte)(GetNextByte() + State.X), (byte)(GetNextByte() + State.X));
+                case AddressMode.IndirectY:
+                    return (ushort)(LittleEndian.GetWordFrom2Bytes(GetNextByte(), GetNextByte()) + (sbyte) (State.Y));
+                case AddressMode.Absolute:
+                    return GetNextWord();
+                case AddressMode.AbsoluteX:
+                    return (ushort)(GetNextWord() + State.X);
+                case AddressMode.AbsoluteY:
+                    return (ushort)(GetNextWord() + State.Y);
+                case AddressMode.Indirect:
+                    return LittleEndian.GetWordFrom2Bytes(MMU[GetNextWord()], MMU[GetNextWord()]);
+                case AddressMode.Relative:
+                    return (ushort)(State.PC + ((sbyte) GetNextByte()));
+                default:
+                    throw new Exception();
+            }
+        }
 
         public override IOpcode StepCycle()
         {

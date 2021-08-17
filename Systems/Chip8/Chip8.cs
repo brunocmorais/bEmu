@@ -19,7 +19,7 @@ namespace bEmu.Systems.Chip8
         {
             byte lsb = MMU[State.PC++];
             byte msb = MMU[State.PC++];
-            var opcode = new Opcode(ByteOperations.GetWordFrom2Bytes(msb, lsb));
+            var opcode = new Opcode(LittleEndian.GetWordFrom2Bytes(msb, lsb));
 
             base.StepCycle();
 

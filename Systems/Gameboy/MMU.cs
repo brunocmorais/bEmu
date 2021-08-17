@@ -19,7 +19,6 @@ namespace bEmu.Systems.Gameboy
         public OAM OAM { get; private set; }
         public byte[] ZeroPage { get; private set; }
         public IMBC MBC { get; private set; }
-        public BIOS Bios { get; private set; }
         public CartridgeHeader CartridgeHeader { get; private set; }
         public ColorPaletteData ColorPaletteData { get; private set; }
         public MonochromePaletteData MonochromePaletteData { get; private set; }
@@ -42,14 +41,12 @@ namespace bEmu.Systems.Gameboy
         { 
             get
             {
-                if (Bios.Running && (addr < 0x100 || (addr >= 0x200 && addr < Bios.InitAddress)))
-                    return Bios[addr];
-                else if (addr >= 0x0000 && addr <= 0x7FFF)
+                if (addr >= 0x0000 && addr <= 0x7FFF)
                     return MBC.ReadROM(addr);
                 else if (addr >= 0x8000 && addr <= 0x9FFF)
                     return VRAM[addr - 0x8000];
                 else if (addr >= 0xA000 && addr <= 0xBFFF)
-                    return MBC.ReadCartRAM((addr - 0xA000));
+                    return MBC.ReadCartRAM(addr - 0xA000);
                 else if (addr >= 0xC000 && addr <= 0xDFFF)
                     return WRAM[addr - 0xC000];
                 else if (addr >= 0xE000 && addr <= 0xFDFF)
@@ -135,8 +132,6 @@ namespace bEmu.Systems.Gameboy
         {
             byte[] bytes = File.ReadAllBytes(System.FileName);
             CartridgeHeader = new CartridgeHeader(bytes);
-            bool gbc = (CartridgeHeader.GBCFlag & 0x80) == 0x80;
-            Bios = new BIOS(System, gbc);
             MBC = MBCFactory.GetMBC(this, CartridgeHeader.CartridgeType);
             MBC.LoadProgram(bytes);
         }

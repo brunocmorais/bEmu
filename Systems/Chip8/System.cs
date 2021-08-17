@@ -152,8 +152,6 @@ namespace bEmu.Systems.Chip8
             return true;
         }
 
-        public override void Stop() { }
-
         public override void UpdateGamePad(IGamePad gamePad)
         {
             var state = (State) State;

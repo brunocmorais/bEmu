@@ -26,8 +26,6 @@ namespace bEmu.Core.System
 
         public override IState GetInitialState() => default;
 
-        public override void Stop() {}
-
         public override void UpdateGamePad(IGamePad gamePad) {}
     }
 }

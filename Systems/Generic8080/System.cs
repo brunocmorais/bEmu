@@ -38,29 +38,6 @@ namespace bEmu.Systems.Generic8080
             ((Systems.Generic8080.State) State).UpdatePorts(2, 0x00);
         }
 
-        public void LoadZipFile(IList<GameInfo> gameInfos)
-        {
-            var entries = new Dictionary<string, byte[]>();
-            var gameInfo = gameInfos.FirstOrDefault(x => x.ZipName == Path.GetFileNameWithoutExtension(FileName));
-
-            using (var zipFile = ZipFile.OpenRead($"{FileName}"))
-            {
-                foreach (var fileName in gameInfo.FileNames)
-                {
-                    var stream = zipFile.GetEntry(fileName).Open();
-
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        stream.CopyTo(memoryStream);
-                        entries.Add(fileName, memoryStream.ToArray());
-                    }
-                }
-            }
-
-            for (int i = 0; i < gameInfo.FileNames.Length; i++)
-                MMU.LoadProgram(entries[gameInfo.FileNames[i]], Convert.ToInt32(gameInfo.MemoryPositions[i], 16));
-        }
-
         public override IState GetInitialState()
         {
             var state = new State(this);
@@ -126,11 +103,6 @@ namespace bEmu.Systems.Generic8080
             }
 
             return interrupt;
-        }
-
-        public override void Stop()
-        {
-            
         }
 
         public override void UpdateGamePad(IGamePad gamePad)
