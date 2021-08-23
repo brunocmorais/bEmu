@@ -21,8 +21,8 @@ namespace bEmu.Systems.Gameboy.MBCs
         {
             get
             {
-                string directory = Path.GetDirectoryName(Mmu.System.FileName);
-                string name = Path.GetFileNameWithoutExtension(Mmu.System.FileName) + ".rtc";
+                string directory = Path.GetDirectoryName(Mmu.System.ROM.FileName);
+                string name = Path.GetFileNameWithoutExtension(Mmu.System.ROM.FileName) + ".rtc";
                 return Path.Combine(directory, name);
             }
         }

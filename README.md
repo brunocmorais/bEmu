@@ -19,7 +19,6 @@ Todo o código encontrado no bEmu é escrito do zero, sem uso de bibliotecas ext
 **Roadmap**
 
 - Melhorar a qualidade de emulação do GameBoy/GameBoy Color
-- Desenvolver o suporte a áudio nativo nos sistemas atuais
 - Desenvolver a implementação do processador Z80
 - Desenvolver a emulação do arcade original de Pac-Man
 - Desenvolver a emulação do Nintendo Entertainment System (NES)

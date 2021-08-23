@@ -16,7 +16,7 @@ namespace bEmu.Systems.Generic8080
         {
             this.mmu = mmu;
             this.data = new byte[Width * Height * 4];
-            backdrop = Bitmap.Read(AssetLoader.Load(mmu.System, "backdrop.bmp").ToBytes());
+            backdrop = BitmapReader.Instance.Read(AssetLoader.Load(mmu.System, "backdrop.bmp"));
         }
 
         public override byte[] Data

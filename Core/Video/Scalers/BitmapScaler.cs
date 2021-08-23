@@ -9,7 +9,7 @@ namespace bEmu.Core.Video
     {
         public static Bitmap Scale(string fileName, ScalerType scalerType, int passes)
         {
-            var bitmap = Bitmap.Read(FileManager.Read(fileName).ToBytes());
+            var bitmap = BitmapReader.Instance.Read(FileManager.Read(fileName));
 
             for (int i = 0; i < passes; i++)
             {

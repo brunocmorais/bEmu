@@ -69,7 +69,7 @@ namespace bEmu.Systems.Chip8
             return state;
         }
 
-        public System(string fileName) : base(fileName)
+        public System(IROM rom) : base(rom)
         {
             State = GetInitialState();
             MMU = new MMU(this);

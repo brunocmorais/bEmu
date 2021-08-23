@@ -6,6 +6,7 @@ using bEmu.Core.IO;
 using bEmu.Systems.Generic8080;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using bEmu.Core.Extensions;
+using bEmu.Core.Memory;
 
 namespace Tests
 {
@@ -17,7 +18,8 @@ namespace Tests
         [TestMethod]
         public void TestarIntel8080()
         {
-            var system = new bEmu.Systems.Generic8080.System("test_roms/intel8080/cpudiag");
+            var rom = new bEmu.Core.Memory.ROMReader().Read("test_roms/intel8080/cpudiag");
+            var system = new bEmu.Systems.Generic8080.System(rom);
             system.SetStartPoint(Pc);
             bEmu.Core.CPU.Intel8080.Disassembler disassembler = new bEmu.Core.CPU.Intel8080.Disassembler(system.MMU);
             var sb = new StringBuilder();

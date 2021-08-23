@@ -32,7 +32,7 @@ namespace bEmu.Core.Video
             pixels = new Pixel[Width, Height];
         }
 
-        public static Bitmap Read(byte[] bytes)
+        public Bitmap Read(byte[] bytes)
         {
             int width = (int) LittleEndian.GetDWordFrom4Bytes(bytes[0x12], bytes[0x13], bytes[0x14], bytes[0x15]);
             int height = (int) LittleEndian.GetDWordFrom4Bytes(bytes[0x16], bytes[0x17], bytes[0x18], bytes[0x19]);

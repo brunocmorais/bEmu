@@ -1,23 +1,22 @@
 using System.IO;
 using bEmu.Core.Enums;
 using bEmu.Core.Extensions;
+using bEmu.Core.Memory;
 
 namespace bEmu.Core.System
 {
     public abstract class BaseSystem : ISystem
     {
-        public string FileName { get; }
         public IDebugger Debugger { get; protected set; }
         public abstract SystemType Type { get; }
-        public string FileNameWithoutExtension => FileExtensions.GetFileNameWithoutExtension(FileName);
-        public string FilePath => Path.GetDirectoryName(FileName);
-        public string SaveFileName => FileNameWithoutExtension + ".sav";
+        public IROM ROM { get; }
 
-        public BaseSystem(string fileName)
+        public BaseSystem(IROM rom)
         {
-            FileName = fileName;
+            ROM = rom;
         }
 
+        protected BaseSystem() { }
         
         public abstract void Reset();
         public abstract void Stop();

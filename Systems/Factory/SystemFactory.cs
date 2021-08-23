@@ -1,7 +1,7 @@
 using System;
-using bEmu.Core;
 using bEmu.Core.Enums;
 using bEmu.Core.Factory;
+using bEmu.Core.IO;
 using bEmu.Core.System;
 
 namespace bEmu.Systems.Factory
@@ -10,7 +10,7 @@ namespace bEmu.Systems.Factory
     {
         public override IRunnableSystem Get(SystemType type, params object[] parameters)
         {
-            var rom = parameters[0] as string;
+            var rom = ROMReaderFactory.Instance.Get(type).Read(FileManager.Read(parameters[0] as string));
 
             switch (type)
             {
@@ -21,7 +21,6 @@ namespace bEmu.Systems.Factory
                 case SystemType.Generic8080:
                     return new Generic8080.System(rom);
                 default:
-                    //return new EmptySystem();
                     throw new Exception("Sistema não suportado.");
             }
         }

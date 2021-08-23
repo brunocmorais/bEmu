@@ -37,7 +37,7 @@ namespace bEmu.Systems.Generic8080
 
         public Sound(FileStream fileStream, bool isLooped = false)
         {
-            bytes = Wave.From(fileStream).Data.ToArray();
+            bytes = WavReader.Instance.Read(fileStream).Data.ToArray();
             this.isLooped = isLooped;
         }
 

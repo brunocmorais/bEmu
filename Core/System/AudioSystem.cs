@@ -1,4 +1,5 @@
 using bEmu.Core.Audio;
+using bEmu.Core.Memory;
 
 namespace bEmu.Core.System
 {
@@ -21,7 +22,7 @@ namespace bEmu.Core.System
             }
         }
 
-        protected AudioSystem(string fileName) : base(fileName)
+        protected AudioSystem(IROM rom) : base(rom)
         {
         }
     }

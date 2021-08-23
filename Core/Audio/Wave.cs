@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.IO;
 using bEmu.Core.Extensions;
+using bEmu.Core.IO;
 
 namespace bEmu.Core.Audio
 {
     public class Wave
     {
-        const int HeaderSize = 44;
+        public const int HeaderSize = 44;
         public List<byte> Data { get; }
         public byte[] Header { get; }
         public int Length => Header.Length + Data.Count;
@@ -25,22 +26,6 @@ namespace bEmu.Core.Audio
         public void AddBytes(IEnumerable<byte> bytes)
         {
             this.Data.AddRange(bytes);
-        }
-
-        public static Wave From(FileStream reader)
-        {
-            var wave = new Wave();
-            reader.Position = 0;
-            int b;
-
-            for (int i = 0; i < HeaderSize; i++)
-                wave.Header[i] = (byte)reader.ReadByte();
-
-            while ((b = reader.ReadByte()) != -1)
-                wave.AddByte((byte) b);
-
-            reader.Dispose();
-            return wave;
         }
 
         public void FillHeader()

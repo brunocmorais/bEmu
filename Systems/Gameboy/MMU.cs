@@ -19,7 +19,6 @@ namespace bEmu.Systems.Gameboy
         public OAM OAM { get; private set; }
         public byte[] ZeroPage { get; private set; }
         public IMBC MBC { get; private set; }
-        public CartridgeHeader CartridgeHeader { get; private set; }
         public ColorPaletteData ColorPaletteData { get; private set; }
         public MonochromePaletteData MonochromePaletteData { get; private set; }
         public Joypad Joypad { get; set; }
@@ -130,10 +129,8 @@ namespace bEmu.Systems.Gameboy
 
         public override void LoadProgram()
         {
-            byte[] bytes = File.ReadAllBytes(System.FileName);
-            CartridgeHeader = new CartridgeHeader(bytes);
-            MBC = MBCFactory.GetMBC(this, CartridgeHeader.CartridgeType);
-            MBC.LoadProgram(bytes);
+            MBC = MBCFactory.GetMBC(this, (System.ROM as ROM).CartridgeHeader.CartridgeType);
+            MBC.LoadProgram(System.ROM.Bytes);
         }
     }
 }

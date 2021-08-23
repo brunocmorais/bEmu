@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using bEmu.Core.Audio;
 using bEmu.Core.Enums;
 using bEmu.Core.Extensions;
 using bEmu.Core.Factory;
@@ -8,6 +10,7 @@ using bEmu.Core.IO;
 using bEmu.Core.Video;
 using bEmu.MonoGame;
 using bEmu.Systems.Factory;
+using Microsoft.Xna.Framework.Audio;
 
 namespace bEmu.CLI
 {
@@ -28,6 +31,9 @@ namespace bEmu.CLI
                     case "disasm":
                         Disasm(args[1], args[2]);
                         break;
+                    case "play":
+                        Play(args[1]);
+                        break;
                     default:
                         PrintGenericHelp();
                         break;
@@ -38,6 +44,11 @@ namespace bEmu.CLI
                 PrintGenericHelp();
                 throw;
             }
+        }
+
+        private static void Play(string fileName)
+        {
+
         }
 
         private static void Disasm(string systemType, string fileName)
@@ -79,6 +90,7 @@ asm [cpu] [file]
 disasm [cpu] [file]
 load [system] [file]
 scale [scaler] [file] [passes]
+play [file]
 ");
         }
     }

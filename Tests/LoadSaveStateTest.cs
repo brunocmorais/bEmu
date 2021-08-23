@@ -10,7 +10,7 @@ namespace Tests
         [TestMethod]
         public void LoadState()
         {
-            var chip8 = new bEmu.Systems.Chip8.System("");
+            var chip8 = new bEmu.Systems.Chip8.System(null);
             var bytes = chip8.State.SaveState();
         }
     }

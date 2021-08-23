@@ -51,11 +51,11 @@ namespace bEmu.Systems.Gameboy.MBCs
 
         private byte[] GetOrCreateSaveFile()
         {
-            if (File.Exists(Mmu.System.SaveFileName))
-                return File.ReadAllBytes(Mmu.System.SaveFileName);
+            if (File.Exists(Mmu.System.ROM.SaveFileName))
+                return File.ReadAllBytes(Mmu.System.ROM.SaveFileName);
             
             var bytes = new byte[ExternalRamSize * RamBankCount];
-            File.WriteAllBytes(Mmu.System.SaveFileName, bytes);
+            File.WriteAllBytes(Mmu.System.ROM.SaveFileName, bytes);
             return bytes;
         }
 
@@ -88,7 +88,7 @@ namespace bEmu.Systems.Gameboy.MBCs
                     for (int j = 0; j < ExternalRamSize; j++)
                         externalRAM[j + (i * ExternalRamSize)] = RamBanks[i][j];
 
-                File.WriteAllBytes(Mmu.System.SaveFileName, externalRAM);
+                File.WriteAllBytes(Mmu.System.ROM.SaveFileName, externalRAM);
             }
         }
     }

@@ -1,21 +1,15 @@
-using bEmu.Core.CPU.LR35902;
-using bEmu.Core;
 using APU = bEmu.Systems.Gameboy.Sound.APU;
 using bEmu.Core.Enums;
-using bEmu.Systems.Gameboy.GPU;
 using bEmu.Systems.Gameboy.GPU.Palettes;
-using bEmu.Core.Audio;
 using bEmu.Core.GamePad;
 using bEmu.Core.Memory;
-using bEmu.Core.CPU;
-using bEmu.Core.Video;
 using bEmu.Core.System;
 
 namespace bEmu.Systems.Gameboy
 {
     public class System : VideoGameSystem
     {
-        public bool GBCMode => ((MMU as MMU).CartridgeHeader.GBCFlag & 0x80) == 0x80;
+        public bool GBCMode => ((ROM as ROM).CartridgeHeader.GBCFlag & 0x80) == 0x80;
         public IColorPalette ColorPalette { get; private set; }
         public bool DoubleSpeedMode => (MMU[0xFF4D] & 0x80) == 0x80;
         public override int Width => 160;
@@ -23,7 +17,7 @@ namespace bEmu.Systems.Gameboy
         public override int StartAddress => 0;
         public override SystemType Type => SystemType.GameBoy;
 
-        public System(string fileName) : base(fileName)
+        public System(IROM rom) : base(rom)
         {
             MMU = new MMU(this);
             State = GetInitialState();

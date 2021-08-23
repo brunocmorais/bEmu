@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using bEmu.Core.GamePad;
+using bEmu.Core.Memory;
 using bEmu.Core.Video;
 
 namespace bEmu.Core.System
@@ -32,11 +33,11 @@ namespace bEmu.Core.System
 
         public IFrameBuffer Framebuffer => PPU?.Framebuffer ?? new FrameBuffer(Width, Height);
         public bool SkipFrame => (Frameskip >= 1 && Frame % (Frameskip + 1) != 0);
-        public string SaveStateName => FileNameWithoutExtension + ".state";
+        public string SaveStateName => ROM.FileNameWithoutExtension + ".state";
 
         public abstract void UpdateGamePad(IGamePad gamePad);
 
-        protected VideoGameSystem(string fileName) : base(fileName)
+        protected VideoGameSystem(IROM rom) : base(rom)
         {
         }
 

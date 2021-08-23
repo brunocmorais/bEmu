@@ -17,7 +17,7 @@ namespace bEmu.Systems.NES
 
         public override SystemType Type { get; }
 
-        public System(string fileName) : base(fileName)
+        public System(IROM rom) : base(rom)
         {
             MMU = new MMU(this);
             State = GetInitialState();

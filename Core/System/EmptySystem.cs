@@ -11,10 +11,6 @@ namespace bEmu.Core.System
     public class EmptySystem : BaseSystem
     {
         public override SystemType Type => SystemType.None;
-        
-        public EmptySystem() : base(string.Empty)
-        {
-        }
 
         public override void Reset() { }
 

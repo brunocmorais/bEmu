@@ -301,7 +301,7 @@ namespace bEmu.MonoGame
             IsRunning = false;
 
             Osd.InsertMessage(MessageType.Default, "Jogo reiniciado");
-            LoadSystem(System.Type, System.FileName);
+            LoadSystem(System.Type, System.ROM.FileName);
 
             MenuManager.CloseAll();
         }

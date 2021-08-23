@@ -21,20 +21,20 @@ namespace bEmu.Systems.Gameboy
 
         public CartridgeHeader(byte[] rom)
         {
-            NintendoLogo = GetArray(rom, 0x0104, 0x0133);
-            Title = GetString(rom, 0x0134, 0x0143);
-            ManufacturerCode = GetString(rom, 0x013F, 0x0142);
-            GBCFlag = rom[0x0143];
-            NewLicenseeCode = GetString(rom, 0x0144, 0x0145);
-            SGBFlag = rom[0x0146];
-            CartridgeType = rom[0x0147];
-            ROMSize = 32 << rom[0x0148];
-            RAMSize = GetRAMSize(rom[0x0149]);
-            Japanese = rom[0x014A] == 0;
-            OldLicenseeCode = rom[0x014B];
-            MaskROMVersionNumber = rom[0x014C];
-            HeaderCheckSum = rom[0x014D];
-            GlobalChecksum = (ushort) (rom[0x014E] << 8 | rom[0x014F]);
+            NintendoLogo = GetArray(rom, 0x004, 0x033);
+            Title = GetString(rom, 0x034, 0x043);
+            ManufacturerCode = GetString(rom, 0x03F, 0x042);
+            GBCFlag = rom[0x043];
+            NewLicenseeCode = GetString(rom, 0x044, 0x045);
+            SGBFlag = rom[0x046];
+            CartridgeType = rom[0x047];
+            ROMSize = 32 << rom[0x048];
+            RAMSize = GetRAMSize(rom[0x049]);
+            Japanese = rom[0x04A] == 0;
+            OldLicenseeCode = rom[0x04B];
+            MaskROMVersionNumber = rom[0x04C];
+            HeaderCheckSum = rom[0x04D];
+            GlobalChecksum = (ushort) (rom[0x04E] << 8 | rom[0x04F]);
         }
 
         private byte[] GetArray(byte[] rom, ushort start, ushort end)

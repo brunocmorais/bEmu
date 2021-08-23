@@ -39,14 +39,11 @@ namespace bEmu.Core.Memory
 
         public virtual void LoadProgram()
         {
-            if (!string.IsNullOrWhiteSpace(System.FileName))
-            {
-                byte[] bytes = File.ReadAllBytes(System.FileName);
-                LoadProgram(bytes, System.StartAddress);
-            }
+            if (System.ROM != null)
+                LoadProgram(System.ROM.Bytes, System.StartAddress);
         }
 
-        public virtual void LoadProgram(byte[] bytes, int startAddress = 0)
+        private void LoadProgram(byte[] bytes, int startAddress)
         {
             if ((bytes.Length + startAddress) > ram.Length)
                 throw new Exception("Programa não cabe na memória!");

@@ -12,7 +12,7 @@ namespace bEmu.Core.System
         public IState State { get; protected set; }
         public abstract int StartAddress { get; }
         
-        protected RunnableSystem(string fileName) : base(fileName)
+        protected RunnableSystem(IROM rom) : base(rom)
         {
         }
 

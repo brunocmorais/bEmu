@@ -30,7 +30,7 @@ namespace Tests
         [TestMethod]
         public void TestBitmapReader()
         {
-            var bitmapReader = Bitmap.Read(bitmapTest2);
+            var bitmapReader = BitmapReader.Instance.Read(bitmapTest2);
             Assert.AreEqual(bitmapReader[0, 0], (uint) 0x0000FFFF);
             Assert.AreEqual(bitmapReader[0, 1], (uint) 0xFF0000FF);
             Assert.AreEqual(bitmapReader[1, 0], (uint) 0x00FF00FF);

@@ -1,15 +1,13 @@
 using bEmu.Core.Enums;
+using bEmu.Core.Memory;
 
 namespace bEmu.Core.System
 {
     public interface ISystem
     {
-        string FileName { get; }
         IDebugger Debugger { get; }
         SystemType Type { get; }
-        string FileNameWithoutExtension { get; }
-        string FilePath { get; }
-        string SaveFileName { get; }
+        IROM ROM { get; }
 
         void Reset();
         bool Update();

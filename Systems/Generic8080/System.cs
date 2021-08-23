@@ -11,6 +11,7 @@ using bEmu.Core.Memory;
 using bEmu.Core.CPU;
 using bEmu.Core.Video;
 using bEmu.Core.System;
+using bEmu.Core.IO;
 
 namespace bEmu.Systems.Generic8080
 {
@@ -21,7 +22,7 @@ namespace bEmu.Systems.Generic8080
         public override int StartAddress => 0;
         public override SystemType Type => SystemType.Generic8080;
 
-        public System(string fileName) : base(fileName)
+        public System(IROM rom) : base(rom)
         {
             State = GetInitialState();
             MMU = new MMU(this);

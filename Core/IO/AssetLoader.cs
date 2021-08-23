@@ -1,4 +1,5 @@
 using System.IO;
+using bEmu.Core.Enums;
 using bEmu.Core.System;
 using bEmu.Core.Util;
 
@@ -9,7 +10,12 @@ namespace bEmu.Core.IO
         public const string AssetFolder = "Assets";
         public static FileStream Load(ISystem system, string assetName)
         {
-            return Load(system.Type.ToString(), assetName);
+            return Load(system.Type, assetName);
+        }
+
+        public static FileStream Load(SystemType type, string assetName)
+        {
+            return Load(type.ToString(), assetName);
         }
 
         public static FileStream Load(string assetName)
