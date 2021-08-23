@@ -11,20 +11,20 @@ namespace bEmu.Core.CPU
         where TPPU : class, IPPU
         where TAPU : class, IAPU
     {
-        public ISystem System { get; }
+        public IRunnableSystem System { get; }
         public TState State { get; }
         public TMMU MMU { get; }
         public TPPU PPU { get; }
         public TAPU APU { get; }
         public int Clock { get; }
 
-        public VM(ISystem system, int clock)
+        public VM(IAudioVideoSystem system, int clock)
         {
             System = system;
             State = System.State as TState;
             MMU = System.MMU as TMMU;
-            PPU = System.PPU as TPPU;
-            APU = System.APU as TAPU;
+            PPU = system.PPU as TPPU;
+            APU = system.APU as TAPU;
             Clock = clock;
         }
 

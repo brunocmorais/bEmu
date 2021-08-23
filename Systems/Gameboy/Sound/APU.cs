@@ -16,7 +16,7 @@ namespace bEmu.Systems.Gameboy.Sound
         public int VolumeSO2 => (System.MMU[0xFF24] & 0x70) >> 4;
         public bool SoundOn => (System.MMU[0xFF26] & 0x80) == 0x80;
 
-        public APU(ISystem system) : base(system)
+        public APU(IAudioSystem system) : base(system)
         {
             var channel1 = new Channel1(this);
             var channel2 = new Channel2(this);

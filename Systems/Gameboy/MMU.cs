@@ -23,9 +23,9 @@ namespace bEmu.Systems.Gameboy
         public ColorPaletteData ColorPaletteData { get; private set; }
         public MonochromePaletteData MonochromePaletteData { get; private set; }
         public Joypad Joypad { get; set; }
-        private Sound.APU APU => (System.APU as Gameboy.Sound.APU);
+        private Sound.APU APU => ((System as IAudioSystem).APU as Gameboy.Sound.APU);
 
-        public MMU(ISystem system) : base(system, 0x10000)
+        public MMU(IRunnableSystem system) : base(system, 0x10000)
         {
             IO = new byte[128];
             VRAM = new VRAM(this);

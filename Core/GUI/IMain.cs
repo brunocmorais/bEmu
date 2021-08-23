@@ -16,6 +16,8 @@ namespace bEmu.Core.GUI
         MenuManager MenuManager { get; }
         IPopupManager PopupManager { get; }
         Wave Recording { get; }
+        int Width { get; }
+        int Height { get; }
 
         void LoadSystem(SystemType system, string file);
         void StopGame();

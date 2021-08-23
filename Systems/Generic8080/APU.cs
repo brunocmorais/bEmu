@@ -18,7 +18,7 @@ namespace bEmu.Systems.Generic8080
         private readonly Sound fastInvader4;
         private SoundInfo lastInfo;
 
-        public APU(ISystem system) : base(system)
+        public APU(IAudioSystem system) : base(system)
         {
             shot = new Sound(AssetLoader.Load(system, "shot.wav"));
             invaderDie = new Sound(AssetLoader.Load(system, "invader_die.wav"));

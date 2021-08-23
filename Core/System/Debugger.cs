@@ -8,12 +8,12 @@ namespace bEmu.Core.System
 
     public class Debugger : IDebugger
     {
-        public ISystem System { get; }
+        public IRunnableSystem System { get; }
         public int BreakpointAddress { get; set; }
         public int AccessBreakpointAddress { get; set; }
         public bool IsStopped { get; set; }
 
-        public Debugger(ISystem system)
+        public Debugger(IRunnableSystem system)
         {
             System = system;
         }

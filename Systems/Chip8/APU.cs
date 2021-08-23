@@ -10,7 +10,7 @@ namespace bEmu.Systems.Chip8
         private const float Amplitude = 1.0f;
         private bool playingTone = false;
 
-        public APU(ISystem system) : base(system) 
+        public APU(IAudioSystem system) : base(system) 
         { 
         }
 

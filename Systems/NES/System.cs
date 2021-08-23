@@ -8,24 +8,12 @@ using bEmu.Core.Video;
 
 namespace bEmu.Systems.NES
 {
-    public class System : Core.System.System
+    public class System : VideoGameSystem
     {
 
         public override int Width { get; }
-
         public override int Height { get; }
-
         public override int StartAddress { get; }
-
-        public override IRunner Runner { get; }
-
-        public override IState State { get; }
-
-        public override IMMU MMU { get; }
-
-        public override IPPU PPU { get; }
-
-        public override IAPU APU { get; }
 
         public override SystemType Type { get; }
 
@@ -65,6 +53,11 @@ namespace bEmu.Systems.NES
             }
 
             return true;
+        }
+
+        public override void Stop()
+        {
+            throw new global::System.NotImplementedException();
         }
     }
 }

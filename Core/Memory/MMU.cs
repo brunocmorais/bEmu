@@ -8,9 +8,9 @@ namespace bEmu.Core.Memory
     {
         private byte[] ram;
         public int Length => ram.Length;
-        public ISystem System { get; }
+        public IRunnableSystem System { get; }
 
-        public MMU(ISystem system, int size)
+        public MMU(IRunnableSystem system, int size)
         {
             ram = new byte[size];
             System = system;

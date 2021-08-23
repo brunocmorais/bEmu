@@ -6,7 +6,7 @@ namespace bEmu.Core.Video
 {
     public interface IPPU
     {
-        ISystem System { get; }
+        IVideoSystem System { get; }
         int Width { get; }
         int Height { get; }
         IFrameBuffer Framebuffer { get; }

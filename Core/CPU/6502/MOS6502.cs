@@ -17,7 +17,7 @@ namespace bEmu.Core.CPU.MOS6502
         public const ushort NmiVectorH = 0xFFFB;
         public const ushort NmiVectorL = 0xFFFA;
 
-        public MOS6502(ISystem system, int clock) : base(system, clock) { }
+        public MOS6502(IRunnableSystem system, int clock) : base(system, clock) { }
 
         protected byte PullStack()
         {

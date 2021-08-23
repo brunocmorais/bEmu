@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using bEmu.Core;
 using bEmu.Core.CPU.LR35902;
+using bEmu.Core.System;
 using bEmu.Core.Video;
 using bEmu.Systems.Gameboy.GPU.Palettes;
 
@@ -25,7 +26,7 @@ namespace bEmu.Systems.Gameboy.GPU
         private IPaletteData paletteData => (GBCMode ? (IPaletteData) mmu.ColorPaletteData : (IPaletteData) mmu.MonochromePaletteData);
         private IColorPalette colorPalette => (System as System).ColorPalette;
 
-        public GPU(System system) : base(system, 160, 144)
+        public GPU(System system) : base(system as IVideoSystem, 160, 144)
         {
             Reset();
         }

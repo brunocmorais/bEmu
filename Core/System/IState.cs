@@ -2,7 +2,7 @@ namespace bEmu.Core.System
 {
     public interface IState : ISaveable
     {
-        ISystem System { get; }
+        IRunnableSystem System { get; }
         int Cycles { get; set; }
         bool Halted { get; set; }
         ulong Instructions { get; set; }

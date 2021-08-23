@@ -37,8 +37,8 @@ namespace bEmu.Core.GUI.Menus
 
         public void Update()
         {
-            this.Width = game.System.Width * game.Options.Size;
-            this.Height = game.System.Height * game.Options.Size;
+            this.Width = game.Width * game.Options.Size;
+            this.Height = game.Height * game.Options.Size;
         }
 
         public virtual void UpdateControls(double totalMilliseconds)

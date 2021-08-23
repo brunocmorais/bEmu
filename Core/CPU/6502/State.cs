@@ -33,7 +33,7 @@ namespace bEmu.Core.CPU.MOS6502
             }
         }
 
-        public State(ISystem system) : base(system)
+        public State(IRunnableSystem system) : base(system)
         {
         }
 

@@ -54,8 +54,8 @@ namespace bEmu.Core.GUI.Popups
                     widthFactor = 0.9f; heightFactor = 0.9f; break;
             }
 
-            int screenWidth = game.System.Width * game.Options.Size;
-            int screenHeight = game.System.Height * game.Options.Size;
+            int screenWidth = game.Width * game.Options.Size;
+            int screenHeight = game.Height * game.Options.Size;
 
             Width = (int)(widthFactor * screenWidth);
             Height = (int)(heightFactor * screenHeight);

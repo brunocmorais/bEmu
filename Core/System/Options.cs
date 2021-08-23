@@ -96,7 +96,8 @@ namespace bEmu.Core.System
 
                     break;
                 case nameof(options.Frameskip):
-                    Game.System.Frameskip = options.Frameskip;
+                    if (Game.System is IVideoSystem)
+                        (Game.System as IVideoGameSystem).Frameskip = options.Frameskip;
                     break;
                 case nameof(options.Scaler):
                     Game.SetScaler();

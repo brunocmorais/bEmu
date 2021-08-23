@@ -13,7 +13,7 @@ using bEmu.Core.System;
 
 namespace bEmu.Systems.Gameboy
 {
-    public class System : Core.System.System
+    public class System : VideoGameSystem
     {
         public bool GBCMode => ((MMU as MMU).CartridgeHeader.GBCFlag & 0x80) == 0x80;
         public IColorPalette ColorPalette { get; private set; }
@@ -22,11 +22,6 @@ namespace bEmu.Systems.Gameboy
         public override int Height => 144;
         public override int StartAddress => 0;
         public override SystemType Type => SystemType.GameBoy;
-        public override IRunner Runner { get; }
-        public override IState State { get; }
-        public override IMMU MMU { get; }
-        public override IPPU PPU { get; }
-        public override IAPU APU { get; }
 
         public System(string fileName) : base(fileName)
         {
@@ -67,7 +62,6 @@ namespace bEmu.Systems.Gameboy
 
         public override void Stop()
         {
-            base.Stop();
             ((MMU) MMU).MBC.Shutdown();
         }
 

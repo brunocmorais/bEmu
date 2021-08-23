@@ -16,7 +16,7 @@ namespace bEmu.Core.CPU.LR35902
         public Flags Flags;
         public bool EnableInterrupts { get; set; }
 
-        public State(ISystem system) : base(system) { }
+        public State(IRunnableSystem system) : base(system) { }
         
         public ushort BC
         {

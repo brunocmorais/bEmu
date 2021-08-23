@@ -4,7 +4,7 @@ namespace bEmu.Core.System
 {
     public interface IDebugger
     {
-        ISystem System { get; }
+        IRunnableSystem System { get; }
         int BreakpointAddress { get; set; }
         int AccessBreakpointAddress { get; set; }
         bool IsStopped { get; set; }

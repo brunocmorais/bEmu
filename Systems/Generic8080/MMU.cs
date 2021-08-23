@@ -10,7 +10,7 @@ namespace bEmu.Systems.Generic8080
 {
     public class MMU : Core.Memory.MMU
     {
-        public MMU(ISystem system) : base(system, 0x10000) 
+        public MMU(IRunnableSystem system) : base(system, 0x10000) 
         {
         }
 

@@ -41,6 +41,8 @@ namespace bEmu.MonoGame
         public bool IsRunning { get; private set; }
         public IOptions Options { get; private set; }
         public ISystem System { get; private set; }
+        public int Width => System is IVideoSystem ? (System as IVideoSystem).Width : 640; 
+        public int Height => System is IVideoSystem ? (System as IVideoSystem).Height : 480; 
 
         public Main() : this(SystemType.None, string.Empty) { }
 
@@ -77,11 +79,19 @@ namespace bEmu.MonoGame
 
         public void LoadSystem(SystemType system, string file)
         {
-            System = SystemFactory.Instance.Get(system, file);
-            Options = OptionsFactory.Instance.Get(system, this);
-
-            if (system != SystemType.None)
+            if (system == SystemType.None)
             {
+                System = SystemFactory.Instance.GetEmptySystem();
+                Options = OptionsFactory.Instance.Get(system, this);
+
+                SetScreenSize();
+                SetScaler();
+            }
+            else
+            {
+                System = SystemFactory.Instance.Get(system, file);
+                Options = OptionsFactory.Instance.Get(system, this);
+
                 try
                 {
                     MenuManager.CloseAll();
@@ -96,20 +106,15 @@ namespace bEmu.MonoGame
                     LoadSystem(SystemType.None, string.Empty);
                     PopupManager.ShowErrorDialog("Erro", "Houve um erro do sistema ao carregar o jogo selecionado.", ex);
                 }
-            }
-            else
-            {
-                SetScreenSize();
-                SetScaler();
-            }
+            }    
         }
 
         public void SetScreenSize()
         {
-            graphics.PreferredBackBufferWidth = System.Width * Options.Size;
-            graphics.PreferredBackBufferHeight = System.Height * Options.Size;
+            graphics.PreferredBackBufferWidth = Width * Options.Size;
+            graphics.PreferredBackBufferHeight = Height * Options.Size;
 
-            destinationRectangle = new Rectangle(0, 0, System.Width * Options.Size, System.Height * Options.Size);
+            destinationRectangle = new Rectangle(0, 0, Width * Options.Size, Height * Options.Size);
             graphics.ApplyChanges();
         }
 
@@ -152,33 +157,41 @@ namespace bEmu.MonoGame
 
         private void UpdateSystem(IGamePad gamePad)
         {
-            if (IsRunning && System.Frame == lastRenderedFrame)
+            if (IsRunning)
             {
-                System.UpdateGamePad(gamePad);
+                if (System is IVideoSystem)
+                {
+                    var system = System as IVideoSystem;
+                    
+                    if (system.Frame == lastRenderedFrame)
+                    {
+                        system.Update();
+
+                        if (scaler.Frame < system.Frame && !system.SkipFrame)
+                            scaler.Update(system.Frame);
+                    }
+                }
+
+                if (System is IGamePadSystem)
+                    (System as IGamePadSystem).UpdateGamePad(gamePad);
 
                 if (Options.ShowFPS)
                     Osd.UpdateMessage(MessageType.FPS, $"{FPS:0.0} fps");
-                
-                UpdateSound();
 
-                System.Update();
 
-                if (scaler.Frame < System.Frame && !System.SkipFrame)
-                    scaler.Update(System.Frame);
-            }
-        }
+                if (System is IAudioSystem)
+                {
+                    while (sound.PendingBufferCount < APU.MaxBufferPending)
+                    {
+                        var soundBuffer = (System as IAudioSystem).SoundBuffer;
 
-        private void UpdateSound()
-        {
-            while (sound.PendingBufferCount < APU.MaxBufferPending)
-            {
-                var soundBuffer = System.SoundBuffer;
+                        if (Options.EnableSound)
+                            sound.SubmitBuffer(soundBuffer);
 
-                if (Options.EnableSound)
-                    sound.SubmitBuffer(soundBuffer);
-
-                if (Recording != null)
-                    Recording.AddBytes(soundBuffer);
+                        if (Recording != null)
+                            Recording.AddBytes(soundBuffer);
+                    }
+                }    
             }
         }
 
@@ -227,22 +240,27 @@ namespace bEmu.MonoGame
         {
             GraphicsDevice.Clear(Color.Black);
 
-            if (backBuffer == null)
-                return;
-
             spriteBatch.Begin();
 
-            if (IsRunning && System.Frame > lastRenderedFrame)
+            if (System is IVideoSystem)
             {
-                lastRenderedFrame = System.Frame;
+                if (backBuffer == null)
+                    return;
 
-                if (!System.SkipFrame)
-                    backBuffer.SetData(scaler.ScaledFramebuffer.Data);
-                    
-                drawCounter++;
+                var system = System as IVideoSystem;
+
+                if (IsRunning && system.Frame > lastRenderedFrame)
+                {
+                    lastRenderedFrame = system.Frame;
+
+                    if (!system.SkipFrame)
+                        backBuffer.SetData(scaler.ScaledFramebuffer.Data);
+                        
+                    drawCounter++;
+                }
+
+                spriteBatch.Draw(backBuffer, destinationRectangle, Color.White);
             }
-
-            spriteBatch.Draw(backBuffer, destinationRectangle, Color.White);
 
             if (MenuManager.IsOpen)
                 menuDrawer.Draw(MenuManager.Current);
@@ -267,11 +285,15 @@ namespace bEmu.MonoGame
 
         public void SetScaler()
         {
-            scaler = ScalerFactory.Get(Options.Scaler, Options.Size, System.Framebuffer);
-            scaler.Update(System.Frame);
-            
-            backBuffer = new Texture2D(GraphicsDevice, System.Width * scaler.ScaleFactor, System.Height * scaler.ScaleFactor);
-            backBuffer.SetData(scaler.ScaledFramebuffer.Data);
+            if (System is IVideoSystem)
+            {
+                var system = System as IVideoSystem;
+                scaler = ScalerFactory.Get(Options.Scaler, Options.Size, system.Framebuffer);
+                scaler.Update(system.Frame);
+                
+                backBuffer = new Texture2D(GraphicsDevice, Width * scaler.ScaleFactor, Height * scaler.ScaleFactor);
+                backBuffer.SetData(scaler.ScaledFramebuffer.Data);
+            }
         }
 
         public void ResetGame()
@@ -292,27 +314,27 @@ namespace bEmu.MonoGame
 
         public void LoadState()
         {
-            if (System.Type == SystemType.None)
-                return;
+            if (System is ISaveStateSystem)
+            {
+                bool success = (System as ISaveStateSystem).LoadState();
 
-            bool success = System.LoadState();
-
-            if (success)
-                Osd.InsertMessage(MessageType.Default, "Estado carregado");
-            else
-                Osd.InsertMessage(MessageType.Default, "Nenhum estado encontrado");
+                if (success)
+                    Osd.InsertMessage(MessageType.Default, "Estado carregado");
+                else
+                    Osd.InsertMessage(MessageType.Default, "Nenhum estado encontrado");
+            }
 
             MenuManager.CloseAll();
         }
 
         public void SaveState()
         {
-            if (System.Type == SystemType.None)
-                return;
-
-            System.SaveState();
-            Osd.InsertMessage(MessageType.Default, "Estado salvo");
-
+            if (System is ISaveStateSystem)
+            {
+                (System as ISaveStateSystem).SaveState();
+                Osd.InsertMessage(MessageType.Default, "Estado salvo");
+            }
+            
             MenuManager.CloseAll();
         }
 

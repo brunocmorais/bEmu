@@ -8,24 +8,23 @@ using bEmu.Core.Video;
 
 namespace bEmu.Core.System
 {
-    public class EmptySystem : Core.System.System
+    public class EmptySystem : BaseSystem
     {
-        public override int Width => 640;
-        public override int Height => 480;
-        public override int StartAddress => 0;
         public override SystemType Type => SystemType.None;
-        public override IRunner Runner { get; }
-        public override IState State { get; }
-        public override IMMU MMU { get; }
-        public override IPPU PPU { get; }
-        public override IAPU APU { get; }
-
+        
         public EmptySystem() : base(string.Empty)
         {
         }
 
-        public override IState GetInitialState() => default;
+        public override void Reset() { }
 
-        public override void UpdateGamePad(IGamePad gamePad) {}
+        public override void Stop() { }
+
+        public override bool Update()
+        {
+            return true;
+        }
+
+        public override void AttachDebugger() { }
     }
 }

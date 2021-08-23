@@ -4,6 +4,7 @@ using bEmu.Core.CPU.LR35902;
 using bEmu.Core;
 using bEmu.Core.Util;
 using bEmu.Systems.Gameboy.GPU;
+using bEmu.Core.System;
 
 namespace bEmu.Systems.Gameboy
 {

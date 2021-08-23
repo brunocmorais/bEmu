@@ -1,5 +1,6 @@
 using System;
 using bEmu.Core;
+using bEmu.Core.System;
 using bEmu.Core.Util;
 using bEmu.Core.Video;
 
@@ -8,7 +9,7 @@ namespace bEmu.Systems.Chip8
     public class PPU : Core.Video.PPU
     {
         private State state;
-        public PPU(State state, int width, int height) : base(state.System, width, height) 
+        public PPU(State state, int width, int height) : base(state.System as IVideoGameSystem, width, height) 
         { 
             this.state = state;
         }

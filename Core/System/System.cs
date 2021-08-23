@@ -10,7 +10,7 @@ using bEmu.Core.Extensions;
 
 namespace bEmu.Core.System
 {
-    public abstract class System : ISystem
+    /*public abstract class System : ISystem
     {
         private readonly byte[] dummySoundBuffer = new byte[Audio.APU.BufferSize];
         public string FileNameWithoutExtension => FileExtensions.GetFileNameWithoutExtension(FileName);
@@ -128,5 +128,5 @@ namespace bEmu.Core.System
         { 
             // adicionar lógica base para evento Stop
         }
-    }
+    }*/
 }

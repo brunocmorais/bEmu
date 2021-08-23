@@ -11,7 +11,7 @@ namespace bEmu.Systems.Generic8080
     {
         public Ports Ports;
 
-        public State(ISystem system) : base(system) { }
+        public State(IRunnableSystem system) : base(system) { }
 
         public void UpdatePorts(int number, byte value)
         {

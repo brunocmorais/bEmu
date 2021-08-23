@@ -7,12 +7,12 @@ namespace bEmu.Core.System
         where TPC : struct
         where TSP : struct
     {
-        public State(ISystem system)
+        public State(IRunnableSystem system)
         {
             System = system;
         }
 
-        public ISystem System { get; }
+        public IRunnableSystem System { get; }
         public Number<TPC> PC { get; set; }
         public Number<TSP> SP { get; set; }
         public int Cycles { get; set; }

@@ -14,17 +14,12 @@ using bEmu.Core.System;
 
 namespace bEmu.Systems.Generic8080
 {
-    public class System : Core.System.System
+    public class System : VideoGameSystem
     {
         public override int Width => 224;
         public override int Height => 256;
         public override int StartAddress => 0;
         public override SystemType Type => SystemType.Generic8080;
-        public override IRunner Runner { get; }
-        public override IState State { get; }
-        public override IMMU MMU { get; }
-        public override IPPU PPU { get; }
-        public override IAPU APU { get; }
 
         public System(string fileName) : base(fileName)
         {
@@ -136,5 +131,7 @@ namespace bEmu.Systems.Generic8080
         {
             (PPU as PPU).SetBackdrop(value);
         }
+
+        public override void Stop() { }
     }
 }

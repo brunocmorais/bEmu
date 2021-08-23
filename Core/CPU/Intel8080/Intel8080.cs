@@ -13,7 +13,7 @@ namespace bEmu.Core.CPU.Intel8080
         where TState : State
         where TMMU : MMU
     {
-        public Intel8080(ISystem system, int clock) : base(system, clock) { }
+        public Intel8080(IRunnableSystem system, int clock) : base(system, clock) { }
 
         protected void UpdateFlags(byte value)
         {

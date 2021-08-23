@@ -12,7 +12,7 @@ namespace bEmu.Core.CPU.LR35902
     {
         const int CyclesInHalt = 12;
 
-        public LR35902(ISystem system, int clock) : base(system, clock) { }
+        public LR35902(IRunnableSystem system, int clock) : base(system, clock) { }
 
         protected ushort PopStack()
         {

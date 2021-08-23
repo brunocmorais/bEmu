@@ -91,7 +91,7 @@ namespace bEmu.Core.CPU.Z80
             throw new NotImplementedException();
         }
 
-        public State(ISystem system) : base(system) 
+        public State(IRunnableSystem system) : base(system) 
         { 
             Main = new RegisterSet();
             Alt = new RegisterSet();

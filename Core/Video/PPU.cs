@@ -7,7 +7,7 @@ namespace bEmu.Core.Video
 
     public abstract class PPU : IPPU
     {
-        public ISystem System { get; }
+        public IVideoSystem System { get; }
         public int Width { get; private set; }
         public int Height { get; private set; }
         public IFrameBuffer Framebuffer { get; protected set; }
@@ -15,7 +15,7 @@ namespace bEmu.Core.Video
         public int Frame { get; set; }
         public int Cycles { get; set; }
 
-        public PPU(ISystem system, int width, int height)
+        public PPU(IVideoSystem system, int width, int height)
         {
             System = system;
             DefineSize(width, height);

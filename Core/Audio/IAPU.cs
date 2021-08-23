@@ -4,7 +4,7 @@ namespace bEmu.Core.Audio
 {
     public interface IAPU
     {
-        ISystem System { get; }
+        IAudioSystem System { get; }
         byte[] Buffer { get; }
         double Time { get; }
 

@@ -8,12 +8,12 @@ namespace bEmu.Core.CPU
         where TState : class, IState, IProgramCounter<ushort>
         where TMMU : class, IMMU
     {
-        public ISystem System { get; }
+        public IRunnableSystem System { get; }
         public TState State { get; }
         public TMMU MMU { get; }
         public int Clock { get; }
 
-        public CPU(ISystem system, int clock)
+        public CPU(IRunnableSystem system, int clock)
         {
             System = system;
             State = system.State as TState;

@@ -4,7 +4,7 @@ namespace bEmu.Core.CPU
 {
     public interface IRunner
     {
-        ISystem System { get; }
+        IRunnableSystem System { get; }
         IOpcode StepCycle();
         int Clock { get; }
     }

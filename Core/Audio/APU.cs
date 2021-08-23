@@ -8,14 +8,14 @@ namespace bEmu.Core.Audio
         public const int BitsPerSample = 16;
         public const int BufferSize = 2048;
         public const int MaxBufferPending = 4;
-        public ISystem System { get; }
+        public IAudioSystem System { get; }
         public byte[] Buffer { get; }
         public double Time { get; protected set; }
 
         public abstract void UpdateBuffer();
         public abstract void Update(int cycles);
 
-        public APU(ISystem system)
+        public APU(IAudioSystem system)
         {
             System = system;
             Buffer = new byte[BufferSize];

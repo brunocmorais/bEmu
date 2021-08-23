@@ -12,7 +12,7 @@ using bEmu.Core.System;
 
 namespace bEmu.Systems.Chip8
 {
-    public class System : Core.System.System
+    public class System : VideoGameSystem
     {
         private readonly GamePadKey[] keys = new GamePadKey[]
         {
@@ -26,11 +26,6 @@ namespace bEmu.Systems.Chip8
         public override int Height => 64;
         public override int StartAddress => 0x200;
         public override SystemType Type => SystemType.Chip8;
-        public override IRunner Runner { get; }
-        public override IState State { get; }
-        public override IMMU MMU { get; }
-        public override IPPU PPU { get; }
-        public override IAPU APU { get; }
         public ExecutionSpeed Speed { get; set; }
         public override int CycleCount 
         {
@@ -49,6 +44,7 @@ namespace bEmu.Systems.Chip8
                 return (int)(base.CycleCount * multiplier);
             }
         }
+
 
         public void SetSuperChipMode()
         {
@@ -158,6 +154,11 @@ namespace bEmu.Systems.Chip8
 
             for (int i = 0; i < keys.Length; i++)
                 state.Keys[BIOS.Keyboard[i]] = gamePad.IsKeyDown(keys[i]);
+        }
+
+        public override void Stop()
+        {
+            
         }
     }
 }

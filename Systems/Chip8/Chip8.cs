@@ -8,9 +8,10 @@ namespace bEmu.Systems.Chip8
 {
     public partial class Chip8 : VM<State, MMU, PPU, APU>
     {
-        private Random random;
+        protected Random random;
+        protected Opcode opcode;
         
-        public Chip8(ISystem system, int clock) : base(system, clock) 
+        public Chip8(IAudioVideoSystem system, int clock) : base(system, clock) 
         { 
             random = new Random();
         }
@@ -19,7 +20,7 @@ namespace bEmu.Systems.Chip8
         {
             byte lsb = MMU[State.PC++];
             byte msb = MMU[State.PC++];
-            var opcode = new Opcode(LittleEndian.GetWordFrom2Bytes(msb, lsb));
+            opcode = new Opcode(LittleEndian.GetWordFrom2Bytes(msb, lsb));
 
             base.StepCycle();
 
