@@ -1,11 +1,13 @@
+using bEmu.Core.Memory;
+
 namespace bEmu.Systems.Gameboy
 {
     public class WRAM
     {
-        public MMU MMU { get; }
+        public IMMU MMU { get; }
         private byte[][] wramBanks;
         
-        public WRAM(MMU mmu)
+        public WRAM(IMMU mmu)
         {
             wramBanks = new byte[8][];
 

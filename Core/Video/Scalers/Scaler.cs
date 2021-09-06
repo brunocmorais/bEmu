@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace bEmu.Core.Video.Scalers
 {
     public abstract class Scaler : IScaler

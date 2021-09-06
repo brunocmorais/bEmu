@@ -93,7 +93,7 @@ namespace bEmu.Systems.Generic8080
             if (((Systems.Generic8080.State)State).EnableInterrupts)
             {
                 if (interrupt == 1)
-                    PPU.Frame++;
+                    PPU.IncreaseFrame();
 
                 (Runner as CPU).GenerateInterrupt(interrupt);
             }

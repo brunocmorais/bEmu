@@ -9,7 +9,7 @@ namespace bEmu.Systems.Gameboy
 {
     public class CPU : LR35902<State, MMU>
     {
-        public CPU(IRunnableSystem system, int clock) : base(system, clock) { }
+        public CPU(IGBSystem system, int clock) : base(system, clock) { }
 
         public override void HandleInterrupts()
         {

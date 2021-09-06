@@ -23,8 +23,9 @@ namespace bEmu.Systems.Gameboy
         public MonochromePaletteData MonochromePaletteData { get; private set; }
         public Joypad Joypad { get; set; }
         private Sound.APU APU => ((System as IAudioSystem).APU as Gameboy.Sound.APU);
+        public bool GBCMode => (System as System)?.GBCMode ?? false;
 
-        public MMU(IRunnableSystem system) : base(system, 0x10000)
+        public MMU(IGBSystem system) : base(system, 0x10000)
         {
             IO = new byte[128];
             VRAM = new VRAM(this);
@@ -129,7 +130,11 @@ namespace bEmu.Systems.Gameboy
 
         public override void LoadProgram()
         {
-            MBC = MBCFactory.GetMBC(this, (System.ROM as ROM).CartridgeHeader.CartridgeType);
+            if (System.ROM is ROM)
+                MBC = MBCFactory.GetMBC(this, (System.ROM as ROM).CartridgeHeader.CartridgeType);
+            else
+                MBC = MBCFactory.GetMBC(this, 0);
+            
             MBC.LoadProgram(System.ROM.Bytes);
         }
     }

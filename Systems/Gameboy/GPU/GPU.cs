@@ -26,7 +26,7 @@ namespace bEmu.Systems.Gameboy.GPU
         private IPaletteData paletteData => (GBCMode ? (IPaletteData) mmu.ColorPaletteData : (IPaletteData) mmu.MonochromePaletteData);
         private IColorPalette colorPalette => (System as System).ColorPalette;
 
-        public GPU(System system) : base(system as IVideoSystem, 160, 144)
+        public GPU(IGBSystem system) : base(system as IVideoSystem, 160, 144)
         {
             Reset();
         }
@@ -119,7 +119,7 @@ namespace bEmu.Systems.Gameboy.GPU
                     if (!lcdEnabled)
                         TurnOffLCD();
 
-                    Frame++;
+                    IncreaseFrame();
                 }
             }
         }

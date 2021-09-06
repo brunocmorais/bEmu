@@ -178,9 +178,11 @@ namespace bEmu.MonoGame
                 if (Options.ShowFPS)
                     Osd.UpdateMessage(MessageType.FPS, $"{FPS:0.0} fps");
 
-
                 if (System is IAudioSystem)
                 {
+                    if (System is not IVideoSystem)
+                        System.Update();
+
                     while (sound.PendingBufferCount < APU.MaxBufferPending)
                     {
                         var soundBuffer = (System as IAudioSystem).SoundBuffer;

@@ -81,6 +81,9 @@ namespace bEmu.Core.CPU.Z80
             set { if (AlternativeRegisters) Alt.Flags = value; else Main.Flags = value; }
         }
 
+        public ushort IX { get; set; }
+        public ushort IY { get; set; }
+
         public override byte[] SaveState()
         {
             throw new NotImplementedException();

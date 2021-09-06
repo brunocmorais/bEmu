@@ -20,6 +20,8 @@ namespace bEmu.Systems.Factory
                     return new Gameboy.System(rom);
                 case SystemType.Generic8080:
                     return new Generic8080.System(rom);
+                case SystemType.GameBoySoundSystem:
+                    return new GBS.System(rom);
                 default:
                     throw new Exception("Sistema não suportado.");
             }

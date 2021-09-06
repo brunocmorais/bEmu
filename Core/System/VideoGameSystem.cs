@@ -14,11 +14,11 @@ namespace bEmu.Core.System
         public int Frame
         {
             get => PPU?.Frame ?? 0;
-            private set
-            {
-                if (PPU != null)
-                    PPU.Frame = value;
-            }
+            // private set
+            // {
+            //     if (PPU != null)
+            //         PPU.Frame = value;
+            // }
         }
 
         public int Frameskip

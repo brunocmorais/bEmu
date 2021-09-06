@@ -19,6 +19,8 @@ namespace bEmu.Systems.Factory
                     return Core.Memory.ROMReader.Instance;
                 case SystemType.GameBoy:
                     return Gameboy.ROMReader.Instance;
+                case SystemType.GameBoySoundSystem:
+                    return GBS.ROMReader.Instance;
                 default:
                     throw new Exception("Sistema não suportado!");
             }

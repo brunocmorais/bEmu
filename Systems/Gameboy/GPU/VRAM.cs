@@ -46,13 +46,16 @@ namespace bEmu.Systems.Gameboy.GPU
 
         public bool VBK 
         {
-            get { return (MMU[0xFF4F] & 0x1) == 0x1; }
+            get { return ((MMU[0xFF4F] & 0x1) == 0x1) && MMU.GBCMode; }
             set { MMU[0xFF4F] = (byte) (value ? 0x1 : 0x0); }
         }
         
         public byte this[int index]
         {
-            get { return VBK ? Bank1[index] : Bank0[index]; }
+            get 
+            {
+                return VBK ? Bank1[index] : Bank0[index]; 
+            }
             set 
             {
                 if (VBK)

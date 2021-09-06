@@ -7,11 +7,11 @@ using bEmu.Core.System;
 
 namespace bEmu.Systems.Gameboy
 {
-    public class System : VideoGameSystem
+    public class System : VideoGameSystem, IGBSystem
     {
         public bool GBCMode => ((ROM as ROM).CartridgeHeader.GBCFlag & 0x80) == 0x80;
         public IColorPalette ColorPalette { get; private set; }
-        public bool DoubleSpeedMode => (MMU[0xFF4D] & 0x80) == 0x80;
+        public bool DoubleSpeedMode => GBCMode && (MMU[0xFF4D] & 0x80) == 0x80;
         public override int Width => 160;
         public override int Height => 144;
         public override int StartAddress => 0;
@@ -32,7 +32,7 @@ namespace bEmu.Systems.Gameboy
             if (GBCMode)
                 return Gameboy.State.GetCGBState(this);
             else
-                return Gameboy.State.GetCGBState(this);
+                return Gameboy.State.GetDMGState(this);
         }
 
         public override bool Update()
@@ -43,8 +43,8 @@ namespace bEmu.Systems.Gameboy
             while (Cycles >= 0)
             {                    
                 var opcode = Runner.StepCycle();
-
                 PPU.Cycles += opcode.CyclesTaken;
+
                 PPU.StepCycle();
 
                 Cycles -= opcode.CyclesTaken;
@@ -63,39 +63,7 @@ namespace bEmu.Systems.Gameboy
         {
             var joypad = ((Systems.Gameboy.MMU) MMU).Joypad;
 
-            if (gamePad.IsKeyDown(GamePadKey.Z))
-                joypad.Column1 &= 0xE;
-            if (gamePad.IsKeyDown(GamePadKey.X))
-                joypad.Column1 &= 0xD;
-            if (gamePad.IsKeyDown(GamePadKey.RightShift))
-                joypad.Column1 &= 0xB;
-            if (gamePad.IsKeyDown(GamePadKey.Enter))
-                joypad.Column1 &= 0x7;
-            if (gamePad.IsKeyDown(GamePadKey.Right))
-                joypad.Column2 &= 0xE;
-            if (gamePad.IsKeyDown(GamePadKey.Left))
-                joypad.Column2 &= 0xD;
-            if (gamePad.IsKeyDown(GamePadKey.Up))
-                joypad.Column2 &= 0xB;
-            if (gamePad.IsKeyDown(GamePadKey.Down))
-                joypad.Column2 &= 0x7;
-
-            if (gamePad.IsKeyUp(GamePadKey.Z))
-                joypad.Column1 |= 0x1;
-            if (gamePad.IsKeyUp(GamePadKey.X))
-                joypad.Column1 |= 0x2;
-            if (gamePad.IsKeyUp(GamePadKey.RightShift))
-                joypad.Column1 |= 0x4;
-            if (gamePad.IsKeyUp(GamePadKey.Enter))
-                joypad.Column1 |= 0x8;
-            if (gamePad.IsKeyUp(GamePadKey.Right))
-                joypad.Column2 |= 0x1;
-            if (gamePad.IsKeyUp(GamePadKey.Left))
-                joypad.Column2 |= 0x2;
-            if (gamePad.IsKeyUp(GamePadKey.Up))
-                joypad.Column2 |= 0x4;
-            if (gamePad.IsKeyUp(GamePadKey.Down))
-                joypad.Column2 |= 0x8;
+            joypad.Update(gamePad);
 
             if (joypad.Column1 != 0xF || joypad.Column2 != 0xF)
                 ((State)State).RequestInterrupt(InterruptType.Joypad);

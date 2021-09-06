@@ -24,5 +24,7 @@ Main
 0xDD - prefixo DD (instruções IX)
 0xED - prefixo ED (extended instructions)
 0xFD - prefixo FD (instruções IY)
+0xDDCB = OK
+0xFDCB = OK
 
 TODO: verificar todo o comportamento de flags do Z80 em relação à implementação do LR35902

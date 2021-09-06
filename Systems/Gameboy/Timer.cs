@@ -1,12 +1,13 @@
 using System;
 using System.Diagnostics;
 using bEmu.Core.CPU.LR35902;
+using bEmu.Core.System;
 
 namespace bEmu.Systems.Gameboy
 {
     public class Timer
     {
-        private readonly System system;
+        private readonly IGBSystem system;
         private int cycles;
         private int cyclesDivider;
         private bEmu.Systems.Gameboy.MMU Mmu => (system.MMU as bEmu.Systems.Gameboy.MMU);
@@ -52,7 +53,7 @@ namespace bEmu.Systems.Gameboy
             }
         }
 
-        public Timer(System system)
+        public Timer(IGBSystem system)
         {
             this.system = system;
             cycles = 0;

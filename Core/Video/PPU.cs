@@ -12,7 +12,7 @@ namespace bEmu.Core.Video
         public int Height { get; private set; }
         public IFrameBuffer Framebuffer { get; protected set; }
         public int Frameskip { get; set; }
-        public int Frame { get; set; }
+        public int Frame { get; protected set; }
         public int Cycles { get; set; }
 
         public PPU(IVideoSystem system, int width, int height)
@@ -39,6 +39,11 @@ namespace bEmu.Core.Video
             Frame = 0;
             Cycles = 0;
             Framebuffer.Reset();
+        }
+
+        public void IncreaseFrame()
+        {
+            Frame++;
         }
     }
 }

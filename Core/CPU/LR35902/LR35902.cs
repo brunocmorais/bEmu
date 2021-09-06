@@ -11,6 +11,7 @@ namespace bEmu.Core.CPU.LR35902
         where TMMU : MMU
     {
         const int CyclesInHalt = 12;
+        public ushort RstOffset { get; set; }
 
         public LR35902(IRunnableSystem system, int clock) : base(system, clock) { }
 
@@ -328,10 +329,10 @@ namespace bEmu.Core.CPU.LR35902
                 case 0xD6: Sub_d8(); break;
                 case 0xE6: And_d8(); break;
                 case 0xF6: Or_d8(); break;
-                case 0xC7: Rst(0x0); break;
-                case 0xD7: Rst(0x10); break;
-                case 0xE7: Rst(0x20); break;
-                case 0xF7: Rst(0x30); break;
+                case 0xC7: Rst((ushort)(RstOffset + 0x00)); break;
+                case 0xD7: Rst((ushort)(RstOffset + 0x10)); break;
+                case 0xE7: Rst((ushort)(RstOffset + 0x20)); break;
+                case 0xF7: Rst((ushort)(RstOffset + 0x30)); break;
                 case 0xC8: RetZ(); break;
                 case 0xD8: RetC(); break;
                 case 0xE8: AddSP(); break;
@@ -360,10 +361,10 @@ namespace bEmu.Core.CPU.LR35902
                 case 0xDE: Sbc(); break;
                 case 0xEE: Xor(); break;
                 case 0xFE: Cp(); break;
-                case 0xCF: Rst(0x8); break;
-                case 0xDF: Rst(0x18); break;
-                case 0xEF: Rst(0x28); break;
-                case 0xFF: Rst(0x38); break;
+                case 0xCF: Rst((ushort)(RstOffset + 0x08)); break;
+                case 0xDF: Rst((ushort)(RstOffset + 0x18)); break;
+                case 0xEF: Rst((ushort)(RstOffset + 0x28)); break;
+                case 0xFF: Rst((ushort)(RstOffset + 0x38)); break;
             }
 
             HandleInterrupts();

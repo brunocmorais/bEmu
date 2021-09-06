@@ -172,6 +172,38 @@ namespace bEmu.Core.CPU.Z80
             }
         }
 
+        protected ushort GetAddress(Indexer indexer, sbyte displacement)
+        {
+            ushort address;
+
+            if (indexer == Indexer.IX)
+                address = State.IX;
+            else if (indexer == Indexer.IY)
+                address = State.IY;
+            else
+                throw new Exception("Indexador desconhecido.");
+
+            return (ushort)(address + displacement);
+        }
+
+        protected bool CheckParity(byte value)
+        {
+            int numberOfOneBits = 0;
+
+            for (int i = 0; i < 8; i++) 
+                numberOfOneBits += ((value >> i) & 1);
+
+            return (numberOfOneBits & 1) == 0;
+        }
+
+        protected bool CheckOverflow(sbyte a, sbyte b)
+        {
+            byte result = (byte)(a + b);
+
+            return (((a & 0x80) == 0x80) && ((b & 0x80) == 0x80) && ((result & 0x80) == 0)) ||
+                   (((a & 0x80) == 0) && ((b & 0x80) == 0) && ((result & 0x80) == 0x80));
+        }
+
         public abstract void HandleInterrupts();
 
         public override IOpcode StepCycle()

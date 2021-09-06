@@ -11,11 +11,12 @@ namespace bEmu.Core.Video
         int Height { get; }
         IFrameBuffer Framebuffer { get; }
         int Frameskip { get; set; }
-        int Frame { get; set; }
+        int Frame { get; }
         int Cycles { get; set; }
 
         void StepCycle();
         void DefineSize(int width, int height);
         void Reset();
+        void IncreaseFrame();
     }
 }
