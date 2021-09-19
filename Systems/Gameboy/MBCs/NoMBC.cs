@@ -1,9 +1,10 @@
 using bEmu.Core;
+using bEmu.Core.Mappers;
 using bEmu.Core.Memory;
 
 namespace bEmu.Systems.Gameboy.MBCs
 {
-    public class MBC0 : DefaultMBC
+    public class NoMBC : Mapper
     {
         protected override byte[] CartRam => RamBanks != null ? RamBanks[0] : null;
 
@@ -11,15 +12,7 @@ namespace bEmu.Systems.Gameboy.MBCs
 
         protected override int RamBankCount => 1;
 
-        public MBC0(IMMU mmu, bool ram, bool battery) : base(mmu, battery, ram) { }
-
-        public override byte ReadCartRAM(int addr)
-        {
-            if (CartRam != null)
-                return CartRam[addr];
-            
-            return 0xFF;
-        }
+        public NoMBC(IMMU mmu, bool ram, bool battery) : base(mmu, battery, ram) { }
 
         public override byte ReadROM(int addr)
         {
@@ -28,8 +21,5 @@ namespace bEmu.Systems.Gameboy.MBCs
             else
                 return RomBanks[1][addr - 0x4000];
         }
-
-        public override void SetMode(int addr, byte value) { }
-        public override void WriteCartRAM(int addr, byte value) { }
     }
 }

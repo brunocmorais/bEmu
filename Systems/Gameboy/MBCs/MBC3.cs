@@ -1,28 +1,27 @@
 using System.Collections.Generic;
 using System.IO;
 using bEmu.Core;
+using bEmu.Core.Mappers;
 using bEmu.Core.Memory;
 
 namespace bEmu.Systems.Gameboy.MBCs
 {
 
-    public class MBC3 : DefaultMBC, IHasRTC
+    public class MBC3 : Mapper, IRAM, IRTC, IMBC
     {
         private int bank1;
         private int bank2;
         private byte ramg;
         private RTC rtc;
         protected override byte[] CartRam => RamBanks != null ? RamBanks[bank2] : null;
-
         protected override int ExternalRamSize => 8192;
-
         protected override int RamBankCount => 4;
         protected string SaveRTCName
         {
             get
             {
-                string directory = Path.GetDirectoryName(Mmu.System.ROM.FileName);
-                string name = Path.GetFileNameWithoutExtension(Mmu.System.ROM.FileName) + ".rtc";
+                string directory = Path.GetDirectoryName(MMU.System.ROM.FileName);
+                string name = Path.GetFileNameWithoutExtension(MMU.System.ROM.FileName) + ".rtc";
                 return Path.Combine(directory, name);
             }
         }
@@ -36,7 +35,7 @@ namespace bEmu.Systems.Gameboy.MBCs
                 rtc = new RTC();
         }
 
-        public override void SetMode(int addr, byte value)
+        public void SetMode(int addr, byte value)
         {
             if (addr >= 0x0000 && addr <= 0x1FFF)
                 ramg = value;
@@ -68,7 +67,7 @@ namespace bEmu.Systems.Gameboy.MBCs
             return 0xFF;
         }
 
-        public override void WriteCartRAM(int addr, byte value)
+        public void WriteCartRAM(int addr, byte value)
         {
             if ((ramg & 0x0F) == 0x0A)
             {
@@ -79,7 +78,7 @@ namespace bEmu.Systems.Gameboy.MBCs
             }
         }
 
-        public override byte ReadCartRAM(int addr)
+        public byte ReadCartRAM(int addr)
         {
             if ((ramg & 0x0F) == 0x0A)
             {

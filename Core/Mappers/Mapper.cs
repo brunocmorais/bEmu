@@ -3,9 +3,9 @@ using System.IO;
 using bEmu.Core;
 using bEmu.Core.Memory;
 
-namespace bEmu.Systems.Gameboy.MBCs
+namespace bEmu.Core.Mappers
 {
-    public abstract class DefaultMBC : IMBC
+    public abstract class Mapper : IMapper
     {
         private const int RomBankSize = 16384;
         protected byte[][] RomBanks;
@@ -14,20 +14,17 @@ namespace bEmu.Systems.Gameboy.MBCs
         protected abstract byte[] CartRam { get; }
         protected abstract int RamBankCount { get; }
         protected abstract int ExternalRamSize { get; }
-        protected IMMU Mmu { get; }
+        protected IMMU MMU { get; }
         protected readonly bool Battery;
 
-        public DefaultMBC(IMMU mmu, bool battery, bool ram)
+        public Mapper(IMMU mmu, bool battery, bool ram)
         {
-            Mmu = mmu;
+            MMU = mmu;
             Battery = battery;
             InitializeMBC(ram);
         }
 
-        public abstract byte ReadCartRAM(int addr);
         public abstract byte ReadROM(int addr);
-        public abstract void SetMode(int addr, byte value);
-        public abstract void WriteCartRAM(int addr, byte value);
 
         private void InitializeMBC(bool ram)
         {
@@ -51,11 +48,11 @@ namespace bEmu.Systems.Gameboy.MBCs
 
         private byte[] GetOrCreateSaveFile()
         {
-            if (File.Exists(Mmu.System.ROM.SaveFileName))
-                return File.ReadAllBytes(Mmu.System.ROM.SaveFileName);
+            if (File.Exists(MMU.System.ROM.SaveFileName))
+                return File.ReadAllBytes(MMU.System.ROM.SaveFileName);
             
             var bytes = new byte[ExternalRamSize * RamBankCount];
-            File.WriteAllBytes(Mmu.System.ROM.SaveFileName, bytes);
+            File.WriteAllBytes(MMU.System.ROM.SaveFileName, bytes);
             return bytes;
         }
 
@@ -88,7 +85,7 @@ namespace bEmu.Systems.Gameboy.MBCs
                     for (int j = 0; j < ExternalRamSize; j++)
                         externalRAM[j + (i * ExternalRamSize)] = RamBanks[i][j];
 
-                File.WriteAllBytes(Mmu.System.ROM.SaveFileName, externalRAM);
+                File.WriteAllBytes(MMU.System.ROM.SaveFileName, externalRAM);
             }
         }
     }

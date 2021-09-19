@@ -52,8 +52,8 @@ namespace bEmu.Systems.Gameboy
 
             State.Timer.UpdateTimers(opcode.CyclesTaken);
 
-            if (MMU.MBC is IHasRTC)
-                (MMU.MBC as IHasRTC).Tick(opcode.CyclesTaken);
+            if (MMU.MBC is IRTC)
+                (MMU.MBC as IRTC).Tick(opcode.CyclesTaken);
 
             return opcode;
         }

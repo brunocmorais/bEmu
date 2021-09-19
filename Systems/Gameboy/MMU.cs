@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using bEmu.Core;
+using bEmu.Core.Mappers;
 using bEmu.Core.System;
 using bEmu.Systems.Gameboy.GPU;
 using bEmu.Systems.Gameboy.MBCs;
@@ -18,7 +19,7 @@ namespace bEmu.Systems.Gameboy
         public WRAM WRAM { get; private set; }
         public OAM OAM { get; private set; }
         public byte[] ZeroPage { get; private set; }
-        public IMBC MBC { get; private set; }
+        public IMapper MBC { get; private set; }
         public ColorPaletteData ColorPaletteData { get; private set; }
         public MonochromePaletteData MonochromePaletteData { get; private set; }
         public Joypad Joypad { get; set; }
@@ -45,8 +46,8 @@ namespace bEmu.Systems.Gameboy
                     return MBC.ReadROM(addr);
                 else if (addr >= 0x8000 && addr <= 0x9FFF)
                     return VRAM[addr - 0x8000];
-                else if (addr >= 0xA000 && addr <= 0xBFFF)
-                    return MBC.ReadCartRAM(addr - 0xA000);
+                else if (addr >= 0xA000 && addr <= 0xBFFF && MBC is IRAM)
+                    return (MBC as IRAM).ReadCartRAM(addr - 0xA000);
                 else if (addr >= 0xC000 && addr <= 0xDFFF)
                     return WRAM[addr - 0xC000];
                 else if (addr >= 0xE000 && addr <= 0xFDFF)
@@ -73,12 +74,12 @@ namespace bEmu.Systems.Gameboy
             }
             set
             {
-                if (addr >= 0x0000 && addr <= 0x7FFF)
-                    MBC.SetMode(addr, value);
+                if (addr >= 0x0000 && addr <= 0x7FFF && MBC is IMBC)
+                    (MBC as IMBC).SetMode(addr, value);
                 else if (addr >= 0x8000 && addr <= 0x9FFF)
                     VRAM[addr - 0x8000] = value;
-                else if (addr >= 0xA000 && addr <= 0xBFFF)
-                    MBC.WriteCartRAM((addr - 0xA000), value);
+                else if (addr >= 0xA000 && addr <= 0xBFFF && MBC is IRAM)
+                    (MBC as IRAM).WriteCartRAM((addr - 0xA000), value);
                 else if (addr >= 0xC000 && addr <= 0xDFFF)
                     WRAM[addr - 0xC000] = value;
                 else if (addr >= 0xE000 && addr <= 0xFDFF)

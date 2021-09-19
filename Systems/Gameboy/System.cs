@@ -4,6 +4,7 @@ using bEmu.Systems.Gameboy.GPU.Palettes;
 using bEmu.Core.GamePad;
 using bEmu.Core.Memory;
 using bEmu.Core.System;
+using bEmu.Systems.Gameboy.MBCs;
 
 namespace bEmu.Systems.Gameboy
 {
@@ -56,7 +57,10 @@ namespace bEmu.Systems.Gameboy
 
         public override void Stop()
         {
-            ((MMU) MMU).MBC.Shutdown();
+            var mbc = (MMU as MMU).MBC;
+
+            if (mbc != null && mbc is IRTC)
+                (mbc as IRTC).Shutdown();
         }
 
         public override void UpdateGamePad(IGamePad gamePad)

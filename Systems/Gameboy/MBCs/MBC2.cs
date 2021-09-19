@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.IO;
 using bEmu.Core;
+using bEmu.Core.Mappers;
 using bEmu.Core.Memory;
 
 namespace bEmu.Systems.Gameboy.MBCs
 {
 
-    public class MBC2 : DefaultMBC
+    public class MBC2 : Mapper, IRAM, IMBC
     {
         private int romb;
         private byte ramg;
@@ -21,7 +22,7 @@ namespace bEmu.Systems.Gameboy.MBCs
             romb = 1;
         }
 
-        public override void SetMode(int addr, byte value)
+        public void SetMode(int addr, byte value)
         {
             if (addr >= 0x0000 && addr <= 0x3FFF)
             {
@@ -47,13 +48,13 @@ namespace bEmu.Systems.Gameboy.MBCs
             return 0xFF;
         }
 
-        public override void WriteCartRAM(int addr, byte value)
+        public void WriteCartRAM(int addr, byte value)
         {
             if ((ramg & 0x0F) == 0x0A)
                 CartRam[addr] = (byte) (value & 0xF);
         }
 
-        public override byte ReadCartRAM(int addr)
+        public byte ReadCartRAM(int addr)
         {
             if ((ramg & 0x0F) == 0x0A)
                 return (byte) (CartRam[addr % CartRam.Length] | 0xF0);
