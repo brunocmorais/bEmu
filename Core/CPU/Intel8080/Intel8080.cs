@@ -13,7 +13,7 @@ namespace bEmu.Core.CPU.Intel8080
         where TState : State
         where TMMU : MMU
     {
-        public Intel8080(IRunnableSystem system, int clock) : base(system, clock) { }
+        public Intel8080(IRunnableSystem system, int clock) : base(Enums.Endianness.LittleEndian, system, clock) { }
 
         protected void UpdateFlags(byte value)
         {
@@ -384,7 +384,7 @@ namespace bEmu.Core.CPU.Intel8080
                 if (State.C == 9)
                 {
                     var sb = new StringBuilder();
-                    ushort offset = LittleEndian.GetWordFrom2Bytes(State.E, State.D);
+                    ushort offset = Endianness.GetWordFrom2Bytes(State.E, State.D);
                     offset += 3;
                     char c = Convert.ToChar(MMU[offset]);
 

@@ -1,69 +1,70 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using bEmu.Core.Util;
 
-namespace bEmu.Core.Util
+namespace bEmu.Core.CPU
 {
-    public static class LittleEndian
+    public class LittleEndian : Singleton<LittleEndian>, IEndianness
     {
-        public static ushort GetWordFrom2Bytes(byte lsb, byte msb)
+        public ushort GetWordFrom2Bytes(byte lsb, byte msb)
         {
             return (ushort)((msb << 8) | lsb);
         }
 
-        public static uint GetDWordFrom4Bytes(byte b1, byte b2, byte b3, byte b4)
+        public uint GetDWordFrom4Bytes(byte b1, byte b2, byte b3, byte b4)
         {
             return (uint)((b4 << 24) | (b3 << 16) | (b2 << 8) | b1);
         }
 
-        public static void Get2BytesFromWord(ushort value, out byte msb, out byte lsb)
+        public void Get2BytesFromWord(ushort value, out byte msb, out byte lsb)
         {
             msb = (byte) ((value & 0xFF00) >> 8);
             lsb = (byte) ((value & 0xFF));
         }
 
-        public static IEnumerable<byte> ToBytes(int num)
+        public IEnumerable<byte> ToBytes(int num)
         {
             for (int i = 0; i < sizeof(int); i++)
                 yield return (byte)((num >> ((sizeof(int) - 1 - i) * 8)) & 0xFF);
         }
 
-        public static IEnumerable<byte> ToBytes(uint num)
+        public IEnumerable<byte> ToBytes(uint num)
         {
             for (int i = 0; i < sizeof(uint); i++)
                 yield return (byte)((num >> ((sizeof(uint) - 1 - i) * 8)) & 0xFF);
         }
 
-        public static IEnumerable<byte> ToBytes(ulong num)
+        public IEnumerable<byte> ToBytes(ulong num)
         {
             for (int i = 0; i < sizeof(ulong); i++)
                 yield return (byte)((num >> ((sizeof(ulong) - 1 - i) * 8)) & 0xFF);
         }
 
-        public static IEnumerable<byte> ToBytes(short num)
+        public IEnumerable<byte> ToBytes(short num)
         {
             for (int i = 0; i < sizeof(short); i++)
                 yield return (byte)((num >> ((sizeof(short) - 1 - i) * 8)) & 0xFF);
         }
 
-        public static IEnumerable<byte> ToBytes(ushort num)
+        public IEnumerable<byte> ToBytes(ushort num)
         {
             for (int i = 0; i < sizeof(ushort); i++)
                 yield return (byte)((num >> ((sizeof(ushort) - 1 - i) * 8)) & 0xFF);
         }
 
-        public static IEnumerable<byte> ToBytes<T>(IEnumerable<T> itens)
+        public IEnumerable<byte> ToBytes<T>(IEnumerable<T> itens)
         {
             foreach (var item in itens)
-                foreach (var @byte in LittleEndian.ToBytes(item, typeof(T)))
+                foreach (var @byte in ToBytes(item, typeof(T)))
                     yield return @byte;
         }
 
-        public static IEnumerable<byte> ToBytes(byte value) => Enumerable.Empty<byte>().Append(value);
+        public IEnumerable<byte> ToBytes(byte value) => Enumerable.Empty<byte>().Append(value);
 
-        public static IEnumerable<byte> ToBytes(bool value) => Enumerable.Empty<byte>().Append((byte)(value ? 1 : 0));
+        public IEnumerable<byte> ToBytes(bool value) => Enumerable.Empty<byte>().Append((byte)(value ? 1 : 0));
 
-        public static IEnumerable<byte> ToBytes(object num, Type type)
+        public IEnumerable<byte> ToBytes(object num, Type type)
         {
             switch (Type.GetTypeCode(type))
             {
@@ -77,7 +78,7 @@ namespace bEmu.Core.Util
             }
         }
         
-        public static T FromBytes<T>(IEnumerable<byte> bytes) where T : struct
+        public T FromBytes<T>(IEnumerable<byte> bytes) where T : struct
         {
             ulong num = 0;
             
@@ -90,7 +91,7 @@ namespace bEmu.Core.Util
             return (T) Convert.ChangeType(num, typeof(T));
         }
 
-        public static T[] FromBytes<T>(IEnumerable<byte> bytes, int arraySize) where T : struct
+        public T[] FromBytes<T>(IEnumerable<byte> bytes, int arraySize) where T : struct
         {
             var array = new T[arraySize];
             int dataSize = bytes.Count() / arraySize;

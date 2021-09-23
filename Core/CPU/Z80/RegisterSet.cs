@@ -1,3 +1,4 @@
+using bEmu.Core.System;
 using bEmu.Core.Util;
 
 namespace bEmu.Core.CPU.Z80
@@ -15,10 +16,10 @@ namespace bEmu.Core.CPU.Z80
         
         public ushort BC
         {
-            get { return LittleEndian.GetWordFrom2Bytes(C, B); }
+            get { return State.Endianness.GetWordFrom2Bytes(C, B); }
             set
             {
-                LittleEndian.Get2BytesFromWord(value, out byte b, out byte c);
+                State.Endianness.Get2BytesFromWord(value, out byte b, out byte c);
                 B = b;
                 C = c;
             }
@@ -26,10 +27,10 @@ namespace bEmu.Core.CPU.Z80
 
         public ushort DE
         {
-            get { return LittleEndian.GetWordFrom2Bytes(E, D); }
+            get { return State.Endianness.GetWordFrom2Bytes(E, D); }
             set
             {
-                LittleEndian.Get2BytesFromWord(value, out byte d, out byte e);
+                State.Endianness.Get2BytesFromWord(value, out byte d, out byte e);
                 D = d;
                 E = e;
             }
@@ -37,10 +38,10 @@ namespace bEmu.Core.CPU.Z80
 
         public ushort HL
         {
-            get { return LittleEndian.GetWordFrom2Bytes(L, H); }
+            get { return State.Endianness.GetWordFrom2Bytes(L, H); }
             set
             {
-                LittleEndian.Get2BytesFromWord(value, out byte h, out byte l);
+                State.Endianness.Get2BytesFromWord(value, out byte h, out byte l);
                 H = h;
                 L = l;
             }
@@ -48,10 +49,10 @@ namespace bEmu.Core.CPU.Z80
 
         public ushort AF
         {
-            get { return LittleEndian.GetWordFrom2Bytes(F, A); }
+            get { return State.Endianness.GetWordFrom2Bytes(F, A); }
             set
             {
-                LittleEndian.Get2BytesFromWord(value, out byte a, out byte f);
+                State.Endianness.Get2BytesFromWord(value, out byte a, out byte f);
                 A = a;
                 F = f;
             }
@@ -81,6 +82,13 @@ namespace bEmu.Core.CPU.Z80
                 Flags.Subtract         = (value & 0x2)  == 0x2;
                 Flags.Carry            = (value & 0x1)  == 0x1;
             }
+        }
+
+        public IState State { get; }
+
+        public RegisterSet(IState state)
+        {
+            State = state;
         }
     }
 }

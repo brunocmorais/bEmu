@@ -13,7 +13,7 @@ namespace bEmu.Core.CPU.LR35902
         const int CyclesInHalt = 12;
         public ushort RstOffset { get; set; }
 
-        public LR35902(IRunnableSystem system, int clock) : base(system, clock) { }
+        public LR35902(IRunnableSystem system, int clock) : base(Enums.Endianness.LittleEndian, system, clock) { }
 
         protected ushort PopStack()
         {

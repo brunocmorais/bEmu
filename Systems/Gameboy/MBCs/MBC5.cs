@@ -1,12 +1,8 @@
-using System.Collections.Generic;
-using System.IO;
-using bEmu.Core;
-using bEmu.Core.Mappers;
 using bEmu.Core.Memory;
 
 namespace bEmu.Systems.Gameboy.MBCs
 {
-    public class MBC5 : Mapper, IRAM, IMBC
+    public class MBC5 : Mapper, IRAM
     {
         private byte romb0;
         private byte romb1;
@@ -16,7 +12,7 @@ namespace bEmu.Systems.Gameboy.MBCs
         protected override int ExternalRamSize => 8192;
         protected override int RamBankCount => 16;
 
-        public MBC5(IMMU mmu, bool ram, bool battery) : base(mmu, battery, ram)
+        public MBC5(IMMU mmu, bool ram, bool battery) : base(16384, mmu, battery, ram)
         {
             romb0 = 1;
             romb1 = 0;

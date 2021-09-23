@@ -13,10 +13,10 @@ namespace bEmu.Systems.GBS
 
         public System(IROM rom) : base(rom)
         { 
+            Runner = new CPU(this, 4194304);
             MMU = new Gameboy.MMU(this);
             State = GetInitialState();
             APU = new Gameboy.Sound.APU(this);
-            Runner = new CPU(this, 4194304);
         }
 
         public override IState GetInitialState()

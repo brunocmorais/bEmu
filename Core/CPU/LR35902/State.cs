@@ -20,10 +20,10 @@ namespace bEmu.Core.CPU.LR35902
         
         public ushort BC
         {
-            get { return LittleEndian.GetWordFrom2Bytes(C, B); }
+            get { return Endianness.GetWordFrom2Bytes(C, B); }
             set
             {
-                LittleEndian.Get2BytesFromWord(value, out byte b, out byte c);
+                Endianness.Get2BytesFromWord(value, out byte b, out byte c);
                 B = b;
                 C = c;
             }
@@ -31,10 +31,10 @@ namespace bEmu.Core.CPU.LR35902
 
         public ushort DE
         {
-            get { return LittleEndian.GetWordFrom2Bytes(E, D); }
+            get { return Endianness.GetWordFrom2Bytes(E, D); }
             set
             {
-                LittleEndian.Get2BytesFromWord(value, out byte d, out byte e);
+                Endianness.Get2BytesFromWord(value, out byte d, out byte e);
                 D = d;
                 E = e;
             }
@@ -42,10 +42,10 @@ namespace bEmu.Core.CPU.LR35902
 
         public ushort HL
         {
-            get { return LittleEndian.GetWordFrom2Bytes(L, H); }
+            get { return Endianness.GetWordFrom2Bytes(L, H); }
             set
             {
-                LittleEndian.Get2BytesFromWord(value, out byte h, out byte l);
+                Endianness.Get2BytesFromWord(value, out byte h, out byte l);
                 H = h;
                 L = l;
             }
@@ -53,10 +53,10 @@ namespace bEmu.Core.CPU.LR35902
 
         public ushort AF
         {
-            get { return LittleEndian.GetWordFrom2Bytes(F, A); }
+            get { return Endianness.GetWordFrom2Bytes(F, A); }
             set
             {
-                LittleEndian.Get2BytesFromWord(value, out byte a, out byte f);
+                Endianness.Get2BytesFromWord(value, out byte a, out byte f);
                 A = a;
                 F = f;
             }

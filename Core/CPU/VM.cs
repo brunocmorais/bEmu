@@ -1,4 +1,5 @@
 using bEmu.Core.Audio;
+using bEmu.Core.Enums;
 using bEmu.Core.Memory;
 using bEmu.Core.System;
 using bEmu.Core.Video;
@@ -12,19 +13,17 @@ namespace bEmu.Core.CPU
         where TAPU : class, IAPU
     {
         public IRunnableSystem System { get; }
-        public TState State { get; }
-        public TMMU MMU { get; }
-        public TPPU PPU { get; }
-        public TAPU APU { get; }
+        public TState State => System.State as TState;
+        public TMMU MMU => System.MMU as TMMU;
+        public TPPU PPU => (System as IAudioVideoSystem).PPU as TPPU;
+        public TAPU APU => (System as IAudioVideoSystem).APU as TAPU;
         public int Clock { get; }
+        public IEndianness Endianness { get; }
 
-        public VM(IAudioVideoSystem system, int clock)
+        public VM(Endianness endianness, IAudioVideoSystem system, int clock)
         {
+            Endianness = EndiannessFactory.Instance.Get(endianness);
             System = system;
-            State = System.State as TState;
-            MMU = System.MMU as TMMU;
-            PPU = system.PPU as TPPU;
-            APU = system.APU as TAPU;
             Clock = clock;
         }
 

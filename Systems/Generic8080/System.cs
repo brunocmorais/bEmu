@@ -24,10 +24,10 @@ namespace bEmu.Systems.Generic8080
 
         public System(IROM rom) : base(rom)
         {
+            Runner = new CPU(this, 4194304);
             State = GetInitialState();
             MMU = new MMU(this);
             PPU = new PPU(this, 224, 256);
-            Runner = new CPU(this, 4194304);
             APU = new APU(this);
 
             ((Systems.Generic8080.State) State).UpdatePorts(1, 0x01);

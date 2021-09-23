@@ -31,7 +31,7 @@ namespace bEmu.Core.CPU.Intel8080
                     State.H = MMU[State.PC++];
                     break;
                 case Register.SP:
-                    State.SP = LittleEndian.GetWordFrom2Bytes(MMU[State.PC++], MMU[State.PC++]);
+                    State.SP = Endianness.GetWordFrom2Bytes(MMU[State.PC++], MMU[State.PC++]);
                     break;
             }
             

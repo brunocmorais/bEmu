@@ -11,7 +11,7 @@ namespace bEmu.Systems.Chip8
         protected Random random;
         protected Opcode opcode;
         
-        public Chip8(IAudioVideoSystem system, int clock) : base(system, clock) 
+        public Chip8(IAudioVideoSystem system, int clock) : base(Core.Enums.Endianness.LittleEndian, system, clock) 
         { 
             random = new Random();
         }
@@ -20,7 +20,7 @@ namespace bEmu.Systems.Chip8
         {
             byte lsb = MMU[State.PC++];
             byte msb = MMU[State.PC++];
-            opcode = new Opcode(LittleEndian.GetWordFrom2Bytes(msb, lsb));
+            opcode = new Opcode(Endianness.GetWordFrom2Bytes(msb, lsb));
 
             base.StepCycle();
 

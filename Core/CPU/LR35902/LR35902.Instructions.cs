@@ -627,7 +627,7 @@ namespace bEmu.Core.CPU.LR35902
         protected void Ld_SP()
         {
             var addr = GetNextWord();
-            LittleEndian.Get2BytesFromWord(State.SP, out byte msb, out byte lsb);
+            Endianness.Get2BytesFromWord(State.SP, out byte msb, out byte lsb);
             MMU[addr++] = lsb;
             MMU[addr++] = msb;
 
@@ -911,7 +911,7 @@ namespace bEmu.Core.CPU.LR35902
                     State.H = MMU[State.PC++];
                     break;
                 case Register.SP:
-                    State.SP = LittleEndian.GetWordFrom2Bytes(MMU[State.PC++], MMU[State.PC++]);
+                    State.SP = Endianness.GetWordFrom2Bytes(MMU[State.PC++], MMU[State.PC++]);
                     break;
             }
             

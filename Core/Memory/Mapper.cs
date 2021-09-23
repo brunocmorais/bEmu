@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 using System.IO;
-using bEmu.Core;
-using bEmu.Core.Memory;
 
-namespace bEmu.Core.Mappers
+namespace bEmu.Core.Memory
 {
     public abstract class Mapper : IMapper
     {
@@ -15,18 +12,18 @@ namespace bEmu.Core.Mappers
         protected abstract int RamBankCount { get; }
         protected abstract int ExternalRamSize { get; }
         protected IMMU MMU { get; }
-        protected readonly bool Battery;
+        protected bool Battery { get; }
 
-        public Mapper(IMMU mmu, bool battery, bool ram)
+        public Mapper(int romBankSize, IMMU mmu, bool battery, bool ram)
         {
             MMU = mmu;
             Battery = battery;
-            InitializeMBC(ram);
+            Initialize(ram);
         }
 
         public abstract byte ReadROM(int addr);
 
-        private void InitializeMBC(bool ram)
+        private void Initialize(bool ram)
         {
             if (ram)
             {
@@ -48,11 +45,14 @@ namespace bEmu.Core.Mappers
 
         private byte[] GetOrCreateSaveFile()
         {
-            if (File.Exists(MMU.System.ROM.SaveFileName))
-                return File.ReadAllBytes(MMU.System.ROM.SaveFileName);
+            string save = MMU.System.ROM.SaveFileName;
+
+            if (File.Exists(save))
+                return File.ReadAllBytes(save);
             
             var bytes = new byte[ExternalRamSize * RamBankCount];
-            File.WriteAllBytes(MMU.System.ROM.SaveFileName, bytes);
+            File.WriteAllBytes(save, bytes);
+            
             return bytes;
         }
 

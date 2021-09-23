@@ -17,7 +17,7 @@ namespace bEmu.Core.CPU.MOS6502
         public const ushort NmiVectorH = 0xFFFB;
         public const ushort NmiVectorL = 0xFFFA;
 
-        public MOS6502(IRunnableSystem system, int clock) : base(system, clock) { }
+        public MOS6502(IRunnableSystem system, int clock) : base(Enums.Endianness.LittleEndian, system, clock) { }
 
         protected byte PullStack()
         {
@@ -49,9 +49,9 @@ namespace bEmu.Core.CPU.MOS6502
                 case AddressMode.ZeroPageY:
                     return (byte)(GetNextByte() + (sbyte) State.Y);
                 case AddressMode.XIndirect:
-                    return LittleEndian.GetWordFrom2Bytes((byte)(GetNextByte() + State.X), (byte)(GetNextByte() + State.X));
+                    return Endianness.GetWordFrom2Bytes((byte)(GetNextByte() + State.X), (byte)(GetNextByte() + State.X));
                 case AddressMode.IndirectY:
-                    return (ushort)(LittleEndian.GetWordFrom2Bytes(GetNextByte(), GetNextByte()) + (sbyte) (State.Y));
+                    return (ushort)(Endianness.GetWordFrom2Bytes(GetNextByte(), GetNextByte()) + (sbyte) (State.Y));
                 case AddressMode.Absolute:
                     return GetNextWord();
                 case AddressMode.AbsoluteX:
@@ -59,7 +59,7 @@ namespace bEmu.Core.CPU.MOS6502
                 case AddressMode.AbsoluteY:
                     return (ushort)(GetNextWord() + State.Y);
                 case AddressMode.Indirect:
-                    return LittleEndian.GetWordFrom2Bytes(MMU[GetNextWord()], MMU[GetNextWord()]);
+                    return Endianness.GetWordFrom2Bytes(MMU[GetNextWord()], MMU[GetNextWord()]);
                 case AddressMode.Relative:
                     return (ushort)(State.PC + ((sbyte) GetNextByte()));
                 default:

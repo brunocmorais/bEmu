@@ -1,4 +1,4 @@
-namespace bEmu.Core.Mappers
+namespace bEmu.Core.Memory
 {
     public interface IMapper
     {

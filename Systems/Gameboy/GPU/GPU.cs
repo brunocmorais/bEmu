@@ -152,7 +152,7 @@ namespace bEmu.Systems.Gameboy.GPU
 
         private void Renderscan()
         {
-            if (bgDisplay || GBCMode)
+            if (bgDisplay)
                 RenderBGWindowScanline();
             
             if (spriteDisplay)
@@ -188,7 +188,7 @@ namespace bEmu.Systems.Gameboy.GPU
 
             for (int x = 0; x <= (Width / Palette.PaletteSize); x++)
             {
-                if (windowEnabled && x * Palette.PaletteSize >= wx)
+                if (windowEnabled && x * Palette.PaletteSize >= wx) // window display
                 {
                     backgroundMap.Window = true;
                     int line = (state.LCD.LY - state.LCD.WY) & 0xFF;
@@ -196,7 +196,7 @@ namespace bEmu.Systems.Gameboy.GPU
                     var tile = GetTile(x - (wx / 8), line, 0);
                     Push(GetBGWindowPalette(tile, line), padding, x);
                 }
-                else if (bgDisplay)
+                else if (bgDisplay) // background display
                 {
                     backgroundMap.Window = false;
                     int line = (state.LCD.LY + state.LCD.SCY) & 0xFF;

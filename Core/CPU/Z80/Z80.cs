@@ -12,7 +12,7 @@ namespace bEmu.Core.CPU.Z80
     {
         const int CyclesInHalt = 12;
         
-        public Z80(IRunnableSystem system, int clock) : base(system, clock) { }
+        public Z80(IRunnableSystem system, int clock) : base(Enums.Endianness.LittleEndian, system, clock) { }
 
         protected ushort PopStack()
         {
