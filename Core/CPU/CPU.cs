@@ -10,8 +10,8 @@ namespace bEmu.Core.CPU
         where TMMU : class, IMMU
     {
         public IRunnableSystem System { get; }
-        public TState State => System.State as TState;
-        public TMMU MMU => System.MMU as TMMU;
+        public TState State { get; }
+        public TMMU MMU { get; }
         public int Clock { get; }
         public IEndianness Endianness { get; }
 
@@ -19,6 +19,8 @@ namespace bEmu.Core.CPU
         {
             Endianness = EndiannessFactory.Instance.Get(endianness);
             System = system;
+            State = system.State as TState;
+            MMU = system.MMU as TMMU;
             Clock = clock;
         }
 

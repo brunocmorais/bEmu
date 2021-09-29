@@ -5,6 +5,7 @@ using bEmu.Core.Util;
 
 namespace bEmu.Core.CPU
 {
+
     public class LittleEndian : Singleton<LittleEndian>, IEndianness
     {
         public ushort GetWordFrom2Bytes(byte lsb, byte msb)

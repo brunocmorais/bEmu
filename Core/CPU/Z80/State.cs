@@ -83,6 +83,7 @@ namespace bEmu.Core.CPU.Z80
 
         public ushort IX { get; set; }
         public ushort IY { get; set; }
+        public override IEndianness Endianness { get; }
 
         public override byte[] SaveState()
         {
@@ -99,6 +100,7 @@ namespace bEmu.Core.CPU.Z80
             Main = new RegisterSet(this);
             Alt = new RegisterSet(this);
             Ports = new Ports(0x100);
+            Endianness = EndiannessFactory.Instance.Get(Enums.Endianness.LittleEndian);
         }
     }
 }

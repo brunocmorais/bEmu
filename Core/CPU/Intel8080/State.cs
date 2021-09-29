@@ -15,8 +15,12 @@ namespace bEmu.Core.CPU.Intel8080
         public byte L { get; set; }
         public Flags Flags;
         public bool EnableInterrupts { get; set; }
+        public override IEndianness Endianness { get; }
         
-        public State(IRunnableSystem system) : base(system) { }
+        public State(IRunnableSystem system) : base(system) 
+        { 
+            Endianness = EndiannessFactory.Instance.Get(Enums.Endianness.LittleEndian);
+        }
         
         public ushort BC
         {
