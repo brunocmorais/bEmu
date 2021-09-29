@@ -15,8 +15,8 @@ namespace bEmu.Core.Video
 
         public Bitmap Read(byte[] bytes)
         {
-            int width = (int) BitFacade.GetDWordFrom4Bytes(bytes[0x12], bytes[0x13], bytes[0x14], bytes[0x15]);
-            int height = (int) BitFacade.GetDWordFrom4Bytes(bytes[0x16], bytes[0x17], bytes[0x18], bytes[0x19]);
+            int width = (int) LittleEndian.Instance.GetDWordFrom4Bytes(bytes[0x12], bytes[0x13], bytes[0x14], bytes[0x15]);
+            int height = (int) LittleEndian.Instance.GetDWordFrom4Bytes(bytes[0x16], bytes[0x17], bytes[0x18], bytes[0x19]);
 
             var bitmap = new Bitmap(width, height);
             int pointer = bytes[0xA];
@@ -30,7 +30,7 @@ namespace bEmu.Core.Video
                     byte r = bytes[pointer++];
                     byte a = bytes[pointer++];
 
-                    uint v = BitFacade.GetDWordFrom4Bytes(a, b, g, r);
+                    uint v = LittleEndian.Instance.GetDWordFrom4Bytes(a, b, g, r);
                     bitmap[i, j] = v;
                 }
             }

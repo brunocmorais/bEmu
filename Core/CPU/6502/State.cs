@@ -33,11 +33,8 @@ namespace bEmu.Core.CPU.MOS6502
             }
         }
 
-        public override IEndianness Endianness { get; }
-
         public State(IRunnableSystem system) : base(system)
         {
-            Endianness = EndiannessFactory.Instance.Get(Enums.Endianness.LittleEndian);
         }
 
         public override void LoadState(byte[] value)

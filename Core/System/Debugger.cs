@@ -38,7 +38,7 @@ namespace bEmu.Core.System
         {
             byte a = System.MMU[address];
             byte b = System.MMU[address + 1];
-            return BitFacade.GetWordFrom2Bytes(a, b);
+            return LittleEndian.Instance.GetWordFrom2Bytes(a, b);
         }
 
         public void SetByteToMemoryAddress(int address, byte value)
@@ -48,7 +48,7 @@ namespace bEmu.Core.System
 
         public void SetWordToMemoryAddress(int address, ushort word)
         {
-            BitFacade.Get2BytesFromWord(word, out byte a, out byte b);
+            LittleEndian.Instance.Get2BytesFromWord(word, out byte a, out byte b);
             System.MMU[address] = b;
             System.MMU[address + 1] = a;
         }

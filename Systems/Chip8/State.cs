@@ -9,11 +9,7 @@ namespace bEmu.Systems.Chip8
 {
     public class State : Core.System.State<ushort, ushort>
     {
-        public State(IRunnableSystem system) : base(system) 
-        { 
-            Endianness = EndiannessFactory.Instance.Get(Core.Enums.Endianness.LittleEndian);
-        }
-
+        public State(IRunnableSystem system) : base(system) { }
         public byte[] V { get; set; }
         public bool[] Keys {get; set; }
         public ushort I { get; set; }
@@ -23,7 +19,6 @@ namespace bEmu.Systems.Chip8
         public bool Draw { get; set; }
         public bool SuperChipMode { get; set; }
         public byte[] R { get; set; }
-        public override IEndianness Endianness { get; }
 
         public override void Reset()
         {
