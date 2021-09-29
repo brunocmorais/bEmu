@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using bEmu.Core.CPU;
 using bEmu.Core.Util;
 
 namespace bEmu.Core.System
@@ -38,7 +37,7 @@ namespace bEmu.Core.System
         {
             byte a = System.MMU[address];
             byte b = System.MMU[address + 1];
-            return LittleEndian.Instance.GetWordFrom2Bytes(a, b);
+            return LittleEndian.GetWordFrom2Bytes(a, b);
         }
 
         public void SetByteToMemoryAddress(int address, byte value)
@@ -48,7 +47,7 @@ namespace bEmu.Core.System
 
         public void SetWordToMemoryAddress(int address, ushort word)
         {
-            LittleEndian.Instance.Get2BytesFromWord(word, out byte a, out byte b);
+            LittleEndian.Get2BytesFromWord(word, out byte a, out byte b);
             System.MMU[address] = b;
             System.MMU[address + 1] = a;
         }

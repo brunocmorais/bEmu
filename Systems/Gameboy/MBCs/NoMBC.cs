@@ -1,3 +1,5 @@
+using bEmu.Core;
+using bEmu.Core.Mappers;
 using bEmu.Core.Memory;
 
 namespace bEmu.Systems.Gameboy.MBCs
@@ -10,7 +12,7 @@ namespace bEmu.Systems.Gameboy.MBCs
 
         protected override int RamBankCount => 1;
 
-        public NoMBC(IMMU mmu, bool ram, bool battery) : base(16384, mmu, battery, ram) { }
+        public NoMBC(IMMU mmu, bool ram, bool battery) : base(mmu, battery, ram) { }
 
         public override byte ReadROM(int addr)
         {

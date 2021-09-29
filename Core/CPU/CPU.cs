@@ -1,4 +1,3 @@
-using bEmu.Core.Enums;
 using bEmu.Core.Memory;
 using bEmu.Core.System;
 using bEmu.Core.Util;
@@ -10,15 +9,15 @@ namespace bEmu.Core.CPU
         where TMMU : class, IMMU
     {
         public IRunnableSystem System { get; }
-        public TState State => System.State as TState;
-        public TMMU MMU => System.MMU as TMMU;
+        public TState State { get; }
+        public TMMU MMU { get; }
         public int Clock { get; }
-        public IEndianness Endianness { get; }
 
-        public CPU(Endianness endianness, IRunnableSystem system, int clock)
+        public CPU(IRunnableSystem system, int clock)
         {
-            Endianness = EndiannessFactory.Instance.Get(endianness);
             System = system;
+            State = system.State as TState;
+            MMU = system.MMU as TMMU;
             Clock = clock;
         }
 
@@ -37,7 +36,7 @@ namespace bEmu.Core.CPU
         {
             byte b1 = MMU[State.PC++];
             byte b2 = MMU[State.PC++];
-            return Endianness.GetWordFrom2Bytes(b1, b2);
+            return LittleEndian.GetWordFrom2Bytes(b1, b2);
         }
 
         protected virtual byte GetNextByte()
@@ -59,12 +58,12 @@ namespace bEmu.Core.CPU
         {
             byte a = MMU[addr];
             byte b = MMU[addr + 1];
-            return Endianness.GetWordFrom2Bytes(a, b);
+            return LittleEndian.GetWordFrom2Bytes(a, b);
         }
 
         protected virtual void WriteWordToMemory(ushort addr, ushort word)
         {
-            Endianness.Get2BytesFromWord(word, out byte a, out byte b);
+            LittleEndian.Get2BytesFromWord(word, out byte a, out byte b);
             MMU[addr] = b;
             MMU[addr + 1] = a;
         }

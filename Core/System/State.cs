@@ -18,7 +18,6 @@ namespace bEmu.Core.System
         public int Cycles { get; set; }
         public bool Halted { get; set; }
         public ulong Instructions { get; set; }
-        public IEndianness Endianness => System.Runner.Endianness;
 
         public virtual void Reset()
         {

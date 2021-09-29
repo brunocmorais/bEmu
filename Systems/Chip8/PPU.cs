@@ -1,6 +1,5 @@
 using System;
 using bEmu.Core;
-using bEmu.Core.CPU;
 using bEmu.Core.System;
 using bEmu.Core.Util;
 using bEmu.Core.Video;
@@ -139,7 +138,7 @@ namespace bEmu.Systems.Chip8
             ushort[] sprite = new ushort[16];
 
             for (int i = 0; i < 16; i++)
-                sprite[i] = LittleEndian.Instance.GetWordFrom2Bytes(System.MMU[state.I + (2 * i) + 1], System.MMU[state.I + (2 * i)]);
+                sprite[i] = LittleEndian.GetWordFrom2Bytes(System.MMU[state.I + (2 * i) + 1], System.MMU[state.I + (2 * i)]);
 
             byte coordX = state.V[x];
             byte coordY = state.V[y];

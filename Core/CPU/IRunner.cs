@@ -7,6 +7,5 @@ namespace bEmu.Core.CPU
         IRunnableSystem System { get; }
         IOpcode StepCycle();
         int Clock { get; }
-        IEndianness Endianness { get; }
     }
 }

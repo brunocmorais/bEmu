@@ -34,7 +34,6 @@ namespace bEmu.Core.System
         {
             Game = game;
             EnableSound = true;
-            Frameskip = 1;
             Init(size);
         }
 

@@ -1,4 +1,4 @@
-using bEmu.Core.Memory;
+using bEmu.Core.Mappers;
 
 namespace bEmu.Systems.Gameboy.MBCs
 {

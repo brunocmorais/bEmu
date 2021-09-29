@@ -1,6 +1,6 @@
 using System.IO;
 using System.Linq;
-using bEmu.Core.CPU;
+using bEmu.Core.Util;
 
 namespace bEmu.Core.Extensions
 {
@@ -8,7 +8,7 @@ namespace bEmu.Core.Extensions
     {
         public static void WriteUInt(this Stream stream, uint value)
         {
-            var bytes = LittleEndian.Instance.ToBytes(value).ToArray();
+            var bytes = LittleEndian.ToBytes(value).ToArray();
 
             for (int i = bytes.Length - 1; i >= 0; i--)
                 stream.WriteByte(bytes[i]);
@@ -16,7 +16,7 @@ namespace bEmu.Core.Extensions
 
         public static void WriteUShort(this Stream stream, ushort value)
         {
-            LittleEndian.Instance.Get2BytesFromWord(value, out byte msb, out byte lsb);
+            LittleEndian.Get2BytesFromWord(value, out byte msb, out byte lsb);
             stream.WriteByte(lsb);
             stream.WriteByte(msb);
         }

@@ -39,20 +39,20 @@ namespace bEmu.Systems.Chip8
 
         public override byte[] SaveState()
         {
-            var pc = Endianness.ToBytes(PC).ToList();
-            var sp = Endianness.ToBytes(SP).ToList();
-            var cycles = Endianness.ToBytes(Cycles).ToList();
-            var halted = Endianness.ToBytes(Halted).ToList();
-            var instructions = Endianness.ToBytes(Instructions).ToList();
-            var v = Endianness.ToBytes(V).ToList();
-            var keys = Endianness.ToBytes(Keys).ToList();
-            var i = Endianness.ToBytes(I).ToList();
-            var stack = Endianness.ToBytes(Stack).ToList();
-            var delay = Endianness.ToBytes(Delay).ToList();
-            var sound = Endianness.ToBytes(Sound).ToList();
-            var draw = Endianness.ToBytes(Draw).ToList();
-            var superChipMode = Endianness.ToBytes(SuperChipMode).ToList();
-            var r = Endianness.ToBytes(R).ToList();
+            var pc = LittleEndian.ToBytes(PC).ToList();
+            var sp = LittleEndian.ToBytes(SP).ToList();
+            var cycles = LittleEndian.ToBytes(Cycles).ToList();
+            var halted = LittleEndian.ToBytes(Halted).ToList();
+            var instructions = LittleEndian.ToBytes(Instructions).ToList();
+            var v = LittleEndian.ToBytes(V).ToList();
+            var keys = LittleEndian.ToBytes(Keys).ToList();
+            var i = LittleEndian.ToBytes(I).ToList();
+            var stack = LittleEndian.ToBytes(Stack).ToList();
+            var delay = LittleEndian.ToBytes(Delay).ToList();
+            var sound = LittleEndian.ToBytes(Sound).ToList();
+            var draw = LittleEndian.ToBytes(Draw).ToList();
+            var superChipMode = LittleEndian.ToBytes(SuperChipMode).ToList();
+            var r = LittleEndian.ToBytes(R).ToList();
             
             return Enumerable.Empty<byte>()
                 .Concat(pc)
@@ -77,20 +77,20 @@ namespace bEmu.Systems.Chip8
             var bytes = value.ToList();
             int counter = 0;
             int size = 0;
-            PC = Endianness.FromBytes<ushort>(bytes.GetRange((counter += size = sizeof(ushort)) - size, size));
-            SP = Endianness.FromBytes<ushort>(bytes.GetRange((counter += size = sizeof(ushort)) - size, size));
-            Cycles = Endianness.FromBytes<int>(bytes.GetRange((counter += size = sizeof(int)) - size, size));
-            Halted = Endianness.FromBytes<bool>(bytes.GetRange((counter += size = sizeof(bool)) - size, size));
-            Instructions = Endianness.FromBytes<ulong>(bytes.GetRange((counter += size = sizeof(int)) - size, size));
-            V = Endianness.FromBytes<byte>(bytes.GetRange((counter += size = (sizeof(byte) * V.Length)) - size, size), V.Length);
-            Keys = Endianness.FromBytes<bool>(bytes.GetRange((counter += size = (sizeof(bool) * Keys.Length)) - size, size), Keys.Length);
-            I = Endianness.FromBytes<ushort>(bytes.GetRange((counter += size = sizeof(ushort)) - size, size));
-            Stack = Endianness.FromBytes<ushort>(bytes.GetRange((counter += size = (sizeof(ushort) * Stack.Length)) - size, size), Stack.Length);
-            Delay = Endianness.FromBytes<byte>(bytes.GetRange((counter += size = sizeof(byte)) - size, size));
-            Sound = Endianness.FromBytes<byte>(bytes.GetRange((counter += size = sizeof(byte)) - size, size));
-            Draw = Endianness.FromBytes<bool>(bytes.GetRange((counter += size = sizeof(bool)) - size, size));
-            SuperChipMode = Endianness.FromBytes<bool>(bytes.GetRange((counter += size = sizeof(bool)) - size, size));
-            R = Endianness.FromBytes<byte>(bytes.GetRange((counter += size = (sizeof(byte) * R.Length)) - size, size), R.Length);
+            PC = LittleEndian.FromBytes<ushort>(bytes.GetRange((counter += size = sizeof(ushort)) - size, size));
+            SP = LittleEndian.FromBytes<ushort>(bytes.GetRange((counter += size = sizeof(ushort)) - size, size));
+            Cycles = LittleEndian.FromBytes<int>(bytes.GetRange((counter += size = sizeof(int)) - size, size));
+            Halted = LittleEndian.FromBytes<bool>(bytes.GetRange((counter += size = sizeof(bool)) - size, size));
+            Instructions = LittleEndian.FromBytes<ulong>(bytes.GetRange((counter += size = sizeof(int)) - size, size));
+            V = LittleEndian.FromBytes<byte>(bytes.GetRange((counter += size = (sizeof(byte) * V.Length)) - size, size), V.Length);
+            Keys = LittleEndian.FromBytes<bool>(bytes.GetRange((counter += size = (sizeof(bool) * Keys.Length)) - size, size), Keys.Length);
+            I = LittleEndian.FromBytes<ushort>(bytes.GetRange((counter += size = sizeof(ushort)) - size, size));
+            Stack = LittleEndian.FromBytes<ushort>(bytes.GetRange((counter += size = (sizeof(ushort) * Stack.Length)) - size, size), Stack.Length);
+            Delay = LittleEndian.FromBytes<byte>(bytes.GetRange((counter += size = sizeof(byte)) - size, size));
+            Sound = LittleEndian.FromBytes<byte>(bytes.GetRange((counter += size = sizeof(byte)) - size, size));
+            Draw = LittleEndian.FromBytes<bool>(bytes.GetRange((counter += size = sizeof(bool)) - size, size));
+            SuperChipMode = LittleEndian.FromBytes<bool>(bytes.GetRange((counter += size = sizeof(bool)) - size, size));
+            R = LittleEndian.FromBytes<byte>(bytes.GetRange((counter += size = (sizeof(byte) * R.Length)) - size, size), R.Length);
         }
     }
 }

@@ -1,7 +1,14 @@
-using bEmu.Core.Memory;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using bEmu.Core;
+using bEmu.Core.Mappers;
 using bEmu.Core.System;
 using bEmu.Systems.Gameboy.GPU;
 using bEmu.Systems.Gameboy.MBCs;
+using Debugger = System.Diagnostics.Debugger;
 
 namespace bEmu.Systems.Gameboy
 {

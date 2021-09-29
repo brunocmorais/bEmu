@@ -738,7 +738,7 @@ namespace bEmu.Core.CPU.MOS6502
         {
             ushort addr = GetNextWord();
             
-            Endianness.Get2BytesFromWord(State.PC, out byte lsb, out byte msb);
+            LittleEndian.Get2BytesFromWord(State.PC, out byte lsb, out byte msb);
             PushStack(lsb);
             PushStack(msb);
             State.PC = addr;
@@ -799,7 +799,7 @@ namespace bEmu.Core.CPU.MOS6502
 
         private void Rts(AddressMode mode)
         {
-            State.PC = Endianness.GetWordFrom2Bytes(PullStack(), PullStack());
+            State.PC = LittleEndian.GetWordFrom2Bytes(PullStack(), PullStack());
             IncreaseCycles(6);
         }
 
@@ -814,7 +814,7 @@ namespace bEmu.Core.CPU.MOS6502
             State.SR = PullStack();
             State.SR |= 0x20;
             State.SR &= (byte) (breakF ? 0x10 : 0xEF); 
-            State.PC = Endianness.GetWordFrom2Bytes(PullStack(), PullStack());
+            State.PC = LittleEndian.GetWordFrom2Bytes(PullStack(), PullStack());
 
             IncreaseCycles(6);
         }
@@ -843,7 +843,7 @@ namespace bEmu.Core.CPU.MOS6502
 
         private void Brk(AddressMode mode)
         {
-            Endianness.Get2BytesFromWord(State.PC, out byte msb, out byte lsb);
+            LittleEndian.Get2BytesFromWord(State.PC, out byte msb, out byte lsb);
             PushStack(msb);
             PushStack(lsb);
             PushStack((byte)(State.SR | 0x10));
@@ -865,7 +865,7 @@ namespace bEmu.Core.CPU.MOS6502
             if (!State.Flags.DisableInterrupt)
             {
                 State.Flags.Break = false;
-                Endianness.Get2BytesFromWord(State.PC, out byte msb, out byte lsb);
+                LittleEndian.Get2BytesFromWord(State.PC, out byte msb, out byte lsb);
                 PushStack(msb);
                 PushStack(lsb);
                 PushStack(State.SR);
@@ -877,7 +877,7 @@ namespace bEmu.Core.CPU.MOS6502
         public void Nmi()
         {
             State.Flags.Break = false;
-            Endianness.Get2BytesFromWord(State.PC, out byte msb, out byte lsb);
+            LittleEndian.Get2BytesFromWord(State.PC, out byte msb, out byte lsb);
             PushStack(msb);
             PushStack(lsb);
             PushStack(State.SR);

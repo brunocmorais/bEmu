@@ -96,8 +96,8 @@ namespace bEmu.Core.CPU.Z80
 
         public State(IRunnableSystem system) : base(system) 
         { 
-            Main = new RegisterSet(this);
-            Alt = new RegisterSet(this);
+            Main = new RegisterSet();
+            Alt = new RegisterSet();
             Ports = new Ports(0x100);
         }
     }

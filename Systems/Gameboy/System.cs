@@ -20,11 +20,11 @@ namespace bEmu.Systems.Gameboy
 
         public System(IROM rom) : base(rom)
         {
-            Runner = new CPU(this, 4194304);
             MMU = new MMU(this);
             State = GetInitialState();
             PPU = new GPU.GPU(this);
             APU = new APU(this);
+            Runner = new CPU(this, 4194304);
             ColorPalette = ColorPaletteFactory.Get(MonochromePaletteType.Gray);
         }
 

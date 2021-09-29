@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.IO;
 using bEmu.Core;
+using bEmu.Core.Mappers;
 using bEmu.Core.Memory;
 
 namespace bEmu.Systems.Gameboy.MBCs
 {
 
-    public class MBC1 : Mapper, IRAM
+    public class MBC1 : Mapper, IRAM, IMBC
     {
         private int mode;
         private int bank1;
@@ -30,7 +31,7 @@ namespace bEmu.Systems.Gameboy.MBCs
         protected override int RamBankCount => 4;
 
 
-        public MBC1(IMMU mmu, bool ram, bool battery) : base(16384, mmu, battery, ram)
+        public MBC1(IMMU mmu, bool ram, bool battery) : base(mmu, battery, ram)
         {
             bank1 = 1;
             bank2 = 0;

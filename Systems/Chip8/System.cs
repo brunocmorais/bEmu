@@ -71,11 +71,11 @@ namespace bEmu.Systems.Chip8
 
         public System(IROM rom) : base(rom)
         {
-            Runner = new Chip8(this, 480);
             State = GetInitialState();
             MMU = new MMU(this);
             PPU = new PPU((State) State, Width, Height);
             APU = new APU(this);
+            Runner = new Chip8(this, 480);
 
             SetChip8Mode();
             

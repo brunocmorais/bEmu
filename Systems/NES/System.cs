@@ -19,9 +19,9 @@ namespace bEmu.Systems.NES
 
         public System(IROM rom) : base(rom)
         {
-            Runner = new CPU(this, 2144196);
             MMU = new MMU(this);
             State = GetInitialState();
+            Runner = new CPU(this, 2144196);
         }
 
         public override IState GetInitialState()

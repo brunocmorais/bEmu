@@ -1,9 +1,13 @@
+using System.Collections.Generic;
+using System.IO;
+using bEmu.Core;
+using bEmu.Core.Mappers;
 using bEmu.Core.Memory;
 
 namespace bEmu.Systems.Gameboy.MBCs
 {
 
-    public class MBC2 : Mapper, IRAM
+    public class MBC2 : Mapper, IRAM, IMBC
     {
         private int romb;
         private byte ramg;
@@ -13,7 +17,7 @@ namespace bEmu.Systems.Gameboy.MBCs
 
         protected override int RamBankCount => 1;
 
-        public MBC2(IMMU mmu, bool battery) : base(16384, mmu, battery, true)
+        public MBC2(IMMU mmu, bool battery) : base(mmu, battery, true)
         {
             romb = 1;
         }

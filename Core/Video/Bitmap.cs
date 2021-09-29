@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using bEmu.Core.CPU;
 using bEmu.Core.Extensions;
 using bEmu.Core.Util;
 using bEmu.Core.Video;
@@ -35,8 +34,8 @@ namespace bEmu.Core.Video
 
         public Bitmap Read(byte[] bytes)
         {
-            int width = (int) LittleEndian.Instance.GetDWordFrom4Bytes(bytes[0x12], bytes[0x13], bytes[0x14], bytes[0x15]);
-            int height = (int) LittleEndian.Instance.GetDWordFrom4Bytes(bytes[0x16], bytes[0x17], bytes[0x18], bytes[0x19]);
+            int width = (int) LittleEndian.GetDWordFrom4Bytes(bytes[0x12], bytes[0x13], bytes[0x14], bytes[0x15]);
+            int height = (int) LittleEndian.GetDWordFrom4Bytes(bytes[0x16], bytes[0x17], bytes[0x18], bytes[0x19]);
 
             var bitmap = new Bitmap(width, height);
             int pointer = bytes[0xA];
@@ -50,7 +49,7 @@ namespace bEmu.Core.Video
                     byte r = bytes[pointer++];
                     byte a = bytes[pointer++];
 
-                    uint v = LittleEndian.Instance.GetDWordFrom4Bytes(a, b, g, r);
+                    uint v = LittleEndian.GetDWordFrom4Bytes(a, b, g, r);
                     bitmap[i, j] = v;
                 }
             }
@@ -99,8 +98,8 @@ namespace bEmu.Core.Video
                 {
                     for (int i = 0; i < Width; i++)
                     {
-                        var bytes = LittleEndian.Instance.ToBytes(this[i, j].ToUInt()).ToArray();
-                        stream.WriteUInt(LittleEndian.Instance.GetDWordFrom4Bytes(bytes[2], bytes[1], bytes[0], bytes[3]));
+                        var bytes = LittleEndian.ToBytes(this[i, j].ToUInt()).ToArray();
+                        stream.WriteUInt(LittleEndian.GetDWordFrom4Bytes(bytes[2], bytes[1], bytes[0], bytes[3]));
                     }
                 }
 
