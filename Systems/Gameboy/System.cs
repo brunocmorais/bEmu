@@ -8,7 +8,7 @@ using bEmu.Systems.Gameboy.MBCs;
 
 namespace bEmu.Systems.Gameboy
 {
-    public class System : VideoGameSystem, IGBSystem
+    public class System : VideoGameSystem, IGBSystem, ISystem
     {
         public bool GBCMode => ((ROM as ROM).CartridgeHeader.GBCFlag & 0x80) == 0x80;
         public IColorPalette ColorPalette { get; private set; }
@@ -37,12 +37,12 @@ namespace bEmu.Systems.Gameboy
         }
 
         public override bool Update()
-        {    
+        {
             if (!base.Update())
                 return false;
 
             while (Cycles >= 0)
-            {                    
+            {
                 var opcode = Runner.StepCycle();
                 PPU.Cycles += opcode.CyclesTaken;
 
@@ -57,15 +57,12 @@ namespace bEmu.Systems.Gameboy
 
         public override void Stop()
         {
-            var mbc = (MMU as MMU).MBC;
-
-            if (mbc != null && mbc is IRTC)
-                (mbc as IRTC).Shutdown();
+            ((MMU)MMU).MBC.Shutdown();
         }
 
         public override void UpdateGamePad(IGamePad gamePad)
         {
-            var joypad = ((Systems.Gameboy.MMU) MMU).Joypad;
+            var joypad = ((Systems.Gameboy.MMU)MMU).Joypad;
 
             joypad.Update(gamePad);
 

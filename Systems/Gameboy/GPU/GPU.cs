@@ -192,17 +192,15 @@ namespace bEmu.Systems.Gameboy.GPU
                 {
                     backgroundMap.Window = true;
                     int line = (state.LCD.LY - state.LCD.WY) & 0xFF;
-                    int padding = wx;
                     var tile = GetTile(x - (wx / 8), line, 0);
-                    Push(GetBGWindowPalette(tile, line), padding, x);
+                    Push(GetBGWindowPalette(tile, line), wx, x);
                 }
                 else if (bgDisplay)
                 {
                     backgroundMap.Window = false;
                     int line = (state.LCD.LY + state.LCD.SCY) & 0xFF;
-                    int padding = state.LCD.SCX;
-                    var tile = GetTile(x, line, padding);
-                    Push(GetBGWindowPalette(tile, line), padding, x);
+                    var tile = GetTile(x, line, state.LCD.SCX);
+                    Push(GetBGWindowPalette(tile, line), state.LCD.SCX, x);
                 }
             }
         }

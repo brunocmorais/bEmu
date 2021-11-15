@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bEmu/bin/Debug/net5.0/bEmu.dll",
+            "program": "${workspaceFolder}/bEmu/bin/Debug/net6.0/bEmu.dll",
             "args": [],
             "cwd": "${workspaceFolder}/bEmu",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
@@ -23,7 +23,7 @@
             "request": "launch",
             "preLaunchTask": "publish",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bEmu/bin/Release/net5.0/bEmu.dll",
+            "program": "${workspaceFolder}/bEmu/bin/Release/net6.0/bEmu.dll",
             "args": [],
             "cwd": "${workspaceFolder}/bEmu",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console

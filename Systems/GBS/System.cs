@@ -3,6 +3,7 @@ using bEmu.Core.Enums;
 using bEmu.Core.Memory;
 using bEmu.Core.System;
 using bEmu.Systems.Gameboy;
+using bEmu.Systems.Gameboy.GPU.Palettes;
 
 namespace bEmu.Systems.GBS
 {
@@ -10,6 +11,9 @@ namespace bEmu.Systems.GBS
     {
         public override int StartAddress { get; }
         public override SystemType Type => SystemType.GameBoySoundSystem;
+        public bool GBCMode => false;
+        public IColorPalette ColorPalette => null;
+        public bool DoubleSpeedMode => false;
 
         public System(IROM rom) : base(rom)
         { 
@@ -47,6 +51,11 @@ namespace bEmu.Systems.GBS
             }
 
             return true;
+        }
+
+        public void SetColorPalette(MonochromePaletteType type)
+        {
+            throw new global::System.NotImplementedException();
         }
     }
 }

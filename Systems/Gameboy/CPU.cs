@@ -47,13 +47,13 @@ namespace bEmu.Systems.Gameboy
         {
             var opcode = base.StepCycle();
 
-            if (((System) System).DoubleSpeedMode)
-                opcode.CyclesTaken /= 2;
-
             State.Timer.UpdateTimers(opcode.CyclesTaken);
 
             if (MMU.MBC is IRTC)
                 (MMU.MBC as IRTC).Tick(opcode.CyclesTaken);
+
+            if (((System) System).DoubleSpeedMode)
+                opcode.CyclesTaken /= 2;
 
             return opcode;
         }

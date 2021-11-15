@@ -10,7 +10,7 @@ namespace bEmu.Core.CPU.LR35902
         where TState : State
         where TMMU : MMU
     {
-        const int CyclesInHalt = 12;
+        const int CyclesInHalt = 4;
         public ushort RstOffset { get; set; }
 
         public LR35902(IRunnableSystem system, int clock) : base(system, clock) { }
