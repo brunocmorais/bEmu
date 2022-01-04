@@ -5,5 +5,6 @@ namespace bEmu.Core.Mappers
         void LoadProgram(byte[] bytes);
         
         byte ReadROM(int addr);
+        void Shutdown();
     }
 }
