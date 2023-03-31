@@ -1,0 +1,39 @@
+﻿@page "/"
+
+@using Blazor.Extensions;
+@using Blazor.Extensions.Canvas.Canvas2D;
+@using bEmu.Web.Classes;
+
+<div tabindex="0" id="canvas" @onkeydown="OnKeyDown" @onkeyup="OnKeyUp">
+    <BECanvas Width="800" Height="600" @ref="canvas"></BECanvas>
+</div>
+
+@code {
+    private Canvas2DContext context;
+    private BECanvasComponent canvas;
+    private Main main;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        context = await canvas.CreateCanvas2DAsync();
+        main = new Main(context, canvas);
+
+        while (true)
+        {
+            main.Update();
+            await Task.Delay(16);
+        }
+    }
+
+    protected void OnKeyDown(KeyboardEventArgs e)
+    {
+        Console.WriteLine("Pressionado = " + e.Key);
+        main.PressedKey = e.Key;
+    }
+
+    protected void OnKeyUp(KeyboardEventArgs e)
+    {
+        Console.WriteLine("Liberado = " + e.Key);
+        main.PressedKey = "";
+    }
+}
