@@ -2,18 +2,14 @@ using System.Drawing;
 using System.Numerics;
 using bEmu.Core.Enums;
 using bEmu.Core.GUI.Menus;
-using Blazor.Extensions;
 using Blazor.Extensions.Canvas.Canvas2D;
 
 namespace bEmu.Web.Drawers
 {
     public class MenuDrawer : Drawer<IMenu>
     {
-        protected readonly string LightGreen;
-
-        public MenuDrawer(Canvas2DContext context, BECanvasComponent canvas) : base(context, canvas)
+        public MenuDrawer(Canvas2DContext context) : base(context)
         {
-            LightGreen = "#90EE90FF";
         }
 
         public override async void Draw(IMenu menu)

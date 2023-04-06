@@ -3,37 +3,68 @@
 @using Blazor.Extensions;
 @using Blazor.Extensions.Canvas.Canvas2D;
 @using bEmu.Web.Classes;
+@using bEmu.Core.Video;
 
-<div tabindex="0" id="canvas" @onkeydown="OnKeyDown" @onkeyup="OnKeyUp">
-    <BECanvas Width="800" Height="600" @ref="canvas"></BECanvas>
+<div tabindex="0" id="canvas" @onkeydown="OnKeyPress" @onkeyup="OnKeyPress">
+    <BECanvas Width="640" Height="480" @ref="canvas"></BECanvas>
 </div>
 
+@inject IJSRuntime js;
+
 @code {
-    private Canvas2DContext context;
+
     private BECanvasComponent canvas;
     private Main main;
+    private FrameBuffer frameBuffer;
+    private byte color = 0;
+
+    private async Task Test()
+    {
+        uint rgba = (uint)(color << 24 | color << 16 | color << 8 | 0xFF);
+        var pixel = (Pixel) rgba;
+
+        for (int i = 0; i < frameBuffer.Width; i++)
+            for (int j = 0; j < frameBuffer.Height; j++)
+                frameBuffer[i, j] = pixel;
+
+        color += 4;
+
+        await js.InvokeVoidAsync("writeFramebuffer", frameBuffer.Data, frameBuffer.Width, frameBuffer.Height); 
+    }
+
+    [JSInvokable]
+    public async Task GameLoop()
+    {
+        main.Update();
+        await main.Draw();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        context = await canvas.CreateCanvas2DAsync();
-        main = new Main(context, canvas);
+        if (!firstRender)
+            return;
 
-        while (true)
+        var context = await canvas.CreateCanvas2DAsync();
+        main = new Main(context, js);
+        frameBuffer = new FrameBuffer(10, 10);
+        
+        main.Initialize();
+
+        await js.InvokeAsync<object>("initGame", DotNetObjectReference.Create(this));
+    }
+
+
+    protected void OnKeyPress(KeyboardEventArgs e)
+    {
+        switch (e.Type)
         {
-            main.Update();
-            await Task.Delay(16);
+            case "keydown":
+                if (!main.PressedKeys.Contains(e.Key))
+                    main.PressedKeys.Add(e.Key);
+                break;
+            case "keyup":
+                main.PressedKeys.Remove(e.Key);
+                break;
         }
-    }
-
-    protected void OnKeyDown(KeyboardEventArgs e)
-    {
-        Console.WriteLine("Pressionado = " + e.Key);
-        main.PressedKey = e.Key;
-    }
-
-    protected void OnKeyUp(KeyboardEventArgs e)
-    {
-        Console.WriteLine("Liberado = " + e.Key);
-        main.PressedKey = "";
     }
 }

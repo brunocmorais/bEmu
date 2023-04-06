@@ -16,6 +16,7 @@ namespace bEmu.Core.Video
         }
 
         public uint ToUInt() => value;
+        public override string ToString() => value.ToString("x2").ToUpper();
         public static implicit operator Pixel(uint value) => new Pixel(value);
         public static implicit operator uint(Pixel value) => value.value;
     }
