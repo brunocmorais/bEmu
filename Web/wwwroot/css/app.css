@@ -47,3 +47,7 @@ h1:focus {
 .custom {
     font-family: 'MEGAMAN10';
 }
+
+body {
+    background-color: rgb(30, 30, 30);
+}

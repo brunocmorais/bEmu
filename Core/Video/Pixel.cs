@@ -1,5 +1,3 @@
-using System;
-
 namespace bEmu.Core.Video
 {
     public struct Pixel
@@ -15,9 +13,9 @@ namespace bEmu.Core.Video
             this.value = value;
         }
 
-        public uint ToUInt() => value;
-        public override string ToString() => value.ToString("x2").ToUpper();
         public static implicit operator Pixel(uint value) => new Pixel(value);
         public static implicit operator uint(Pixel value) => value.value;
+        public uint ToUInt() => value;
+        public override string ToString() => value.ToString("x2").ToUpper();
     }
 }

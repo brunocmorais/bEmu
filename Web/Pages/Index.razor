@@ -1,7 +1,6 @@
 ﻿@page "/"
 
 @using Blazor.Extensions;
-@using Blazor.Extensions.Canvas.Canvas2D;
 @using bEmu.Web.Classes;
 @using bEmu.Core.Video;
 
@@ -52,7 +51,6 @@
 
         await js.InvokeAsync<object>("initGame", DotNetObjectReference.Create(this));
     }
-
 
     protected void OnKeyPress(KeyboardEventArgs e)
     {
